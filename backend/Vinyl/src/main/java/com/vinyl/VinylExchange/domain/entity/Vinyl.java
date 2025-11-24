@@ -1,10 +1,14 @@
 package com.vinyl.VinylExchange.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.vinyl.VinylExchange.domain.pojo.ArtistCredit;
 import com.vinyl.VinylExchange.domain.pojo.Label;
+import com.vinyl.VinylExchange.domain.pojo.Rating;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,6 +35,13 @@ public class Vinyl {
     private String format;
     private int trackCount;
     private String coverUrl;
+    private String artistName;
+    private String artistId;
+
+    private int rating;
+    private double ratingValue;
+
     @ManyToOne
+    @JoinColumn(name = "label_id")
     private Label label;
 }

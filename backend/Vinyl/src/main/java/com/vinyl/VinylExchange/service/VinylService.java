@@ -1,5 +1,8 @@
 package com.vinyl.VinylExchange.service;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +41,13 @@ public class VinylService {
     // }
 
     // }
+    public List<Vinyl> getAllVinyl() {
+        return vinylRepository.findAll();
+    }
+
+    public Optional<Vinyl> findById(String id) {
+        return vinylRepository.findById(id);
+    }
 
     public void saveReleases(RootResponse response) {
         if (response == null || response.getReleases() == null)
@@ -47,37 +57,60 @@ public class VinylService {
             Vinyl vinyl = new Vinyl();
             vinyl.setId(release.getId());
             vinyl.setTitle(release.getTitle());
-            // vinyl.setStatus(release.getStatus());
             vinyl.setDate(release.getDate());
             vinyl.setCountry(release.getCountry());
-            // vinyl.setBarcode(release.getBarcode());
+            vinyl.setBarcode(release.getBarcode());
+
+            // media information
             if (release.getMedia() != null && !release.getMedia().isEmpty()) {
                 vinyl.setFormat(release.getMedia().get(0).getFormat());
                 vinyl.setTrackCount(release.getMedia().get(0).getTrackCount());
-                vinyl.setPackaging(release.getMedia().get(0).getFormat());
             }
 
+            // label information - null check
             if (release.getLabelInfo() != null && !release.getLabelInfo().isEmpty()) {
                 var labelInfo = release.getLabelInfo().get(0);
-                Label label = labelRepository.findById(labelInfo.getLabel().getId())
-                        .orElseGet(() -> {
-                            Label newLabel = new Label();
-                            newLabel.setId(labelInfo.getLabel().getId());
-                            newLabel.setName(labelInfo.getLabel().getName());
-                            return labelRepository.save(newLabel);
-                        });
-                vinyl.setLabel(label);
+
+                if (labelInfo.getLabel() != null) {
+                    Label label = labelRepository.findById(labelInfo.getLabel().getId())
+                            .orElseGet(() -> {
+                                Label newLabel = new Label();
+                                newLabel.setId(labelInfo.getLabel().getId());
+                                newLabel.setName(labelInfo.getLabel().getName());
+                                return labelRepository.save(newLabel);
+                            });
+                    vinyl.setLabel(label);
+                }
+            }
+            if (release.getRating() != null && !release.getLabelInfo().isEmpty()) {
+                var labelInfo = release.getLabelInfo().get(0);
+
+                if (labelInfo.getLabel() != null) {
+                    Label label = labelRepository.findById(labelInfo.getLabel().getId())
+                            .orElseGet(() -> {
+                                Label newLabel = new Label();
+                                newLabel.setId(labelInfo.getLabel().getId());
+                                newLabel.setName(labelInfo.getLabel().getName());
+                                return labelRepository.save(newLabel);
+                            });
+                    vinyl.setLabel(label);
+                }
+            }
+            // artist credit
+            if (release.getArtistCredit() != null && !release.getArtistCredit().isEmpty()) {
+                var artistCredit = release.getArtistCredit().get(0);
+
+                if (artistCredit != null) {
+                    vinyl.setArtistName(artistCredit.getArtist().getName());
+                    vinyl.setArtistId(artistCredit.getArtist().getId());
+                }
             }
 
+            // packaging
             if (release.getPackaging() != null) {
                 vinyl.setPackaging(release.getPackaging());
             } else if (release.getMedia() != null && !release.getMedia().isEmpty()) {
                 vinyl.setPackaging(release.getMedia().get(0).getFormat());
-            }
-
-            if (release.getMedia() != null && !release.getMedia().isEmpty()) {
-                vinyl.setFormat(release.getMedia().get(0).getFormat());
-                vinyl.setTrackCount(release.getMedia().get(0).getTrackCount());
             }
 
             vinyl.setCoverUrl("https://coverartarchive.org/release/" + vinyl.getId() + "/front");

@@ -22,5 +22,6 @@ public class Release {
     private List<Media> media;
     @JsonProperty("label-info")
     private List<LabelInfo> labelInfo;
+    
     private Rating rating;
 }

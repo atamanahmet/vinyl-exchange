@@ -1,7 +1,5 @@
 package com.vinyl.VinylExchange.domain.pojo;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.Data;
 
 @Data

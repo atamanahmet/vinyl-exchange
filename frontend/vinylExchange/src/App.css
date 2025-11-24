@@ -5,6 +5,9 @@
   padding: 2rem;
   text-align: center;
 }
+.hero {
+  rotate: -90deg;
+}
 
 .logo {
   height: 6em;
