@@ -28,13 +28,8 @@ public class MainController {
 
         boolean connect = false;
 
-        // String artist = "";
-        // String url = "https://musicbrainz.org/ws/2/release?query=artist:" + artist +
-        // "&fmt=json";
-
         @GetMapping("/")
         public ResponseEntity<String> mainPage() throws JsonProcessingException {
-                // String searchString = "david_bowie";
                 System.out.println("Logged");
                 ObjectMapper mapper = new ObjectMapper();
                 String response;
