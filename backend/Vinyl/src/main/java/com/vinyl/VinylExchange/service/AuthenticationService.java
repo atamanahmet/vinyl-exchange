@@ -12,14 +12,13 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final UserService userService;
 
-    @Autowired
     public AuthenticationService(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
     }
 
-    // public User authenticateUser() {
+    public User authenticateUser() {
 
-    // }
+    }
 
 }

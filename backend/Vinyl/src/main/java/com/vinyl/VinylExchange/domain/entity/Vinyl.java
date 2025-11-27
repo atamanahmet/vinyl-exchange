@@ -1,12 +1,9 @@
 package com.vinyl.VinylExchange.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.vinyl.VinylExchange.domain.pojo.ArtistCredit;
 import com.vinyl.VinylExchange.domain.pojo.Label;
-import com.vinyl.VinylExchange.domain.pojo.Rating;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;

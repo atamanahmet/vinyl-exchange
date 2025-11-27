@@ -1,6 +1,5 @@
 package com.vinyl.VinylExchange.security.util;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.auth0.jwt.JWT;
@@ -12,13 +11,11 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Component
-public class JwtUtil {
+public class JwtTokenUtil {
 
     private final JwtConfig jwtConfig;
 
-    @Autowired
-    public JwtUtil(JwtConfig jwtConfig) {
-
+    public JwtTokenUtil(JwtConfig jwtConfig) {
         this.jwtConfig = jwtConfig;
     }
 
