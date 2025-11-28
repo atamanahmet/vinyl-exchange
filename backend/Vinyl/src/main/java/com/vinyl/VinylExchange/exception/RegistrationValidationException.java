@@ -1,17 +1,18 @@
 package com.vinyl.VinylExchange.exception;
 
-import java.util.Map;
-
 public class RegistrationValidationException extends RuntimeException {
 
-    private final Map<String, String> errors;
+    // private final Map<String, String> errors;
 
-    public RegistrationValidationException(Map<String, String> errors) {
+    public RegistrationValidationException() {
         super("Registration validation failed");
-        this.errors = errors;
     }
 
-    public Map<String, String> getErrors() {
-        return this.errors;
+    public RegistrationValidationException(String message) {
+        super(message);
     }
+
+    // public Map<String, String> getErrors() {
+    // return this.errors;
+    // }
 }

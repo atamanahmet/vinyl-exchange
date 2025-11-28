@@ -12,7 +12,7 @@ import jakarta.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = PasswordValidation.class)
 public @interface StrongPassword {
-    String message() default "Password must contain upper, lower, number, special char and be 8+ chars";
+    String message() default "Password must contain uppercase, lowercase, digit, and special character";
 
     Class<?>[] groups() default {};
 
