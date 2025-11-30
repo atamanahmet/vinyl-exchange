@@ -37,6 +37,8 @@ public class AuthController {
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequestDTO registerRequest,
             HttpServletResponse response) {
 
+        System.out.println(registerRequest);
+
         AuthResponseDTO authResponseDTO = authService.registerUser(registerRequest);
 
         Cookie cookie = jwtCookieUtil.createJwtCookie(authResponseDTO.token());
@@ -63,7 +65,7 @@ public class AuthController {
                 .body(authResponseDTO.userResponseDTO());
     }
 
-    @GetMapping("/logout")
+    @PostMapping("/logout")
     public ResponseEntity<Void> logOut(HttpServletResponse response) {
 
         jwtCookieUtil.revokeJwtCookie(response);
@@ -79,7 +81,10 @@ public class AuthController {
 
         String token = jwtCookieUtil.getTokenFromRequest(request);
 
-        UserResponseDTO userResponseDTO = authService.getUser(token);
+        if (token == null)
+            return ResponseEntity.noContent().build();
+
+        UserResponseDTO userResponseDTO = authService.getUserDTO(token);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

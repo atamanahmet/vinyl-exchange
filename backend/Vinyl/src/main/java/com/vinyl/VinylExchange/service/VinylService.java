@@ -21,26 +21,6 @@ public class VinylService {
     @Autowired
     private LabelRepository labelRepository;
 
-    // public void setCoverUrl(Vinyl vinyl) {
-    // vinyl.setCoverUrl("https://coverartarchive.org/release/" + vinyl.getId() +
-    // "/front");
-    // }
-
-    // public String saveVinyl(Vinyl vinyl) {
-    // try {
-    // if (!vinylRepository.existsById(vinyl.getId())) {
-    // setCoverUrl(vinyl);
-    // vinylRepository.save(vinyl);
-    // return "Saved succesfully.";
-    // } else {
-    // return "Already exist.";
-    // }
-    // } catch (Exception e) {
-    // System.out.println(e.getLocalizedMessage());
-    // return "Error, cannot save";
-    // }
-
-    // }
     public List<Vinyl> getAllVinyl() {
         return vinylRepository.findAll();
     }
@@ -113,9 +93,10 @@ public class VinylService {
                 vinyl.setPackaging(release.getMedia().get(0).getFormat());
             }
 
-            vinyl.setCoverUrl("https://coverartarchive.org/release/" + vinyl.getId() + "/front");
+            vinyl.setCoverUrl("https://coverartarchive.org/release/" + vinyl.getId() + "/front-250.jpg");
 
             vinylRepository.save(vinyl);
         }
     }
+
 }

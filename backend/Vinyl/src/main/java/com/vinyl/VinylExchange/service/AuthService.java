@@ -1,5 +1,7 @@
 package com.vinyl.VinylExchange.service;
 
+import java.util.UUID;
+
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -78,14 +80,25 @@ public class AuthService {
         return user;
     }
 
-    public UserResponseDTO getUser(String token) {
+    public UserResponseDTO getUserDTO(String token) {
 
-        Long userId = jwtTokenUtil.extractUserId(token);
+        UUID userId = jwtTokenUtil.extractUserId(token);
 
         User user = userRepository
                 .findById(userId)
                 .orElseThrow(() -> new NoCurrentUserException());
 
         return new UserResponseDTO(user);
+    }
+
+    public User getUserFromToken(String token) {
+
+        UUID userId = jwtTokenUtil.extractUserId(token);
+
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new NoCurrentUserException());
+
+        return user;
     }
 }

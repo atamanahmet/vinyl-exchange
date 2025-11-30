@@ -46,6 +46,11 @@ public class GlobalExceptionHandler {
                 .body(exception.getMessage());
     }
 
+    @ExceptionHandler(TokenExpireException.class)
+    public void handleTokenExpiredException(TokenExpireException exception) {
+
+    }
+
     @ExceptionHandler(NoCurrentUserException.class)
     public ResponseEntity<?> handleNoCurrentUserException(NoCurrentUserException exception) {
 

@@ -6,29 +6,34 @@ import Card from "../comps/Card";
 export default function About({}) {
   return (
     <>
-      <div className="text-left -ml-25 -mt-50">
+      <div className="text-left -ml-25 -mt-50 ">
         <section>
           <div className="grid max-w-7xl px-4 py-8 mx-auto lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
-            <div className="mr-auto lg:col-span-10 pr-50 pl-20 py-20 mt-50 ">
-              <h1 className="max-w-2xl mb-4 text-4xl  tracking-tight leading-none md:text-5xl xl:text-6xl dark:text-white">
+            <div className="mr-auto lg:col-span-10 pr-50 pl-20 py-20 mt-20 ">
+              <h1 className="max-w-2xl mb-4 text-4xl  tracking-tight leading-none md:text-5xl xl:text-6xl dark:text-white my-10">
                 About Vinyl Exchange
               </h1>
-              <p className="max-w-2xl  mb-6 font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400 text-2xl">
-                We don’t care about charts, clicks, or algorithms. We care about
-                vinyl. The crackle. The groove. The feeling you get when you
-                drop the needle and the music hits just right. Vinyl Exchange is
-                for people who just love records. Period. Trade, sell, or
-                collect. Whatever floats your boat. If it spins, we’re into it.
+              <p className="max-w-2xl  mb-6 font-light text-gray-100 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-100 text-2xl leading-relaxed">
+                We don’t care about charts, clicks, or algorithms. <br />
+                We care about vinyl. The crackle. The groove. <br />
+                The feeling you get when you drop the needle and the music hits
+                just right. <br />
+                Vinyl Exchange is for people who just love records. Period.
+                <br />
+                Trade, sell, or collect. Whatever floats your boat. <br />
+                If it spins, we’re into it. <br />
                 Here, you’ll find: Rare pressings that make your collection
-                scream “heck yes!” A place to swap with folks who get it Cover
-                art that’s worth staring at longer than your screen time No
-                corporate nonsense. No fancy rules. Just records, music, and the
-                obsession that comes with it. Vinyl isn’t dead. It’s alive. And
-                so are we.
+                scream “heck yes!”
+                <br /> A place to swap with folks who get it Cover art that’s
+                worth staring at longer than your screen time No corporate
+                nonsense. <br />
+                No fancy rules. Just records, music, and the obsession that
+                comes with it. <br />
+                Vinyl isn’t dead. It’s alive. And so are we.
               </p>
               <a
                 href="/"
-                className="inline-flex items-center justify-center px-5 py-3 mr-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-900"
+                className="inline-flex items-center justify-center px-5 py-3 mr-3  text-center  rounded-lg bg-indigo-800 hover:bg-indigo-900 focus:ring-4 focus:ring-indigo-300 dark:focus:ring-indigo-900 text-blue"
               >
                 Go get some
                 <svg
@@ -46,11 +51,11 @@ export default function About({}) {
               </a>
               <a
                 href="#"
-                className="inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
+                className="inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-black border border-gray-300 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
               >
                 Speak to Us
               </a>
-              <div className="bg-black mr-auto lg:col-span-10 pr-50 py-20 mt-50 opacity-50 absolute top-0 w-200 h-125 -ml-20 -z-1"></div>
+              <div className="bg-gray-900 mr-auto lg:col-span-10 pr-50 py-20 mt-32 opacity-80 absolute top-0 w-200 h-150 -ml-20 -z-1"></div>
             </div>
             <img
               className="rotate-30 absolute -z-2 w-300 -top-25 left-100 "

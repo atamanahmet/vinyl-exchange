@@ -1,10 +1,15 @@
 package com.vinyl.VinylExchange.security.util;
 
+import java.util.UUID;
+
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.stereotype.Component;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.vinyl.VinylExchange.domain.entity.User;
+import com.vinyl.VinylExchange.exception.TokenExpireException;
 import com.vinyl.VinylExchange.security.config.JwtConfig;
 
 import jakarta.servlet.http.Cookie;
@@ -37,13 +42,14 @@ public class JwtTokenUtil {
             return false;
         }
 
-        Long id = null;
+        UUID id = null;
 
         try {
             id = extractUserId(token);
 
         } catch (Exception e) {
             System.out.println(e.getLocalizedMessage());
+            new TokenExpireException();
         }
 
         return id != null && id.equals(user.getId());
@@ -61,7 +67,7 @@ public class JwtTokenUtil {
     }
 
     // xtracting id from token
-    public Long extractUserId(String token) {
+    public UUID extractUserId(String token) {
 
         try {
             String idStr = JWT
@@ -70,14 +76,15 @@ public class JwtTokenUtil {
                     .verify(token)
                     .getSubject();
 
-            return Long.valueOf(idStr);
+            return UUID.fromString(idStr);
 
         } catch (Exception e) {
 
             System.out.println("Invalid Token");
             System.out.println(e.getLocalizedMessage());
 
-            return null;
+            throw new TokenExpireException();
+
         }
     }
 
@@ -102,7 +109,8 @@ public class JwtTokenUtil {
             System.out.println("Invalid Token");
             System.out.println(e.getLocalizedMessage());
 
-            return null;
+            throw new TokenExpireException();
+
         }
     }
 
@@ -117,7 +125,8 @@ public class JwtTokenUtil {
             System.out.println("Invalid Token");
             System.out.println(e.getLocalizedMessage());
 
-            return null;
+            throw new TokenExpireException();
+
         }
     }
 
@@ -146,7 +155,7 @@ public class JwtTokenUtil {
         }
 
         System.out.println("Invalid Token");
+        throw new TokenExpireException();
 
-        return null;
     }
 }

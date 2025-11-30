@@ -1,55 +1,83 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isFetching, setIsFetching] = useState(false);
   const [data, setData] = useState();
-  const [logoutResult, setLogoutResult] = useState(null);
+  const [authResponse, setAuthResponse] = useState(null);
 
   const storedPhoto = sessionStorage.getItem("profilePhoto");
 
-  // const fetchUser = () => {
-  //   setLoading(true);
-  //   axios
-  //     .get("http://localhost:8080/api/me", { withCredentials: true })
-  //     .then((res) => {
-  //       login(res.data);
-  //       getProfilePhoto();
-  //       getWatchList();
-  //     })
-  //     .catch((err) => {
-  //       console.log("Error: " + err);
-  //       setUser(null);
-  //     })
-  //     .finally(() => {
-  //       setLoading(false);
-  //     });
-  // };
+  // register
+  async function registerUser(formData) {
+    const url = "http://localhost:8080/register";
+    try {
+      const response = await axios.post(
+        url,
+        {
+          username: formData.username,
+          password: formData.password,
+          email: formData.email,
+        },
+        { withCredentials: true }
+      );
+      if (response.status === 201) {
+        setAuthResponse("Account created succesfully. Redirecting...");
+        const { username, email } = response.data;
+        setTimeout(function () {
+          setUser({ username, email });
+        }, 2000);
+      }
+    } catch (error) {
+      console.log(error);
+      setResponse("Got some issue. Try again");
+    }
+  }
 
-  // useEffect(() => {
-  //   fetchUser();
-  // }, [location.pathname]);
+  // login
+  async function loginUser(formData) {
+    const url = "http://localhost:8080/login";
+    try {
+      const response = await axios.post(
+        url,
+        {
+          username: formData.username,
+          password: formData.password,
+        },
+        { withCredentials: true }
+      );
+      if (response.status === 200) {
+        setAuthResponse("Logged in succesfully. Redirecting...");
+        const { username, email } = response.data;
+        setTimeout(function () {
+          setUser({ username, email });
+        }, 2000);
+      }
+    } catch (error) {
+      console.log(error);
+      setAuthResponse("Got some issue. Try again");
+    }
+  }
 
   async function searchHandler(searchQuery) {
     if (searchQuery != null) {
       searchQuery = searchQuery.replace(" ", "+");
 
+      const url = "http://localhost:8080/search/";
+
       try {
-        const res = await axios.get(
-          "http://localhost:8080/search/" + searchQuery,
-          {
-            withCredentials: true,
-          }
-        );
+        const res = await axios.get(url + searchQuery, {
+          withCredentials: true,
+        });
 
         if (res.status === 200) {
           setData(res.data);
-          console.log(res.data);
         } else {
           console.error("Search failed with status:", res.status);
         }
@@ -58,14 +86,38 @@ export const UserProvider = ({ children }) => {
       }
     }
   }
+
+  async function currentUser() {
+    const url = "http://localhost:8080/api/me";
+    try {
+      const res = await axios.get(url, {
+        withCredentials: true,
+      });
+
+      if (res.status === 200) {
+        setUser(res.data);
+      } else {
+        console.log("No current user present");
+      }
+    } catch (error) {
+      console.log("Issue while getting user: ", error);
+    }
+  }
+
+  useEffect(() => {
+    currentUser();
+  }, [location.pathname]);
+
   const fetchData = async () => {
     if (isFetching) return;
     setIsFetching(true);
+    const url = "http://localhost:8080";
+
     try {
-      const res = await axios.get("http://localhost:8080", {
+      const res = await axios.get(url, {
         withCredentials: true,
       });
-      console.log(res.data);
+
       setData(res.data);
     } catch (err) {
       console.error("Backend error:", err);
@@ -80,36 +132,33 @@ export const UserProvider = ({ children }) => {
 
   const logOut = async () => {
     console.log("Log out requested");
-    // const url = "http://localhost:8080/logout";
-    // try {
-    //   await axios
-    //     .post(
-    //       url,
-    //       {},
-    //       {
-    //         withCredentials: true,
-    //       }
-    //     )
-    //     .then((res) => setLogoutResult(res.data));
-
-    //   console.log("Logged out");
-    //   sessionStorage.clear();
-    //   setUser(null);
-    // } catch (err) {
-    //   console.log("Error during logout: ", err);
-    // }
+    const url = "http://localhost:8080/logout";
+    try {
+      const res = await axios.post(url, null, {
+        withCredentials: true,
+      });
+      if (res.status === 204) {
+        console.log("Logged out");
+        sessionStorage.clear();
+        setUser(null);
+      }
+    } catch (err) {
+      console.log("Error during logout: ", err);
+    }
   };
 
   return (
     <UserContext.Provider
       value={{
         user,
-        // updateUser,
         loading,
         setSearchQuery,
         data,
         logOut,
         searchHandler,
+        registerUser,
+        loginUser,
+        authResponse,
       }}
     >
       {children}

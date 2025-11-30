@@ -12,11 +12,8 @@ export default function Card({ vinyl }) {
       label = "";
     } else {
       if (vinyl.label.name.includes("Records")) {
-        console.log("includes");
         label = vinyl.label.name;
       } else {
-        console.log("notincludes");
-
         label = vinyl.label.name + " Records";
       }
     }

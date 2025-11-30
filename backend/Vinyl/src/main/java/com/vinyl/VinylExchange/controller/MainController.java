@@ -26,7 +26,7 @@ public class MainController {
         @Autowired
         private VinylService vinylService;
 
-        boolean connect = false;
+        boolean connect = true;
 
         @GetMapping("/")
         public ResponseEntity<String> mainPage() throws JsonProcessingException {
@@ -95,7 +95,7 @@ public class MainController {
 
                         result = client.get()
                                         .uri(uriBuilder -> uriBuilder
-                                                        .queryParam("query", "artist:" + query)
+                                                        .queryParam("query", "release:" + query)
                                                         .queryParam("fmt", "json")
                                                         .queryParam("inc", "ratings")
                                                         .queryParam("limit", 100)

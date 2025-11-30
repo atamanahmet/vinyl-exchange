@@ -6,6 +6,7 @@ import axios from "axios";
 import Navbar from "./comps/Navbar";
 import MainPage from "./pages/MainPage";
 import About from "./pages/About";
+import TermsAndConditions from "./pages/TermsAndConditions";
 import { useUser } from "./context/UserContext";
 import {
   Routes,
@@ -28,6 +29,7 @@ function App() {
       <Routes>
         <Route path="/" element={<MainPage data={data} />} />
         <Route path="/about" element={<About />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
       </Routes>
     </>
   );

@@ -1,8 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
+
 import { useUser } from "../context/UserContext";
 
+import { AuthModal } from "./AuthModal";
+
 export default function Navbar() {
-  const { user, logOut, setSearchQuery, searchHandler } = useUser();
+  const { user, logOut, setSearchQuery, searchHandler, authType } = useUser();
+
+  const [openModal, setOpenModal] = useState(false);
 
   const [query, setQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -21,11 +27,19 @@ export default function Navbar() {
       handleSearch(e);
     }
   };
-  const handleLogOut = () => logOut();
+  const handleLogOut = () => logOut;
+
+  const setModalActive = () => {
+    if (openModal == false) {
+      setOpenModal(true);
+    } else {
+      setOpenModal(false);
+    }
+  };
 
   return (
     <nav className="bg-black fixed w-full z-20 top-0 start-0 p-2 border-b border-default">
-      <div className="max-w-7xl flex flex-wrap items-center justify-between mx-auto p-1">
+      <div className="max-w-6xl flex flex-wrap items-center justify-between mx-auto p-1">
         {/* Logo */}
         <a href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
           <img
@@ -89,69 +103,86 @@ export default function Navbar() {
             />
           </div>
 
-          {/* User Menu */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-              className="flex text-sm bg-neutral-primary rounded-full focus:ring-4 focus:ring-neutral-tertiary"
-            >
-              <span className="sr-only">Open user menu</span>
-              <img
-                className="w-8 h-8 rounded-full bg-white"
-                src="/logo.png"
-                alt="user photo"
-              />
-            </button>
+          {user == null && (
+            <div>
+              <button
+                className="py-1 px-3 text-black bg-slate-500 hover:bg-indigo-800 hover:text-slate-200"
+                onClick={setModalActive}
+              >
+                Sign in
+              </button>
+              <AuthModal
+                openModal={openModal}
+                setOpenModal={setModalActive}
+              ></AuthModal>
+            </div>
+          )}
 
-            {/* User Dropdown */}
-            {isUserMenuOpen && (
-              <div className="absolute bg-black right-0 mt-2 z-50 bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44">
-                <div className="px-4 py-3 text-sm border-b border-default">
-                  <span className="block text-heading font-medium">
-                    {user?.username || "Joseph McFall"}
-                  </span>
-                  <span className="block text-body truncate">
-                    name@flowbite.com
-                  </span>
+          {/* User Menu */}
+          {user != null && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                className="flex text-sm bg-neutral-primary rounded-full focus:ring-4 focus:ring-neutral-tertiary"
+              >
+                <span className="sr-only">Open user menu</span>
+                <img
+                  className="w-8 h-8 rounded-full bg-white"
+                  src="/logo.png"
+                  alt="user photo"
+                />
+              </button>
+
+              {/* User Dropdown */}
+              {isUserMenuOpen && (
+                <div className="absolute bg-black right-0 mt-2 z-50 bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44">
+                  <div className="px-4 py-3 text-sm border-b border-default">
+                    <span className="block text-heading font-medium">
+                      {user?.username || "Joseph McFall"}
+                    </span>
+                    <span className="block text-body truncate">
+                      {user.email}
+                    </span>
+                  </div>
+                  <ul className="p-2 text-sm text-body font-medium">
+                    <li>
+                      <a
+                        href="#"
+                        className="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded"
+                      >
+                        Dashboard
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        className="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded"
+                      >
+                        Settings
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        className="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded"
+                      >
+                        Earnings
+                      </a>
+                    </li>
+                    <li>
+                      <button
+                        className="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded"
+                        onClick={logOut}
+                      >
+                        Sign out
+                      </button>
+                    </li>
+                  </ul>
                 </div>
-                <ul className="p-2 text-sm text-body font-medium">
-                  <li>
-                    <a
-                      href="#"
-                      className="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded"
-                    >
-                      Dashboard
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded"
-                    >
-                      Settings
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded"
-                    >
-                      Earnings
-                    </a>
-                  </li>
-                  <li>
-                    <button
-                      className="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded"
-                      onClick={handleLogOut}
-                    >
-                      Sign out
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
 
           {/* Mobile Menu Toggle */}
           <button
@@ -216,7 +247,7 @@ export default function Navbar() {
           <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 border border-default rounded-base bg-neutral-secondary-soft md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-neutral-primary">
             <li>
               <a
-                href="#"
+                href="/"
                 className="block py-2 px-3 text-white bg-brand rounded md:bg-transparent md:text-fg-brand md:p-0"
                 aria-current="page"
               >
