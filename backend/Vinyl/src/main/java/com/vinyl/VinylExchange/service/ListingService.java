@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.vinyl.VinylExchange.domain.entity.Listing;
-import com.vinyl.VinylExchange.repository.LabelRepository;
+// import com.vinyl.VinylExchange.repository.LabelRepository;
 import com.vinyl.VinylExchange.repository.ListingRepository;
 
 @Service
@@ -12,8 +12,8 @@ public class ListingService {
     @Autowired
     private ListingRepository listingRepository;
 
-    @Autowired
-    private LabelRepository labelRepository;
+    // @Autowired
+    // private LabelRepository labelRepository;
 
     // public void setCoverUrl(Vinyl vinyl) {
     // vinyl.setCoverUrl("https://coverartarchive.org/release/" + vinyl.getId() +

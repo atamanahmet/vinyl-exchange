@@ -37,8 +37,6 @@ public class AuthController {
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequestDTO registerRequest,
             HttpServletResponse response) {
 
-        System.out.println(registerRequest);
-
         AuthResponseDTO authResponseDTO = authService.registerUser(registerRequest);
 
         Cookie cookie = jwtCookieUtil.createJwtCookie(authResponseDTO.token());
@@ -46,8 +44,8 @@ public class AuthController {
         response.addCookie(cookie);
 
         return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(authResponseDTO.userResponseDTO());
+                .status(HttpStatus.CREATED)
+                .build();
     }
 
     @PostMapping("/login")

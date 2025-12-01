@@ -11,7 +11,7 @@ public class JwtConfig {
     @Value("${jwt.secret}")
     private String SECRET;
     @Value("${jwt.expiration}")
-    private String expiration;
+    private long expiration;
 
     // public static final String BEARER = "Bearer ";
     // public static final String AUTHORIZATION = "Authorization";
