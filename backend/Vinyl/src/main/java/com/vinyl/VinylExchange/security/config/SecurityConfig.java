@@ -9,17 +9,30 @@ import org.springframework.http.HttpMethod;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.vinyl.VinylExchange.security.filter.JWTAuthFilter;
+
 @Configuration
+@EnableMethodSecurity
+@EnableWebSecurity
 public class SecurityConfig {
+
+    private final JWTAuthFilter jwtAuthFilter;
+
+    public SecurityConfig(JWTAuthFilter jwtAuthFilter) {
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -38,10 +51,12 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .securityMatcher("/**")
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/register", "/login", "/api/me", "/", "/search/**", "/logout").permitAll()
+                        .requestMatchers("/register", "/login", "/", "/search/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/logout").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/newlisting").authenticated()
                         .anyRequest()
                         .authenticated())
                 .logout(logout -> logout.disable());

@@ -4,8 +4,11 @@ import { useNavigate } from "react-router";
 import { useUser } from "../context/UserContext";
 
 import { AuthModal } from "./AuthModal";
+import { use } from "react";
 
 export default function Navbar() {
+  const navigate = useNavigate();
+
   const { user, logOut, setSearchQuery, searchHandler, authType } = useUser();
 
   const [openModal, setOpenModal] = useState(false);
@@ -115,6 +118,17 @@ export default function Navbar() {
                 openModal={openModal}
                 setOpenModal={setModalActive}
               ></AuthModal>
+            </div>
+          )}
+
+          {user != null && (
+            <div>
+              <button
+                className="py-1 px-3 mt-0.5 text-black bg-slate-500 hover:bg-indigo-800 hover:text-slate-200"
+                onClick={() => navigate("/newlisting")}
+              >
+                New Listing
+              </button>
             </div>
           )}
 

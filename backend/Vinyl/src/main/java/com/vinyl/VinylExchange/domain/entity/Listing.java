@@ -1,11 +1,16 @@
 package com.vinyl.VinylExchange.domain.entity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.vinyl.VinylExchange.domain.pojo.Label;
 
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,7 +42,7 @@ public class Listing {
     private String packaging; // size?
     private String format;
     private int trackCount;
-    private String coverUrl;
+    // private String coverUrl;
     private String artistName;
     private String artistId;
 
@@ -49,4 +54,9 @@ public class Listing {
     @JoinColumn(name = "owner_id")
     @JsonIgnore
     private User owner;
+
+    @ElementCollection
+    @CollectionTable(name = "listing_images", joinColumns = @JoinColumn(name = "listing_id"))
+    @Column(name = "image_path")
+    private List<String> imagePaths = new ArrayList<>();
 }

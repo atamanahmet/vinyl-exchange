@@ -1,6 +1,7 @@
 package com.vinyl.VinylExchange.security.service;
 
-import org.springframework.security.core.userdetails.UserDetails;
+import java.util.UUID;
+
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -18,9 +19,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) {
+    public UserPrincipal loadUserByUsername(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+
+        return new UserPrincipal(user);
+    }
+
+    public UserPrincipal loadUserByUserId(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
 
         return new UserPrincipal(user);
     }

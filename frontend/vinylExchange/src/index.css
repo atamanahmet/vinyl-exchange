@@ -15,6 +15,10 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+.formItem {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
 
 a {
   font-weight: 500;

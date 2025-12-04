@@ -36,7 +36,7 @@ public class ListingService {
 
     // }
 
-    public void saveListing(Listing listing) {
+    public Listing saveListing(Listing listing) {
         // if (listing == null)
         // return;
 
@@ -47,7 +47,7 @@ public class ListingService {
         // listing.setCountry(listing.getCountry());
         // listing.setBarcode(listing.getBarcode());
 
-        listingRepository.save(listing);
+        return listingRepository.save(listing);
 
     }
 }

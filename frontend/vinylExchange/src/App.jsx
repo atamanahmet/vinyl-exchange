@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import { ThemeProvider } from "@material-tailwind/react";
+
 import Card from "./comps/Card";
 import axios from "axios";
 import Navbar from "./comps/Navbar";
 import MainPage from "./pages/MainPage";
 import About from "./pages/About";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import NewListing from "./pages/NewListing";
+
 import { useUser } from "./context/UserContext";
 import {
   Routes,
@@ -29,6 +32,7 @@ function App() {
       <Routes>
         <Route path="/" element={<MainPage data={data} />} />
         <Route path="/about" element={<About />} />
+        <Route path="/newlisting" element={<NewListing />} />
         <Route path="/terms" element={<TermsAndConditions />} />
       </Routes>
     </>

@@ -1,4 +1,4 @@
 package com.vinyl.VinylExchange.domain.dto;
 
-public record AuthResponseDTO(UserResponseDTO userResponseDTO, String token) {
+public record AuthResponseDTO(UserDTO userDTO, String token) {
 }

@@ -2,6 +2,8 @@ package com.vinyl.VinylExchange.security.util;
 
 import org.springframework.stereotype.Component;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,7 +35,10 @@ public class JwtCookieUtil {
         response.addCookie(cookie);
     }
 
-    public String getTokenFromRequest(HttpServletRequest request) {
+    public String extractTokenFromRequest(HttpServletRequest request) {
+
+        if (request == null || request.getCookies() == null)
+            throw new JWTVerificationException("Invalid token");
 
         Cookie[] cookies = request.getCookies();
 

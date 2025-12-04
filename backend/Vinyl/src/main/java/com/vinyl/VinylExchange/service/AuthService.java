@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import com.vinyl.VinylExchange.domain.dto.AuthResponseDTO;
 import com.vinyl.VinylExchange.domain.dto.LoginRequestDTO;
 import com.vinyl.VinylExchange.domain.dto.RegisterRequestDTO;
-import com.vinyl.VinylExchange.domain.dto.UserResponseDTO;
+import com.vinyl.VinylExchange.domain.dto.UserDTO;
 import com.vinyl.VinylExchange.domain.entity.User;
 
 import com.vinyl.VinylExchange.exception.NoCurrentUserException;
@@ -53,9 +53,13 @@ public class AuthService {
 
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-        String token = jwtTokenUtil.generateToken(userPrincipal);
+        String token = jwtTokenUtil.generateToken(
+                userPrincipal.getId(),
+                userPrincipal.getUsername(),
+                userPrincipal.getRoles());
 
-        return new AuthResponseDTO(new UserResponseDTO(userPrincipal), token);
+        return new AuthResponseDTO(
+                new UserDTO(userPrincipal.getUsername(), userPrincipal.getEmail()), token);
     }
 
     public AuthResponseDTO registerUser(RegisterRequestDTO registerRequest) {
@@ -70,11 +74,12 @@ public class AuthService {
         user.getRoles().add(Role.USER);
 
         try {
-            userRepository.save(user);
+            User savedUser = userRepository.save(user);
 
-            String token = jwtTokenUtil.generateToken(user);
+            String token = jwtTokenUtil.generateToken(savedUser);
 
-            return new AuthResponseDTO(new UserResponseDTO(user), token);
+            return new AuthResponseDTO(
+                    new UserDTO(savedUser.getUsername(), savedUser.getEmail()), token);
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -105,7 +110,7 @@ public class AuthService {
         return user;
     }
 
-    public UserResponseDTO getUserDTO(String token) {
+    public UserDTO getUserDTO(String token) {
 
         UUID userId = jwtTokenUtil.extractUserId(token);
 
@@ -113,7 +118,7 @@ public class AuthService {
                 .findById(userId)
                 .orElseThrow(() -> new NoCurrentUserException());
 
-        return new UserResponseDTO(user);
+        return new UserDTO(user);
     }
 
     public User getUserFromToken(String token) {

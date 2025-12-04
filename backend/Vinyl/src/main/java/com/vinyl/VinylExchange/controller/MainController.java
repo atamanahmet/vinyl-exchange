@@ -26,7 +26,7 @@ public class MainController {
         @Autowired
         private VinylService vinylService;
 
-        boolean connect = true;
+        boolean connect = false;
 
         @GetMapping("/")
         public ResponseEntity<String> mainPage() throws JsonProcessingException {
