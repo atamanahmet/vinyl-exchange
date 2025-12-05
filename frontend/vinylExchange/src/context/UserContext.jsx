@@ -17,6 +17,7 @@ export const UserProvider = ({ children }) => {
   // register
   async function registerUser(formData) {
     const url = "http://localhost:8080/register";
+
     try {
       const response = await axios.post(
         url,
@@ -43,6 +44,7 @@ export const UserProvider = ({ children }) => {
   // login
   async function loginUser(formData) {
     const url = "http://localhost:8080/login";
+
     try {
       const response = await axios.post(
         url,
@@ -52,9 +54,12 @@ export const UserProvider = ({ children }) => {
         },
         { withCredentials: true }
       );
+
       if (response.status === 200) {
         setAuthResponse("Logged in succesfully. Redirecting...");
+
         const { username, email } = response.data;
+
         setTimeout(function () {
           setUser({ username, email });
         }, 2000);

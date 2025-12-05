@@ -69,4 +69,5 @@ public class User {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Set<Role> roles = new HashSet<>();
+
 }

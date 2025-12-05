@@ -16,8 +16,12 @@
   -moz-osx-font-smoothing: grayscale;
 }
 .formItem {
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
+}
+
+.vl {
+  border-left: 3px solid rgb(78, 0, 180);
+  height: 36px;
 }
 
 a {

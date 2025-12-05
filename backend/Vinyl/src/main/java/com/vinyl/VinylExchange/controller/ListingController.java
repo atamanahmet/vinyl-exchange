@@ -6,7 +6,8 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vinyl.VinylExchange.domain.entity.Listing;
 import com.vinyl.VinylExchange.domain.entity.User;
 import com.vinyl.VinylExchange.exception.TokenExpireException;
+import com.vinyl.VinylExchange.security.principal.UserPrincipal;
 import com.vinyl.VinylExchange.security.util.JwtCookieUtil;
 import com.vinyl.VinylExchange.service.AuthService;
 import com.vinyl.VinylExchange.service.FileStorageService;
@@ -61,6 +63,10 @@ public class ListingController {
 
             listing.setOwner(user);
 
+            if (listing.getTradePreferences() != null) {
+                listing.getTradePreferences().forEach(preference -> preference.setListing(listing));
+            }
+
             Listing savedListing = listingService.saveListing(listing);
 
             List<String> filePaths = fileStorageService.saveImages(images, savedListing.getId());
@@ -80,6 +86,13 @@ public class ListingController {
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(e.getMessage());
         }
+    }
 
+    @GetMapping("/myListings")
+    public ResponseEntity<?> getMyListings(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(listingService.getAllListingsByUserId(userPrincipal.getId()));
     }
 }

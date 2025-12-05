@@ -72,7 +72,6 @@ public class AuthService {
         user.setEmail(registerRequest.email());
         user.setPassword(passwordEncoder.encode(registerRequest.password()));
         user.getRoles().add(Role.USER);
-
         try {
             User savedUser = userRepository.save(user);
 
@@ -85,7 +84,6 @@ public class AuthService {
             System.out.println(e.getMessage());
             return null;
         }
-
     }
 
     public void validateRegistration(RegisterRequestDTO registerRequest) {

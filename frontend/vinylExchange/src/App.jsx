@@ -9,6 +9,7 @@ import MainPage from "./pages/MainPage";
 import About from "./pages/About";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import NewListing from "./pages/NewListing";
+import ListingsPage from "./pages/ListingsPage";
 
 import { useUser } from "./context/UserContext";
 import {
@@ -33,6 +34,7 @@ function App() {
         <Route path="/" element={<MainPage data={data} />} />
         <Route path="/about" element={<About />} />
         <Route path="/newlisting" element={<NewListing />} />
+        <Route path="/listings" element={<ListingsPage />} />
         <Route path="/terms" element={<TermsAndConditions />} />
       </Routes>
     </>
