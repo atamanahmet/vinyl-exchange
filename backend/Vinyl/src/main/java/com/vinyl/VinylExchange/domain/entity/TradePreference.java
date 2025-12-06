@@ -2,6 +2,8 @@ package com.vinyl.VinylExchange.domain.entity;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,6 +21,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TradePreference {
 
     @Id
@@ -29,7 +32,9 @@ public class TradePreference {
     private String desiredItem;
 
     // positive or negative value delta
-    private double valueDifference;
+    private double extraAmount;
+
+    private String paymentDirection;
 
     @ManyToOne
     @JoinColumn(name = "listing_id", nullable = false)

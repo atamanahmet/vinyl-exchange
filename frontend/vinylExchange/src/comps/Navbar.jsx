@@ -20,6 +20,7 @@ export default function Navbar() {
 
   const handleSearch = (e) => {
     if (e) e.preventDefault();
+    navigate("/");
     searchHandler(query);
     console.log("Searching for:", query);
     // e.g., axios.get(`/api/search?query=${query}`)
@@ -109,7 +110,7 @@ export default function Navbar() {
           {user == null && (
             <div>
               <button
-                className="py-1 px-3 text-black bg-slate-500 hover:bg-indigo-800 hover:text-slate-200"
+                className="rounded-lg py-2 px-3 text-amber-50 bg-indigo-600 hover:bg-indigo-800 hover:text-slate-200"
                 onClick={setModalActive}
               >
                 Sign in
@@ -124,7 +125,7 @@ export default function Navbar() {
           {user != null && (
             <div>
               <button
-                className="py-1 px-3 mt-0.5 text-black bg-slate-500 hover:bg-indigo-800 hover:text-slate-200"
+                className="rounded-lg py-2 px-3 text-amber-50 bg-indigo-600 hover:bg-indigo-800 hover:text-slate-200"
                 onClick={() => navigate("/newlisting")}
               >
                 New Listing

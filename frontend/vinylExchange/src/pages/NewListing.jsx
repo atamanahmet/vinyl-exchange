@@ -15,10 +15,10 @@ export default function NewListing() {
     format: "",
     trackCount: 0,
     artistName: "",
+    tradeValue: 0,
 
     tradeable: false,
     price: 0,
-    tradeValue: 0,
     discount: 0,
     tradePreferences: [],
   });
@@ -26,26 +26,73 @@ export default function NewListing() {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
+    setListing((prev) => {
+      const updated = {
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      };
+
+      // tradeable disabled, clear prefs
+      if (name === "tradeable" && checked === false) {
+        updated.tradePreferences = [];
+      }
+
+      return updated;
+    });
+  };
+
+  const handleTradePrefChange = (index, field, value) => {
+    setListing((prev) => {
+      const prefs = [...prev.tradePreferences];
+      prefs[index] = {
+        ...prefs[index],
+        [field]: value,
+      };
+
+      return { ...prev, tradePreferences: prefs };
+    });
+  };
+
+  const addPreference = () => {
     setListing((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      tradePreferences: [
+        ...prev.tradePreferences,
+        {
+          desiredItem: "",
+          paymentDirection: "NO_EXTRA",
+          extraAmount: 0,
+        },
+      ],
+    }));
+  };
+
+  const removePreference = (index) => {
+    setListing((prev) => ({
+      ...prev,
+      tradePreferences: prev.tradePreferences.filter((_, i) => i !== index),
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const payload = {
+      ...listing,
+      tradePreferences: listing.tradeable ? listing.tradePreferences : null,
+    };
+
     const formData = new FormData();
 
     // JSON as string
     formData.append(
       "listing",
-      new Blob([JSON.stringify(listing)], {
+      new Blob([JSON.stringify(payload)], {
         type: "application/json",
       })
     );
 
-    // images
+    // upload images
     images.forEach((img) => {
       formData.append("images", img);
     });
@@ -257,14 +304,14 @@ export default function NewListing() {
             </div>
           </div>
           <div className="">
-            <h3 className="text-3xl font-bold">trade stuff</h3>
+            <h3 className="text-3xl font-bold">Trade stuff</h3>
             <div className="mt-5">
               <div className="formItem mt-5">
                 <label className="block mb-1">Direct Sell price</label>
                 <input
                   type="number"
-                  name="trackCount"
-                  value={listing.trackCount}
+                  name="price"
+                  value={listing.price}
                   onChange={handleChange}
                   className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
                 />
@@ -295,7 +342,6 @@ export default function NewListing() {
       ${!listing.tradeable ? "opacity-50 cursor-not-allowed" : ""}`}
                 />
               </label>
-              <div className="formItem mt-5"></div>
               {/* <div className="formItem mt-5">
                 <label className="block mb-1">Discount</label>
                 <input
@@ -308,7 +354,7 @@ export default function NewListing() {
               </div> */}
               {listing.tradeable && (
                 <div className="mt-5">
-                  <div className="flex items-center justify-between mb-2">
+                  <div className=" items-center justify-between mb-2 relative">
                     <label className="font-bold">Trade Preferences</label>
 
                     <button
@@ -318,51 +364,134 @@ export default function NewListing() {
                           ...prev,
                           tradePreferences: [
                             ...prev.tradePreferences,
-                            { text: "", price: 0 },
+                            {
+                              desiredItem: "",
+                              price: 0,
+                              extraAmount: 0,
+                              paymentDirection: "NO_EXTRA",
+                            },
                           ],
                         }))
                       }
-                      className="btn btn-sm border border-amber-200"
+                      className="btn btn-sm border border-amber-200 absolute right-11 bottom-0.5"
                     >
                       +
                     </button>
                   </div>
 
                   {listing.tradePreferences.map((pref, index) => (
-                    <div key={index} className="flex items-center gap-3 mb-2">
-                      {/* Text field */}
+                    <div
+                      key={index}
+                      className="mb-3 items-center relative border rounded-md p-1 py-2 -ml-1.5 w-78"
+                    >
+                      {/* Remove */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setListing((prev) => ({
+                            ...prev,
+                            tradePreferences: prev.tradePreferences.filter(
+                              (_, i) => i !== index
+                            ),
+                          }))
+                        }
+                        className="text-red-500 text-xl text-center absolute right-2 top-1 rounded-full p-0.5 w-7"
+                      >
+                        x
+                      </button>
+                      {/* Desired Item */}
                       <input
                         type="text"
-                        placeholder="Item name"
-                        value={pref.text}
-                        onChange={(e) => {
-                          const arr = [...listing.tradePreferences];
-                          arr[index].text = e.target.value;
-                          setListing((prev) => ({
-                            ...prev,
-                            tradePreferences: arr,
-                          }));
-                        }}
-                        className="input input-bordered w-full border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                        placeholder="Record title"
+                        value={pref.desiredItem}
+                        onChange={(e) =>
+                          handleTradePrefChange(
+                            index,
+                            "desiredItem",
+                            e.target.value
+                          )
+                        }
+                        className="input w-75 input-bordered border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1 mb-3"
                       />
 
-                      {/* Price field */}
-                      <input
-                        type="number"
-                        placeholder="Price (+/-)"
-                        value={pref.price}
-                        onChange={(e) => {
-                          const arr = [...listing.tradePreferences];
-                          arr[index].price = Number(e.target.value);
-                          setListing((prev) => ({
-                            ...prev,
-                            tradePreferences: arr,
-                          }));
-                        }}
-                        className="input input-bordered w-28 border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
-                      />
+                      <div className=" mb-1">
+                        <label className="font-bold">Value difference</label>
+                      </div>
 
-                      {/* Optional remove; tell me if you want delete button */}
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleTradePrefChange(
+                              index,
+                              "paymentDirection",
+                              "NO_EXTRA"
+                            )
+                          }
+                          className={`px-2 py-1 rounded-md border ${
+                            pref.paymentDirection === "NO_EXTRA"
+                              ? "bg-green-600 text-white"
+                              : "bg-indigo-700"
+                          }`}
+                        >
+                          0
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleTradePrefChange(
+                              index,
+                              "paymentDirection",
+                              "PAY"
+                            )
+                          }
+                          className={`px-2 py-1 rounded-md border ${
+                            pref.paymentDirection === "PAY"
+                              ? "bg-red-600 text-white"
+                              : "bg-indigo-700"
+                          }`}
+                        >
+                          Pay
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleTradePrefChange(
+                              index,
+                              "paymentDirection",
+                              "RECEIVE"
+                            )
+                          }
+                          className={`px-2 py-1 rounded-md border ${
+                            pref.paymentDirection === "RECEIVE"
+                              ? "bg-green-600 text-white"
+                              : "bg-indigo-700"
+                          }`}
+                        >
+                          Receive
+                        </button>
+                        {/* Extra Amount */}
+                        <input
+                          type="number"
+                          placeholder="Amount"
+                          value={pref.extraAmount}
+                          onChange={(e) =>
+                            handleTradePrefChange(
+                              index,
+                              "extraAmount",
+                              e.target.value
+                            )
+                          }
+                          disabled={pref.paymentDirection === "NO_EXTRA"}
+                          className={`input input-bordered border-3 rounded-md w-33.5 border-white pl-1.5 ${
+                            pref.paymentDirection === "NO_EXTRA"
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
+                          }`}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -26,11 +26,12 @@ public class MainController {
         @Autowired
         private VinylService vinylService;
 
-        boolean connect = false;
+        boolean connect = true;
 
         @GetMapping("/")
         public ResponseEntity<String> mainPage() throws JsonProcessingException {
                 System.out.println("Logged");
+
                 ObjectMapper mapper = new ObjectMapper();
                 String response;
 
@@ -57,8 +58,6 @@ public class MainController {
                                                                                                 "Connection reset")))
                                                 .timeout(Duration.ofSeconds(30)) // Add timeout
                                                 .block();
-
-                                // System.out.println(result);
 
                                 if (result != null) {
                                         // rate limit for mb api
@@ -110,8 +109,6 @@ public class MainController {
                                         .timeout(Duration.ofSeconds(30)) // add timeout
                                         .block();
 
-                        // System.out.println(result);
-
                         if (result != null) {
                                 // rate limit for mb api
                                 Thread.sleep(1000);
@@ -121,10 +118,13 @@ public class MainController {
                                 return new ResponseEntity<>("No data received from API",
                                                 HttpStatus.NO_CONTENT);
                         }
+
                         List<Vinyl> list = new ArrayList<>();
+
                         for (Release item : result.getReleases()) {
                                 list.add(vinylService.findById(item.getId()).get());
                         }
+
                         response = mapper.writeValueAsString(list);
 
                         return new ResponseEntity<>(response, HttpStatus.OK);
