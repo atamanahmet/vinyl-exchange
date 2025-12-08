@@ -2,6 +2,7 @@ package com.vinyl.VinylExchange.domain.entity;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
@@ -38,6 +39,7 @@ public class TradePreference {
 
     @ManyToOne
     @JoinColumn(name = "listing_id", nullable = false)
+    @JsonIgnore
     private Listing listing;
 
 }

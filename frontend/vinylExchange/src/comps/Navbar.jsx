@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 import { useUser } from "../context/UserContext";
@@ -9,7 +9,8 @@ import { use } from "react";
 export default function Navbar() {
   const navigate = useNavigate();
 
-  const { user, logOut, setSearchQuery, searchHandler, authType } = useUser();
+  const { user, logOut, setSearchQuery, searchHandler, authType, openLogin } =
+    useUser();
 
   const [openModal, setOpenModal] = useState(false);
 
@@ -40,6 +41,10 @@ export default function Navbar() {
       setOpenModal(false);
     }
   };
+
+  useEffect(() => {
+    setOpenModal(true);
+  }, [openLogin]);
 
   return (
     <nav className="bg-black fixed w-full z-20 top-0 start-0 p-2 border-b border-default">
@@ -163,7 +168,7 @@ export default function Navbar() {
                   <ul className="p-2 text-sm text-body font-medium">
                     <li>
                       <a
-                        href="#"
+                        href="/listings"
                         className="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded"
                       >
                         Dashboard

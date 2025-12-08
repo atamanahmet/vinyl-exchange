@@ -43,18 +43,18 @@ public class Listing {
     private String barcode;
     private String packaging; // size
     private String format;
-    private int trackCount;
+    private Integer trackCount;
 
     private String artistName;
     private String artistId;
 
-    private boolean tradeable;
+    private Boolean tradeable;
 
-    private double price;
+    private Double price;
 
-    private double tradeValue;
+    private Double tradeValue;
 
-    private double discount;
+    private Double discount;
 
     @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TradePreference> tradePreferences = new ArrayList<>();

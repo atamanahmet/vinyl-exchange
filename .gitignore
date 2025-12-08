@@ -4,6 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 /backend/Vinyl/src/main/resources/application.properties
+/backend/Vinyl/uploads/**
 
 ### STS ###
 .apt_generated

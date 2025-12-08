@@ -68,4 +68,12 @@ public class GlobalExceptionHandler {
                 .body(exception.getMessage());
     }
 
+    @ExceptionHandler(ListingNotFoundException.class)
+    public ResponseEntity<?> handleListingNotFoundException(ListingNotFoundException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(exception.getMessage());
+    }
+
 }

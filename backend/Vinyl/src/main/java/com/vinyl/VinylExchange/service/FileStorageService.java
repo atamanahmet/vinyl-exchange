@@ -35,13 +35,20 @@ public class FileStorageService {
                 if (file.isEmpty())
                     continue;
 
-                String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
+                String fileName = file.getOriginalFilename();
+
                 Path filePath = listingFolder.resolve(fileName);
+
                 System.out.println("Saving file to: " + filePath.toAbsolutePath());
 
-                try (InputStream is = file.getInputStream()) {
-                    Files.copy(is, filePath, StandardCopyOption.REPLACE_EXISTING);
-                    savedPaths.add(filePath.toString()); // absolute path
+                try (InputStream inputStream = file.getInputStream()) {
+
+                    Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+
+                    String relativePath = UPLOAD_DIR + listingId + "/" + fileName;
+
+                    savedPaths.add(relativePath); // relative path
+
                 } catch (IOException e) {
                     System.err.println("Failed to save file: " + file.getOriginalFilename());
                     e.printStackTrace();

@@ -30,7 +30,6 @@ public class MainController {
 
         @GetMapping("/")
         public ResponseEntity<String> mainPage() throws JsonProcessingException {
-                System.out.println("Logged");
 
                 ObjectMapper mapper = new ObjectMapper();
                 String response;

@@ -9,6 +9,7 @@ export const UserProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isFetching, setIsFetching] = useState(false);
+  const [openLogin, setOpenLogin] = useState(false);
   const [data, setData] = useState();
   const [authResponse, setAuthResponse] = useState(null);
 
@@ -103,9 +104,13 @@ export const UserProvider = ({ children }) => {
         setUser(res.data);
       } else {
         console.log("No current user present");
+        navigate("/");
+        setOpenLogin(true);
       }
     } catch (error) {
-      console.log("Issue while getting user: ", error);
+      console.log("Please login: ", error);
+      navigate("/");
+      setOpenLogin(true);
     }
   }
 
@@ -164,6 +169,7 @@ export const UserProvider = ({ children }) => {
         registerUser,
         loginUser,
         authResponse,
+        openLogin,
       }}
     >
       {children}

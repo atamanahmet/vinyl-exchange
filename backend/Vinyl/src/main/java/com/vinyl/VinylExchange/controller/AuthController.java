@@ -2,7 +2,9 @@ package com.vinyl.VinylExchange.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import org.springframework.stereotype.Controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +15,7 @@ import com.vinyl.VinylExchange.domain.dto.AuthResponseDTO;
 import com.vinyl.VinylExchange.domain.dto.LoginRequestDTO;
 import com.vinyl.VinylExchange.domain.dto.RegisterRequestDTO;
 import com.vinyl.VinylExchange.domain.dto.UserDTO;
+
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
 import com.vinyl.VinylExchange.security.util.JwtCookieUtil;
 import com.vinyl.VinylExchange.service.AuthService;
