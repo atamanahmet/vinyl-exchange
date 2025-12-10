@@ -2,14 +2,16 @@ package com.vinyl.VinylExchange.controller;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,6 +55,26 @@ public class ListingController {
 
     }
 
+    // @PostMapping(value = "/listing/{listingId}/edit", consumes =
+    // MediaType.MULTIPART_FORM_DATA_VALUE)
+    // public ResponseEntity<?> editListing(
+    // @AuthenticationPrincipal UserPrincipal userPrincipal,
+    // @RequestPart("listing") String listingJson,
+    // @RequestPart(value = "images", required = false) List<MultipartFile> images,
+    // @PathVariable(name = "listingId", required = true) UUID listingId,
+    // HttpServletRequest request,
+    // HttpServletResponse response) throws IOException {
+
+    // listingService.saveEditedListing(
+    // listingId,
+    // listingJson,
+    // images);
+
+    // return ResponseEntity.status(HttpStatus.OK)
+    // .body("Listing created");
+
+    // }
+
     @GetMapping("/mylistings")
     public ResponseEntity<?> getMyListings(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
@@ -61,6 +83,29 @@ public class ListingController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(listingResponse);
+    }
+
+    @GetMapping("/listing/{listingId}")
+    public ResponseEntity<?> getListing(@AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable(name = "listingId", required = true) UUID listingId) {
+
+        ListingDTO listingDTO = listingService.getListingDTOById(listingId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(listingDTO);
+
+    }
+
+    @DeleteMapping("/delete/{listingId}")
+    public ResponseEntity<?> deleteListing(@AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable(name = "listingId", required = true) UUID listingId) {
+
+        listingService.deleteListing(listingId, userPrincipal);
+
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
     }
 
 }

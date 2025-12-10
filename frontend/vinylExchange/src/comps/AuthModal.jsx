@@ -29,13 +29,16 @@ export function AuthModal({ openModal, setOpenModal }) {
         className="backdrop-blur-sm"
       >
         <div className="bg-gray-900 rounded-lg overflow-hidden">
-          <ModalHeader className="bg-gray-900 pt-8">
+          <ModalHeader className="bg-gray-900 py-5 px-6">
             {authResponse ? authResponse : authType}
           </ModalHeader>
           <ModalBody className="space-y-6 bg-gray-900">
             {authType == "Login" && <Login></Login>}
             {authType == "Register" && <Register></Register>}
-            <a onClick={changeAuthType}>
+            <a
+              onClick={changeAuthType}
+              className="ring-1 ring-indigo-800 rounded-md pt-2 pb-3 p-5 bg-slate-700 cursor-pointer"
+            >
               {authType == "Login" ? "Register" : "Login"}
             </a>
           </ModalBody>

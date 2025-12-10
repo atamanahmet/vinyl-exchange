@@ -4,7 +4,6 @@ import "../App.css";
 import { ThemeProvider } from "@material-tailwind/react";
 import Card from "../comps/Card";
 import axios from "axios";
-import Table from "../comps/Table";
 import ListingItem from "../comps/ListingItem";
 
 export default function ListingsPage() {
@@ -22,16 +21,28 @@ export default function ListingsPage() {
     }
   }
 
+  const deleteListing = async (id) => {
+    const res = await axios.delete(`http://localhost:8080/delete/${id}`, {
+      withCredentials: true,
+    });
+
+    // console.log(res.status);
+
+    if (res.status == 204) {
+      fetchListings();
+    }
+  };
+
   useEffect(() => {
     fetchListings();
   }, []);
 
   return (
     <>
-      <div className="min-h-screen bg-black text-white mt-15 rounded-3xl">
+      <div className="min-h-screen min-w-300 bg-black text-white mt-15 rounded-3xl">
         <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
           <div className="">
-            <h2 className="text-3xl font-semibold">All listings</h2>
+            <h2 className="text-3xl font-semibold mb-5">All listings</h2>
           </div>
           <div className="bg-neutral-primary-soft border-b  border-default grid grid-cols-6 items-center">
             <p>Cover</p>
@@ -42,7 +53,13 @@ export default function ListingsPage() {
           </div>
           <div className="mt-6">
             {listings &&
-              listings.map((item) => <ListingItem key={item.id} item={item} />)}
+              listings.map((item) => (
+                <ListingItem
+                  key={item.id}
+                  item={item}
+                  onDelete={deleteListing}
+                />
+              ))}
           </div>
         </main>
       </div>

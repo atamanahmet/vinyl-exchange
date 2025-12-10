@@ -6,4 +6,8 @@ public class ListingNotFoundException extends RuntimeException {
         super("Listing not found");
     }
 
+    public ListingNotFoundException(String message) {
+        super(message);
+    }
+
 }

@@ -39,7 +39,7 @@ public class FileStorageService {
 
                 Path filePath = listingFolder.resolve(fileName);
 
-                System.out.println("Saving file to: " + filePath.toAbsolutePath());
+                // System.out.println("Saving file to: " + filePath.toAbsolutePath());
 
                 try (InputStream inputStream = file.getInputStream()) {
 

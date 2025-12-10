@@ -1,14 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import ImageUploader from "../comps/ImageUploader";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
-export default function NewListing() {
+export default function EditListing() {
+  const location = useLocation();
+  const listingId = location.state.id;
+  //   console.log(listingId);
+
   const [images, setImages] = useState([]);
 
-  const navigate = useNavigate();
-
   const [listing, setListing] = useState({
+    id: "",
     title: "",
     status: "",
     date: "",
@@ -25,6 +28,50 @@ export default function NewListing() {
     discount: 0,
     tradePreferences: [],
   });
+
+  const normalize = (data) => ({
+    id: data.id ?? "",
+    title: data.title ?? "",
+    status: data.status ?? "",
+    date: data.date ?? "",
+    country: data.country ?? "",
+    barcode: data.barcode ?? "",
+    packaging: data.packaging ?? "",
+    format: data.format ?? "",
+    trackCount: data.trackCount ?? 0,
+    artistName: data.artistName ?? "",
+    tradeValue: data.tradeValue ?? 0,
+    tradeable: data.tradeable ?? false,
+    price: data.price ?? 0,
+    discount: data.discount ?? 0,
+    tradePreferences: Array.isArray(data.tradePreferences)
+      ? data.tradePreferences.map((p) => ({
+          desiredItem: p.desiredItem ?? "",
+          paymentDirection: p.paymentDirection ?? "NO_EXTRA",
+          extraAmount: p.extraAmount ?? 0,
+        }))
+      : [],
+  });
+
+  async function getListing() {
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/listing/${listingId}`,
+        {
+          withCredentials: true,
+        }
+      );
+      if (res.status == 200) {
+        setListing(normalize(res.data));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    getListing();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -105,7 +152,7 @@ export default function NewListing() {
 
     try {
       const res = await axios.post(
-        "http://localhost:8080/newlisting",
+        `http://localhost:8080/newlisting`,
         formData,
         {
           withCredentials: true,
@@ -114,7 +161,6 @@ export default function NewListing() {
       );
 
       alert("Listing added successfully!");
-      navigate("/listings");
     } catch (err) {
       console.error(err);
       alert("Error adding vinyl");

@@ -11,9 +11,11 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vinyl.VinylExchange.domain.dto.ListingDTO;
 import com.vinyl.VinylExchange.domain.entity.Vinyl;
 import com.vinyl.VinylExchange.domain.pojo.Release;
 import com.vinyl.VinylExchange.domain.pojo.RootResponse;
+import com.vinyl.VinylExchange.service.ListingService;
 import com.vinyl.VinylExchange.service.VinylService;
 
 import reactor.util.retry.Retry;
@@ -23,16 +25,26 @@ import java.util.List;
 
 @Controller
 public class MainController {
-        @Autowired
-        private VinylService vinylService;
 
-        boolean connect = true;
+        private final VinylService vinylService;
+        private final ListingService listingService;
+
+        public MainController(VinylService vinylService, ListingService listingService) {
+                this.vinylService = vinylService;
+                this.listingService = listingService;
+        }
+
+        boolean connect = false;
+        boolean onlyListings = true;
 
         @GetMapping("/")
         public ResponseEntity<String> mainPage() throws JsonProcessingException {
 
                 ObjectMapper mapper = new ObjectMapper();
+
                 String response;
+
+                List<ListingDTO> allListingDTOs = listingService.getListingsDTOs();
 
                 try {
                         if (connect) {
@@ -68,8 +80,13 @@ public class MainController {
                                                         HttpStatus.NO_CONTENT);
                                 }
                         }
-                        response = mapper.writeValueAsString(vinylService.getAllVinyl());
+                        if (onlyListings) {
+                                response = mapper.writeValueAsString(allListingDTOs);
 
+                        } else {
+                                response = mapper.writeValueAsString(vinylService.getAllVinyl());
+
+                        }
                         return new ResponseEntity<>(response, HttpStatus.OK);
 
                 } catch (Exception e) {

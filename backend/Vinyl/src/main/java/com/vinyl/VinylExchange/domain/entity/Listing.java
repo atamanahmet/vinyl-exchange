@@ -84,4 +84,8 @@ public class Listing {
         tradePreferences.remove(tradePreference);
         tradePreference.setListing(null);
     }
+
+    public void setImagePaths(List<String> paths) {
+        this.imagePaths = (paths != null) ? new ArrayList<>(paths) : new ArrayList<>();
+    }
 }

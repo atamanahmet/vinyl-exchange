@@ -1,9 +1,12 @@
 package com.vinyl.VinylExchange.service;
 
+import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,7 +18,12 @@ import com.vinyl.VinylExchange.domain.entity.Listing;
 import com.vinyl.VinylExchange.domain.entity.TradePreference;
 import com.vinyl.VinylExchange.domain.entity.User;
 
+import com.vinyl.VinylExchange.exception.ListingNotFoundException;
+
 import com.vinyl.VinylExchange.repository.ListingRepository;
+import com.vinyl.VinylExchange.security.principal.UserPrincipal;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class ListingService {
@@ -27,18 +35,61 @@ public class ListingService {
         this.fileStorageService = fileStorageService;
     }
 
+    public List<Listing> getListings() {
+        return listingRepository.findAll();
+    }
+
+    public List<ListingDTO> getListingsDTOs() {
+        List<Listing> allListings = listingRepository.findAll();
+
+        List<ListingDTO> listingDTOs = new ArrayList<>();
+
+        for (Listing listing : allListings) {
+            List<TradePreferenceDTO> tradePreferenceDTOs = new ArrayList<>();
+
+            for (TradePreference tradePreference : listing.getTradePreferences()) {
+
+                tradePreferenceDTOs.add(new TradePreferenceDTO(tradePreference));
+            }
+
+            listingDTOs.add(new ListingDTO(listing, tradePreferenceDTOs));
+        }
+
+        return listingDTOs;
+    }
+
     public Listing saveListing(Listing listing) {
         return listingRepository.save(listing);
 
     }
 
+    public void deleteListing(UUID listingId, UserPrincipal userPrincipal) {
+
+        Listing listing = listingRepository.findById(listingId).orElseThrow(() -> new ListingNotFoundException());
+
+        if (listing.getOwner().getId().equals(userPrincipal.getId()))
+            listingRepository.deleteById(listingId);
+    }
+
+    public Listing getListingById(UUID listingId) {
+        return listingRepository
+                .findById(listingId)
+                .orElseThrow(() -> new ListingNotFoundException());
+    }
+
+    @Transactional
     public void createNewListing(
             String listingJson,
             List<MultipartFile> images,
             User user) {
 
+        boolean edit = false;
+
         try {
+
             Listing listing = new ObjectMapper().readValue(listingJson, Listing.class);
+
+            edit = listing.getId() != null && listingRepository.existsById(listing.getId());
 
             listing.setOwner(user);
 
@@ -48,18 +99,55 @@ public class ListingService {
                         .forEach(preference -> preference.setListing(listing));
             }
 
-            Listing savedListing = saveListing(listing);
+            if (edit) {
 
-            List<String> filePaths = fileStorageService.saveImages(
-                    images,
-                    savedListing.getId());
+                Listing oldListing = listingRepository
+                        .findById(listing.getId())
+                        .orElseThrow(() -> new ListingNotFoundException());
 
-            savedListing.setImagePaths(filePaths);
+                List<String> existingUploads = new ArrayList<>(oldListing.getImagePaths());
 
-            saveListing(savedListing);
+                List<String> newFilePaths = new ArrayList<>();
+                if (images != null && !images.isEmpty()) {
+                    newFilePaths = fileStorageService.saveImages(images, oldListing.getId());
+                }
+
+                existingUploads.addAll(newFilePaths);
+
+                copyNonNullFields(listing, oldListing);
+
+                oldListing.getTradePreferences().clear();
+
+                if (listing.getTradePreferences() != null) {
+                    for (TradePreference preference : listing.getTradePreferences()) {
+                        preference.setListing(oldListing);
+                        oldListing.getTradePreferences().add(preference);
+                    }
+                }
+
+                oldListing.setImagePaths(existingUploads);
+
+                saveListing(oldListing);
+
+            } else {
+                // for getting id
+                Listing savedListing = saveListing(listing);
+
+                if (images != null) {
+                    List<String> newFilePaths = fileStorageService.saveImages(
+                            images,
+                            savedListing.getId());
+
+                    savedListing.setImagePaths(newFilePaths);
+
+                    saveListing(savedListing);
+                }
+
+            }
+
         } catch (Exception e) {
-            // TODO: handle exception
-            System.out.println(e.getMessage());
+            // // TODO: handle exception
+            throw new RuntimeException(e);
         }
     }
 
@@ -85,5 +173,49 @@ public class ListingService {
         }
 
         return listingDTOs;
+    }
+
+    public ListingDTO getListingDTOById(UUID listingId) {
+
+        Listing listing = listingRepository
+                .findById(listingId)
+                .orElseThrow(() -> new ListingNotFoundException());
+
+        List<TradePreferenceDTO> tradePreferenceDTOs = new ArrayList<>();
+
+        for (TradePreference tradePreference : listing.getTradePreferences()) {
+
+            tradePreferenceDTOs.add(new TradePreferenceDTO(tradePreference));
+
+        }
+        ListingDTO listingDTO = new ListingDTO(listing, tradePreferenceDTOs);
+
+        return listingDTO;
+    }
+
+    public static void copyNonNullFields(Listing source, Listing target) {
+        BeanWrapper sourceWrap = new BeanWrapperImpl(source);
+        BeanWrapper targetWrap = new BeanWrapperImpl(target);
+
+        for (PropertyDescriptor propertyDescriptor : sourceWrap.getPropertyDescriptors()) {
+            String name = propertyDescriptor.getName();
+
+            if (name.equals("class")
+                    || name.equals("id")
+                    || name.equals("imagePaths")
+                    || name.equals("owner")
+                    || name.equals("tradePreferences")) {
+                continue;
+            }
+
+            if (!targetWrap.isWritableProperty(name)) {
+                continue;
+            }
+            Object value = sourceWrap.getPropertyValue(name);
+
+            if (value != null) {
+                targetWrap.setPropertyValue(name, value);
+            }
+        }
     }
 }

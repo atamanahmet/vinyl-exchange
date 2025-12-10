@@ -104,13 +104,13 @@ export const UserProvider = ({ children }) => {
         setUser(res.data);
       } else {
         console.log("No current user present");
-        navigate("/");
-        setOpenLogin(true);
+        // navigate("/");
+        // setOpenLogin(true);
       }
     } catch (error) {
       console.log("Please login: ", error);
-      navigate("/");
-      setOpenLogin(true);
+      // navigate("/");
+      // setOpenLogin(true);
     }
   }
 

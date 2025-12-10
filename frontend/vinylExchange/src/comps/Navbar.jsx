@@ -156,7 +156,7 @@ export default function Navbar() {
 
               {/* User Dropdown */}
               {isUserMenuOpen && (
-                <div className="absolute bg-black right-0 mt-2 z-50 bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44">
+                <div className="absolute bg-black right-0 mt-2 z-50 bg-neutral-primary-medium border border-default-medium rounded-xl shadow-lg w-44">
                   <div className="px-4 py-3 text-sm border-b border-default">
                     <span className="block text-heading font-medium">
                       {user?.username || "Joseph McFall"}
@@ -171,7 +171,7 @@ export default function Navbar() {
                         href="/listings"
                         className="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded"
                       >
-                        Dashboard
+                        My listings
                       </a>
                     </li>
                     <li>
@@ -179,7 +179,7 @@ export default function Navbar() {
                         href="#"
                         className="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded"
                       >
-                        Settings
+                        Profile
                       </a>
                     </li>
                     <li>

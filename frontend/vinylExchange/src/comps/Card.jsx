@@ -22,10 +22,11 @@ export default function Card({ vinyl }) {
     <div className="bg-neutral-primary-soft  max-w-sm p-6 border border-default rounded-2xl shadow-xs flex flex-col justify-between">
       <img
         className="rounded-xl h-60 w-60"
-        src={`https://coverartarchive.org/release/${vinyl.id}/front`}
-        onError={(e) => {
-          e.target.src = "/placeholder.png";
-        }}
+        src={
+          vinyl.imagePaths[0]
+            ? `http://localhost:8080/${vinyl.imagePaths[0]}`
+            : "/placeholder.png"
+        }
         alt=""
       />
 
