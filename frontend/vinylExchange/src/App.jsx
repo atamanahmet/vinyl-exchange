@@ -11,6 +11,8 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 import NewListing from "./pages/NewListing";
 import ListingsPage from "./pages/ListingsPage";
 import EditListing from "./pages/EditListing";
+import ItemPage from "./pages/ItemPage";
+import CartPage from "./pages/CartPage";
 
 import { useUser } from "./context/UserContext";
 import {
@@ -38,6 +40,8 @@ function App() {
         <Route path="/listings" element={<ListingsPage />} />
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/edit" element={<EditListing />} />
+        <Route path="/itempage" element={<ItemPage />} />
+        <Route path="/cart" element={<CartPage />} />
       </Routes>
     </>
   );

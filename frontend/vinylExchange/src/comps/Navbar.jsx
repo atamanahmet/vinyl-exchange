@@ -42,9 +42,9 @@ export default function Navbar() {
     }
   };
 
-  useEffect(() => {
-    setOpenModal(true);
-  }, [openLogin]);
+  // useEffect(() => {
+  //   setOpenModal(true);
+  // }, [openLogin]);
 
   return (
     <nav className="bg-black fixed w-full z-20 top-0 start-0 p-2 border-b border-default">
@@ -104,7 +104,7 @@ export default function Navbar() {
             </div>
             <input
               type="text"
-              className="block w-full ps-9 pe-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body"
+              className="block w-full ps-9 pe-3 py-2.5 bg-neutral-secondary-medium border rounded-md border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body"
               placeholder="Search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}

@@ -1,4 +1,7 @@
+import { useNavigate } from "react-router-dom";
+
 export default function Card({ vinyl }) {
+  const navigate = useNavigate();
   const coverUrl = `https://coverartarchive.org/release/${vinyl.id}/front-250`;
   let date;
   let label;
@@ -18,43 +21,54 @@ export default function Card({ vinyl }) {
       }
     }
   }
+
+  const navigateItemWithId = () => {
+    console.log(vinyl.id);
+    navigate("/itempage", { state: { id: vinyl.id } });
+  };
   return (
-    <div className="bg-neutral-primary-soft  max-w-sm p-6 border border-default rounded-2xl shadow-xs flex flex-col justify-between">
-      <img
-        className="rounded-xl h-60 w-60"
-        src={
-          vinyl.imagePaths[0]
-            ? `http://localhost:8080/${vinyl.imagePaths[0]}`
-            : "/placeholder.png"
-        }
-        alt=""
-      />
+    <button
+      onClick={() => {
+        navigateItemWithId();
+      }}
+    >
+      <div className="bg-neutral-primary-soft  max-w-sm p-6 border border-default rounded-2xl shadow-xs flex flex-col justify-between">
+        <img
+          className="rounded-xl h-60 w-60"
+          src={
+            vinyl.imagePaths[0]
+              ? `http://localhost:8080/${vinyl.imagePaths[0]}`
+              : "/placeholder.png"
+          }
+          alt=""
+        />
 
-      <a href="#">
-        <h5 className="mt-3 mb-2 text-2xl font-semibold tracking-tight text-heading">
-          {vinyl.title}
-        </h5>
-      </a>
-      <p className="mb-3 text-body">{vinyl.artistName || "No info"}</p>
-
-      <p className="text-body mb-2">{date}</p>
-
-      <p className="text-body">{label || "No Label info"}</p>
-
-      <div className="flex flex-row gap-3 justify-center">
-        <a
-          href="#"
-          className="text-body mt-5 rounded-xl bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-9"
-        >
-          Trade
+        <a href="#">
+          <h5 className="mt-3 mb-2 text-2xl font-semibold tracking-tight text-heading">
+            {vinyl.title}
+          </h5>
         </a>
-        <a
-          href="#"
-          className="text-body mt-5 rounded-xl bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-10"
-        >
-          Buy
-        </a>
+        <p className="mb-3 text-body">{vinyl.artistName || "No info"}</p>
+
+        <p className="text-body mb-2">{date}</p>
+
+        <p className="text-body">{label || "No Label info"}</p>
+
+        <div className="flex flex-row gap-3 justify-center">
+          <a
+            href="#"
+            className="text-body mt-5 rounded-xl bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-9"
+          >
+            Trade
+          </a>
+          <a
+            href="#"
+            className="text-body mt-5 rounded-xl bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-10"
+          >
+            Buy
+          </a>
+        </div>
       </div>
-    </div>
+    </button>
   );
 }

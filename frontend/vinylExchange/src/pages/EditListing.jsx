@@ -169,9 +169,7 @@ export default function EditListing() {
 
   return (
     <div className="">
-      <h2 className="text-3xl font-bold text-left mt-15 ml-4 mb-5">
-        Create New Listing
-      </h2>
+      <h2 className="text-3xl font-bold text-left mt-15 ml-4">Edit Listing</h2>
       <form onSubmit={handleSubmit} className=" p-4 space-y-4 text-left">
         <div className="grid grid-cols-[0.9fr_0.5fr_1fr_1fr]">
           <div className="">
@@ -267,9 +265,9 @@ export default function EditListing() {
 
             <button
               type="submit"
-              className="btn btn-primary border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1 mt-5"
+              className="btn btn-primary border-2 bg-indigo-800 text-white border-amber-50 ring-1 py-2 ring-indigo-800 rounded-md px-2 mt-2"
             >
-              Create
+              Submit
             </button>
           </div>
           <div className="formItem max-w-50 mt-14 ml-4">

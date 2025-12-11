@@ -12,6 +12,7 @@ export const UserProvider = ({ children }) => {
   const [openLogin, setOpenLogin] = useState(false);
   const [data, setData] = useState();
   const [authResponse, setAuthResponse] = useState(null);
+  const [cart, setCart] = useState([]);
 
   const storedPhoto = sessionStorage.getItem("profilePhoto");
 
@@ -118,6 +119,37 @@ export const UserProvider = ({ children }) => {
     currentUser();
   }, [location.pathname]);
 
+  // cart
+  function addToCart(id) {
+    setCart((prev) => {
+      const item = prev.find((p) => p.id === id);
+
+      if (item) {
+        return prev.map((p) => (p.id === id ? { ...p, qty: p.qty + 1 } : p));
+      }
+
+      return [...prev, { id, qty: 1 }];
+    });
+  }
+
+  function decreaseFromCart(id) {
+    setCart((prev) => {
+      const item = prev.find((p) => p.id === id);
+      if (!item) return prev;
+
+      if (item.qty === 1) {
+        return prev.filter((p) => p.id !== id);
+      }
+
+      return prev.map((p) => (p.id === id ? { ...p, qty: p.qty - 1 } : p));
+    });
+  }
+
+  function removeFromCart(id) {
+    setCart((prev) => prev.filter((p) => p.id !== id));
+  }
+  //
+
   const fetchData = async () => {
     if (isFetching) return;
     setIsFetching(true);
@@ -170,6 +202,10 @@ export const UserProvider = ({ children }) => {
         loginUser,
         authResponse,
         openLogin,
+        addToCart,
+        cart,
+        decreaseFromCart,
+        removeFromCart,
       }}
     >
       {children}

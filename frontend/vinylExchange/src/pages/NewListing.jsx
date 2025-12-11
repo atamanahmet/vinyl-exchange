@@ -19,6 +19,7 @@ export default function NewListing() {
     trackCount: 0,
     artistName: "",
     tradeValue: 0,
+    description: "",
 
     tradeable: false,
     price: 0,
@@ -123,14 +124,14 @@ export default function NewListing() {
 
   return (
     <div className="">
-      <h2 className="text-3xl font-bold text-left mt-15 ml-4 mb-5">
+      <h2 className="text-3xl font-bold text-left mt-15 ml-4">
         Create New Listing
       </h2>
       <form onSubmit={handleSubmit} className=" p-4 space-y-4 text-left">
         <div className="grid grid-cols-[0.9fr_0.5fr_1fr_1fr]">
           <div className="">
             <div className="formItem">
-              <h3 className="text-3xl font-bold mb-5">Listing information</h3>
+              <h3 className="text-2xl font-bold mb-5">Listing information</h3>
               <label className="block mb-1">Title</label>
               <input
                 type="text"
@@ -221,7 +222,7 @@ export default function NewListing() {
 
             <button
               type="submit"
-              className="btn btn-primary border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1 mt-5"
+              className="btn btn-primary border-2 bg-indigo-800 text-white border-amber-50 ring-1 py-2 ring-indigo-800 rounded-md px-2 mt-2"
             >
               Create
             </button>
@@ -308,7 +309,7 @@ export default function NewListing() {
             </div>
           </div>
           <div className="">
-            <h3 className="text-3xl font-bold">Trade stuff</h3>
+            <h3 className="text-2xl font-bold">Trade stuff</h3>
             <div className="mt-5">
               <div className="formItem mt-5">
                 <label className="block mb-1">Direct Sell price</label>
@@ -503,9 +504,32 @@ export default function NewListing() {
             </div>
           </div>
           <div>
-            <h3 className="text-3xl font-bold mb-5">Upload images</h3>
+            <div className="formItem ">
+              <label className="block text-2xl font-bold mb-2">
+                Description
+              </label>
+              <textArea
+                type="text"
+                name="description"
+                value={listing.description}
+                onChange={handleChange}
+                maxlength="255"
+                className="input w-87 input-bordered border-2 mt-5 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+              />
+              <p
+                className="text-right"
+                style={{
+                  color: listing.description.length <= 255 ? "green" : "red",
+                }}
+              >
+                {listing.description.length}/255
+              </p>
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold mb-5 mt-5">Upload images</h3>
 
-            <ImageUploader images={images} setImages={setImages} />
+              <ImageUploader images={images} setImages={setImages} />
+            </div>
           </div>
         </div>
       </form>
