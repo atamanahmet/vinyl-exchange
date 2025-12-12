@@ -160,10 +160,10 @@ export default function EditListing() {
         }
       );
 
-      alert("Listing added successfully!");
+      alert("Listing saved successfully!");
     } catch (err) {
       console.error(err);
-      alert("Error adding vinyl");
+      alert("ServerError");
     }
   };
 

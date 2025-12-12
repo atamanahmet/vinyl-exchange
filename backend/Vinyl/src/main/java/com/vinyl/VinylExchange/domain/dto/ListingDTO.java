@@ -30,6 +30,9 @@ public class ListingDTO {
     private Integer trackCount;
     private Double tradeValue;
     private Double discount;
+    private String condition;
+    private String artistName;
+    private String labelName;
 
     public ListingDTO(Listing listing, List<TradePreferenceDTO> tradePreferenceDTOs) {
         this.id = listing.getId();
@@ -42,6 +45,10 @@ public class ListingDTO {
         this.trackCount = listing.getTrackCount();
         this.tradePreferences = tradePreferenceDTOs;
         this.discount = listing.getDiscount();
+        this.barcode = listing.getBarcode();
+        this.artistName = listing.getArtistName();
+        this.condition = listing.getCondition();
+        this.labelName = listing.getLabelName();
 
     }
 }

@@ -14,7 +14,8 @@ export default function NewListing() {
     date: "",
     country: "",
     barcode: "",
-    packaging: "",
+    condition: "",
+    labelName: "",
     format: "",
     trackCount: 0,
     artistName: "",
@@ -123,16 +124,15 @@ export default function NewListing() {
   };
 
   return (
-    <div className="">
-      <h2 className="text-3xl font-bold text-left mt-15 ml-4">
-        Create New Listing
-      </h2>
+    <div className="mt-10 -ml-5">
+      <h2 className="text-3xl font-bold text-left ml-4">Create New Listing</h2>
       <form onSubmit={handleSubmit} className=" p-4 space-y-4 text-left">
         <div className="grid grid-cols-[0.9fr_0.5fr_1fr_1fr]">
           <div className="">
             <div className="formItem">
               <h3 className="text-2xl font-bold mb-5">Listing information</h3>
-              <label className="block mb-1">Title</label>
+
+              <label className="block mb-1">Album</label>
               <input
                 type="text"
                 name="title"
@@ -144,17 +144,41 @@ export default function NewListing() {
             </div>
 
             <div className="formItem">
-              <label className="block mb-1">Status</label>
+              <label className="block mb-1">Artist / Band</label>
               <input
                 type="text"
-                name="status"
-                value={listing.status}
+                name="artistName"
+                value={listing.artistName}
                 onChange={handleChange}
                 className="input w-75 input-bordered border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
               />
             </div>
 
-            <div className="formItem">
+            <div className="formItem my-3">
+              <h2 className="mb-1 text-white">Status</h2>
+              <label className="inline-flex items-center gap-2 ">
+                <input
+                  type="radio"
+                  name="status"
+                  value="Used"
+                  checked={listing.status === "Used"}
+                  onChange={handleChange}
+                  className="radio radio-primary border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                />
+                <span>Used</span>
+                <input
+                  type="radio"
+                  name="status"
+                  value="New"
+                  checked={listing.status === "New"}
+                  onChange={handleChange}
+                  className="ml-5 radio radio-primary border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                />
+                <span>New</span>
+              </label>
+            </div>
+
+            <div className="formItem mt-3">
               <label className="block mb-1">Release Date</label>
               <input
                 type="date"
@@ -175,9 +199,19 @@ export default function NewListing() {
                 className="input w-75 input-bordered border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
               />
             </div>
+            <div className="formItem">
+              <label className="block mb-1">Label</label>
+              <input
+                type="text"
+                name="labelName"
+                value={listing.labelName}
+                onChange={handleChange}
+                className="input w-75 input-bordered border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+              />
+            </div>
 
             <div className="formItem">
-              <label className="block mb-1">Barcode</label>
+              <label className="block mb-1">Barcode / Catalog No.</label>
               <input
                 type="text"
                 name="barcode"
@@ -187,7 +221,7 @@ export default function NewListing() {
               />
             </div>
 
-            <div className="formItem">
+            {/* <div className="formItem">
               <label className="block mb-1">Packaging</label>
               <input
                 type="text"
@@ -196,7 +230,7 @@ export default function NewListing() {
                 onChange={handleChange}
                 className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
               />
-            </div>
+            </div> */}
 
             <div className="formItem">
               <label className="block mb-1">Track Count</label>
@@ -209,17 +243,6 @@ export default function NewListing() {
               />
             </div>
 
-            <div className="formItem">
-              <label className="block mb-1">Artist Name</label>
-              <input
-                type="text"
-                name="artistName"
-                value={listing.artistName}
-                onChange={handleChange}
-                className="input w-75 input-bordered border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
-              />
-            </div>
-
             <button
               type="submit"
               className="btn btn-primary border-2 bg-indigo-800 text-white border-amber-50 ring-1 py-2 ring-indigo-800 rounded-md px-2 mt-2"
@@ -227,8 +250,9 @@ export default function NewListing() {
               Create
             </button>
           </div>
-          <div className="formItem max-w-50 mt-14 ml-4">
-            <label className="block mb-1 ">Format</label>
+
+          <div className="formItem max-w-50 mt-14 ml-1">
+            <label className="block mb-1 font-bold ">Format</label>
 
             <div className="flex flex-col gap-2">
               {/* listing LP */}
@@ -307,9 +331,96 @@ export default function NewListing() {
                 <span>Other</span>
               </label>
             </div>
+            <label className="block mb-1 mt-5 font-bold ">Condition</label>
+
+            <div className="flex flex-col gap-2">
+              <label className="inline-flex items-center gap-2 ">
+                <input
+                  type="radio"
+                  name="condition"
+                  value="P"
+                  checked={listing.condition === "P"}
+                  onChange={handleChange}
+                  className="radio radio-primary border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                />
+                <span>(P) (F) Poor / Fair</span>
+              </label>
+
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="condition"
+                  value="G"
+                  checked={listing.condition === "G"}
+                  onChange={handleChange}
+                  className="radio radio-primary border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                />
+                <span>(G) Good</span>
+              </label>
+
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="condition"
+                  value="VG"
+                  checked={listing.condition === "VG"}
+                  onChange={handleChange}
+                  className="radio radio-primary border-2  border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                />
+                <span>(VG) Very Good</span>
+              </label>
+
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="condition"
+                  value="VG+"
+                  checked={listing.condition === "VG+"}
+                  onChange={handleChange}
+                  className="radio radio-primary border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                />
+                <span>(VG+) Very Good+</span>
+              </label>
+
+              {/* CD */}
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="condition"
+                  value="E"
+                  checked={listing.condition === "E"}
+                  onChange={handleChange}
+                  className="radio radio-primary border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                />
+                <span>(E) Excellent</span>
+              </label>
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="condition"
+                  value="NM"
+                  checked={listing.condition === "NM"}
+                  onChange={handleChange}
+                  className="radio radio-primary border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                />
+                <span>(NM) Near Mint</span>
+              </label>
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="condition"
+                  value="M"
+                  checked={listing.condition === "M"}
+                  onChange={handleChange}
+                  className="radio radio-primary border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                />
+                <span>(M) Mint</span>
+              </label>
+            </div>
           </div>
-          <div className="">
-            <h3 className="text-2xl font-bold">Trade stuff</h3>
+
+          <div className="ml-5">
+            <h3 className="text-2xl font-bold ">Trade Information</h3>
             <div className="mt-5">
               <div className="formItem mt-5">
                 <label className="block mb-1">Direct Sell price</label>
@@ -508,12 +619,13 @@ export default function NewListing() {
               <label className="block text-2xl font-bold mb-2">
                 Description
               </label>
-              <textArea
+              <textarea
                 type="text"
                 name="description"
+                rows="5"
                 value={listing.description}
                 onChange={handleChange}
-                maxlength="255"
+                maxLength="255"
                 className="input w-87 input-bordered border-2 mt-5 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
               />
               <p

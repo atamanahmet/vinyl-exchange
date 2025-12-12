@@ -1,7 +1,22 @@
+import axios from "axios";
 import { useState } from "react";
 
 export function useCart() {
   const [cart, setCart] = useState([]);
+
+  async function fetchCart() {
+    try {
+      const res = await axios.get("http://localhost:8080/cart", {
+        withCredentials: true,
+      });
+      if (res.status === 200) {
+        console.log(res.data);
+        setCart(res.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const addToCart = (id) => {
     setCart((prev) => {

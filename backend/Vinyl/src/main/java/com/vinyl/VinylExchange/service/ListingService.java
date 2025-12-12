@@ -31,15 +31,23 @@ public class ListingService {
     private FileStorageService fileStorageService;
 
     public ListingService(ListingRepository listingRepository, FileStorageService fileStorageService) {
+
         this.listingRepository = listingRepository;
         this.fileStorageService = fileStorageService;
     }
 
     public List<Listing> getListings() {
+
         return listingRepository.findAll();
     }
 
+    public List<Listing> getListingsByIds(List<UUID> listingIds) {
+
+        return listingRepository.findAllByIdIn(listingIds);
+    }
+
     public List<ListingDTO> getListingsDTOs() {
+
         List<Listing> allListings = listingRepository.findAll();
 
         List<ListingDTO> listingDTOs = new ArrayList<>();
@@ -59,8 +67,8 @@ public class ListingService {
     }
 
     public Listing saveListing(Listing listing) {
-        return listingRepository.save(listing);
 
+        return listingRepository.save(listing);
     }
 
     public void deleteListing(UUID listingId, UserPrincipal userPrincipal) {
@@ -152,6 +160,7 @@ public class ListingService {
     }
 
     public List<Listing> getAllListingsByUserId(UUID ownerId) {
+
         return listingRepository.findAllByOwner_Id(ownerId);
     }
 

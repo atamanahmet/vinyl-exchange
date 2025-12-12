@@ -11,4 +11,6 @@ import com.vinyl.VinylExchange.domain.entity.Listing;
 @Repository
 public interface ListingRepository extends JpaRepository<Listing, UUID> {
     List<Listing> findAllByOwner_Id(UUID ownerId);
+
+    List<Listing> findAllByIdIn(List<UUID> listingIds);
 }

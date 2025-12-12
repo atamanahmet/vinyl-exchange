@@ -7,6 +7,8 @@ import { useUser } from "../context/UserContext";
 export default function ItemPage({}) {
   const { addToCart } = useUser();
 
+  const [label, setLabel] = useState();
+
   const location = useLocation();
   const listingId = location.state.id;
 
@@ -55,6 +57,7 @@ export default function ItemPage({}) {
     price: data.price ?? 0,
     discount: data.discount ?? 0,
     imagePaths: data.imagePaths ?? [],
+    labelName: data.labelName ?? "",
 
     tradePreferences: Array.isArray(data.tradePreferences)
       ? data.tradePreferences.map((p) => ({
@@ -81,6 +84,20 @@ export default function ItemPage({}) {
     }
   }
 
+  const size = listing.format == 33 ? `12"- ` : `7"- `;
+
+  if (vinyl.labelName) {
+    if (vinyl.labelName.includes("no label")) {
+      label = "";
+    } else {
+      if (vinyl.labelName.includes("Records")) {
+        label = vinyl.labelName;
+      } else {
+        label = vinyl.labelName + " Records";
+      }
+    }
+  }
+
   useEffect(() => {
     getListing();
   }, []);
@@ -90,18 +107,25 @@ export default function ItemPage({}) {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-10">
+      <div className="grid grid-cols-2 gap-10 text-left">
         <ImageGallery imagePaths={listing.imagePaths} />
         <div>
           <h2 className="company uppercase text-orange font-bold text-sm sm:text-md tracking-wider pb-3 sm:pb-5">
-            sneaker company
+            {listing.labelName}
           </h2>
           <h3
             // ref={listing.title}
             className="product capitalize text-very-dark-blue font-bold text-3xl sm:text-4xl sm:leading-none pb-3"
           >
             {listing.title}{" "}
-            <span className="block lg:mt-1">{listing.format}</span>
+            <span className="block  mt-5 text-2xl">
+              {size}
+              {listing.format + " rpm"}
+            </span>
+            <span className="block  mt-5 text-2xl">
+              {/* {size} */}
+              {listing.labelName}
+            </span>
           </h3>
           <p className="text-dark-grayish-blue pb-6 lg:py-7 lg:leading-6">
             {listing.description}

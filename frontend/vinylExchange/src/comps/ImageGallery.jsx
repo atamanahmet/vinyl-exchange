@@ -20,7 +20,7 @@ export default function ImageGallery({ imagePaths }) {
           e.target.src = "/placeholder.png";
         }}
         alt="main"
-        className="w-200 h-100 object-cover rounded-md mb-4"
+        className="w-auto h-130 object-fit rounded-md mb-4"
       />
 
       <div className="flex gap-4.5 flex-wrap">

@@ -46,6 +46,8 @@ public class Listing {
     private String description;
     private String artistName;
     private String artistId;
+    private String labelName;
+    private String condition;
 
     private Integer trackCount;
 

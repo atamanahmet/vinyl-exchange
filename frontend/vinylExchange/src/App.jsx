@@ -32,7 +32,7 @@ function App() {
 
   return (
     <>
-      <Navbar></Navbar>
+      <Navbar />
       <Routes>
         <Route path="/" element={<MainPage data={data} />} />
         <Route path="/about" element={<About />} />

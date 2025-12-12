@@ -90,7 +90,7 @@ public class ListingController {
         public ResponseEntity<?> getListing(@AuthenticationPrincipal UserPrincipal userPrincipal,
                         @PathVariable(name = "listingId", required = true) UUID listingId) {
 
-                ListingDTO listingDTO = listingService.getListingDTOById(listingId);
+                // ListingDTO listingDTO = listingService.getListingDTOById(listingId);
                 Listing listing = listingService.getListingById(listingId);
 
                 return ResponseEntity

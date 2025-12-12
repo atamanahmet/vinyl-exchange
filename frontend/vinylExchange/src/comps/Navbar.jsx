@@ -47,7 +47,7 @@ export default function Navbar() {
   // }, [openLogin]);
 
   return (
-    <nav className="bg-black fixed w-full z-20 top-0 start-0 p-2 border-b border-default">
+    <nav className="bg-black fixed w-full z-20 top-0 start-0 p-2 border-b border-default ">
       <div className="max-w-6xl flex flex-wrap items-center justify-between mx-auto p-1">
         {/* Logo */}
         <a href="/" className="flex items-center space-x-3 rtl:space-x-reverse">

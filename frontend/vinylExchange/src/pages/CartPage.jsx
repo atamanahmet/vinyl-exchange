@@ -3,9 +3,9 @@ import { useCart } from "../context/UseCart";
 import { useState } from "react";
 
 export default function CartPage() {
-    const [items, setItems] = useState();
+  const [items, setItems] = useState();
   const { cart, addToCart, decreaseFromCart, removeFromCart } = useCart();
-
+  console.log("CartPage cart: " + cart);
   return (
     <>
       <section className="bg-white py-8 antialiased dark:bg-gray-900 md:py-16">

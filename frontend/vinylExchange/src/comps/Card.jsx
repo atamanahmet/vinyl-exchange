@@ -10,14 +10,14 @@ export default function Card({ vinyl }) {
   } else {
     date = "No date";
   }
-  if (vinyl.label) {
-    if (vinyl.label.name.includes("no label")) {
+  if (vinyl.labelName) {
+    if (vinyl.labelName.includes("no label")) {
       label = "";
     } else {
-      if (vinyl.label.name.includes("Records")) {
-        label = vinyl.label.name;
+      if (vinyl.labelName.includes("Records")) {
+        label = vinyl.labelName;
       } else {
-        label = vinyl.label.name + " Records";
+        label = vinyl.labelName + " Records";
       }
     }
   }
