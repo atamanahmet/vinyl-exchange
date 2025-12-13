@@ -42,9 +42,9 @@ export default function Navbar() {
     }
   };
 
-  // useEffect(() => {
-  //   setOpenModal(true);
-  // }, [openLogin]);
+  useEffect(() => {
+    setOpenModal(true);
+  }, [openLogin]);
 
   return (
     <nav className="bg-black fixed w-full z-20 top-0 start-0 p-2 border-b border-default ">

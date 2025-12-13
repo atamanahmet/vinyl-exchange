@@ -24,17 +24,18 @@ export default function Card({ vinyl }) {
 
   const navigateItemWithId = () => {
     console.log(vinyl.id);
-    navigate("/itempage", { state: { id: vinyl.id } });
+    navigate(`/listing/${vinyl.id}`);
   };
+  
   return (
     <button
       onClick={() => {
         navigateItemWithId();
       }}
     >
-      <div className="bg-neutral-primary-soft  max-w-sm p-6 border border-default rounded-2xl shadow-xs flex flex-col justify-between">
+      <div className="bg-neutral-primary-soft  max-w-sm p-6 border border-default rounded-2xl shadow-xs flex flex-col justify-center">
         <img
-          className="rounded-xl h-60 w-60"
+          className="rounded-md h-60 w-60 object-fill"
           src={
             vinyl.imagePaths[0]
               ? `http://localhost:8080/${vinyl.imagePaths[0]}`

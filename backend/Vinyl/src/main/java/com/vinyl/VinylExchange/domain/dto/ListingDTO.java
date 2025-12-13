@@ -21,15 +21,15 @@ public class ListingDTO {
     private String title;
     private String status;
     private String barcode;
-    private Double price;
+    private long priceKurus;
     private Boolean tradeable;
     private List<String> imagePaths;
     private List<TradePreferenceDTO> tradePreferences;
     private String format;
     private String date;
     private Integer trackCount;
-    private Double tradeValue;
-    private Double discount;
+    private long tradeValue;
+    private int discountBP; // bp
     private String condition;
     private String artistName;
     private String labelName;
@@ -38,13 +38,13 @@ public class ListingDTO {
         this.id = listing.getId();
         this.title = listing.getTitle();
         this.date = listing.getDate();
-        this.price = listing.getPrice();
+        this.priceKurus = listing.getPriceKurus();
         this.tradeable = listing.getTradeable();
         this.imagePaths = listing.getImagePaths();
         this.format = listing.getFormat();
         this.trackCount = listing.getTrackCount();
         this.tradePreferences = tradePreferenceDTOs;
-        this.discount = listing.getDiscount();
+        this.discountBP = listing.getDiscountBP();
         this.barcode = listing.getBarcode();
         this.artistName = listing.getArtistName();
         this.condition = listing.getCondition();

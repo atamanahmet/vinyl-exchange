@@ -121,15 +121,20 @@ export const UserProvider = ({ children }) => {
 
   // cart
   function addToCart(id) {
-    setCart((prev) => {
-      const item = prev.find((p) => p.id === id);
+    if (!user) {
+      console.log("Please login");
+      setOpenLogin(true);
+    } else {
+      setCart((prev) => {
+        const item = prev.find((p) => p.id === id);
 
-      if (item) {
-        return prev.map((p) => (p.id === id ? { ...p, qty: p.qty + 1 } : p));
-      }
+        if (item) {
+          return prev.map((p) => (p.id === id ? { ...p, qty: p.qty + 1 } : p));
+        }
 
-      return [...prev, { id, qty: 1 }];
-    });
+        return [...prev, { id, qty: 1 }];
+      });
+    }
   }
 
   function decreaseFromCart(id) {

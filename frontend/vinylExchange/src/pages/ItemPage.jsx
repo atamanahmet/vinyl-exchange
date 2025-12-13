@@ -1,16 +1,19 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import ImageGallery from "../comps/ImageGallery";
 import { useUser } from "../context/UserContext";
 
 export default function ItemPage({}) {
+  const { listingId } = useParams();
   const { addToCart } = useUser();
 
-  const [label, setLabel] = useState();
-
   const location = useLocation();
-  const listingId = location.state.id;
+
+  let label;
+  let format;
+
+  // const [label, setLabel] = useState();
 
   const navigate = useNavigate();
 
@@ -33,6 +36,7 @@ export default function ItemPage({}) {
     artistName: "",
     tradeValue: 0,
     imagePaths: [],
+    condition: "",
 
     tradeable: false,
     price: 0,
@@ -58,6 +62,7 @@ export default function ItemPage({}) {
     discount: data.discount ?? 0,
     imagePaths: data.imagePaths ?? [],
     labelName: data.labelName ?? "",
+    condition: data.condition ?? "",
 
     tradePreferences: Array.isArray(data.tradePreferences)
       ? data.tradePreferences.map((p) => ({
@@ -84,29 +89,45 @@ export default function ItemPage({}) {
     }
   }
 
-  const size = listing.format == 33 ? `12"- ` : `7"- `;
+  switch (listing.format) {
+    case listing.format:
+      "33";
+      format = `12" LP - 33 RPM`;
+      break;
+    case listing.format:
+      "45";
+      format = `7" EP - 45 RPM`;
+      break;
 
-  if (vinyl.labelName) {
-    if (vinyl.labelName.includes("no label")) {
-      label = "";
-    } else {
-      if (vinyl.labelName.includes("Records")) {
-        label = vinyl.labelName;
-      } else {
-        label = vinyl.labelName + " Records";
-      }
-    }
+    default:
+      "";
+      break;
   }
 
   useEffect(() => {
     getListing();
-  }, []);
+  }, [listingId]);
+
+  if (listing.labelName) {
+    if (listing.labelName.includes("no label")) {
+      label = "";
+    } else {
+      if (listing.labelName.includes("Records")) {
+        label = listing.labelName;
+      } else {
+        label = listing.labelName + " Records";
+      }
+    }
+  }
 
   const [mainImage, setMainImage] = useState();
   // `http://localhost:8080/${listing.imagePaths[0]}`
 
   return (
     <>
+      {/* {listing && (
+        
+      )} */}
       <div className="grid grid-cols-2 gap-10 text-left">
         <ImageGallery imagePaths={listing.imagePaths} />
         <div>
@@ -118,25 +139,30 @@ export default function ItemPage({}) {
             className="product capitalize text-very-dark-blue font-bold text-3xl sm:text-4xl sm:leading-none pb-3"
           >
             {listing.title}{" "}
-            <span className="block  mt-5 text-2xl">
-              {size}
-              {listing.format + " rpm"}
+            <span className="block  mt-5 text-2xl text-indigo-400">
+              {/* {size} */}
+              {listing.artistName}
             </span>
             <span className="block  mt-5 text-2xl">
               {/* {size} */}
-              {listing.labelName}
+              {label}
             </span>
+            <span className="block  mt-5 text-2xl">{format}</span>
+            <span className="block  mt-5 text-2xl">{listing.condition}</span>
           </h3>
           <p className="text-dark-grayish-blue pb-6 lg:py-7 lg:leading-6">
             {listing.description}
           </p>
           <div className="amount font-bold flex items-center justify-between lg:flex-col lg:items-start mb-6">
             <div className="discount-price items-center flex">
-              <div className="price text-3xl">
-                {listing.discount != 0
-                  ? listing.price - (listing.price * listing.discount) / 100
-                  : listing.price}{" "}
-                ₺
+              <div className="price text-3xl ">
+                <span className="text-green-400">
+                  {" "}
+                  {listing.discount != 0
+                    ? listing.price - (listing.price * listing.discount) / 100
+                    : listing.price}{" "}
+                  ₺
+                </span>
               </div>
               <div className="discount text-green bg-pale-orange w-max px-2 rounded mx-5 h-6">
                 {listing.discount != 0 ? listing.discount : null}%
@@ -173,15 +199,28 @@ export default function ItemPage({}) {
               </button>
             </div>
 
-            <button
-              onClick={addCart}
-              className="cart w-full h-14 bg-orange rounded-lg lg:rounded-xl mb-2 shadow-orange-shadow shadow-2xl text-white flex items-center justify-center lg:w-3/5 hover:opacity-60"
-            >
-              <i className="cursor-pointer text-white text-xl leading-0 pr-3">
-                <ion-icon name="cart-outline"></ion-icon>
-              </i>
-              Add to cart
-            </button>
+            <div className="inline-flex justify-center w-full gap-3">
+              <button
+                onClick={addCart}
+                className=" w-full h-14 bg-orange rounded-lg lg:rounded-xl mb-2 hover:shadow-lg hover:shadow-indigo-600 text-white flex bg-indigo-600 hover:bg-indigo-800 hover:text-slate-200 items-center justify-center lg:w-3/5 "
+                // className="rounded-lg py-2 px-3 text-amber-50  "
+              >
+                <i className="cursor-pointer text-white text-xl text-center ">
+                  <ion-icon name="cart-outline"></ion-icon>
+                </i>
+                Trade
+              </button>
+              <button
+                onClick={addCart}
+                className=" w-full h-14 bg-orange rounded-lg lg:rounded-xl mb-2 hover:shadow-lg hover:shadow-indigo-600 text-white flex bg-indigo-600 hover:bg-indigo-800 hover:text-slate-200 items-center justify-center lg:w-3/5 "
+                // className="rounded-lg py-2 px-3 text-amber-50  "
+              >
+                <i className="cursor-pointer text-white text-xl text-center ">
+                  <ion-icon name="cart-outline"></ion-icon>
+                </i>
+                Add to cart
+              </button>
+            </div>
           </div>
         </div>
       </div>

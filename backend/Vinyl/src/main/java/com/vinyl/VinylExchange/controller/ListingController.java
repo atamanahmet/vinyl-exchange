@@ -56,26 +56,6 @@ public class ListingController {
 
         }
 
-        // @PostMapping(value = "/listing/{listingId}/edit", consumes =
-        // MediaType.MULTIPART_FORM_DATA_VALUE)
-        // public ResponseEntity<?> editListing(
-        // @AuthenticationPrincipal UserPrincipal userPrincipal,
-        // @RequestPart("listing") String listingJson,
-        // @RequestPart(value = "images", required = false) List<MultipartFile> images,
-        // @PathVariable(name = "listingId", required = true) UUID listingId,
-        // HttpServletRequest request,
-        // HttpServletResponse response) throws IOException {
-
-        // listingService.saveEditedListing(
-        // listingId,
-        // listingJson,
-        // images);
-
-        // return ResponseEntity.status(HttpStatus.OK)
-        // .body("Listing created");
-
-        // }
-
         @GetMapping("/mylistings")
         public ResponseEntity<?> getMyListings(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
@@ -87,8 +67,7 @@ public class ListingController {
         }
 
         @GetMapping("/listing/{listingId}")
-        public ResponseEntity<?> getListing(@AuthenticationPrincipal UserPrincipal userPrincipal,
-                        @PathVariable(name = "listingId", required = true) UUID listingId) {
+        public ResponseEntity<?> getListing(@PathVariable(name = "listingId", required = true) UUID listingId) {
 
                 // ListingDTO listingDTO = listingService.getListingDTOById(listingId);
                 Listing listing = listingService.getListingById(listingId);

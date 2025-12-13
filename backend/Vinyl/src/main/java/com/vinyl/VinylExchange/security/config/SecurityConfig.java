@@ -56,7 +56,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/register", "/login", "/", "/search/**", "/uploads/**").permitAll()
+                        .requestMatchers("/register", "/login", "/", "/search/**", "/uploads/**", "/listing/**")
+                        .permitAll()
                         .requestMatchers(HttpMethod.POST, "/logout").authenticated()
                         .requestMatchers(HttpMethod.POST, "/newlisting").authenticated()
                         .anyRequest()

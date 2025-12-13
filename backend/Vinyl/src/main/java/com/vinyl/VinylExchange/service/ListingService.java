@@ -80,6 +80,7 @@ public class ListingService {
     }
 
     public Listing getListingById(UUID listingId) {
+
         return listingRepository
                 .findById(listingId)
                 .orElseThrow(() -> new ListingNotFoundException());

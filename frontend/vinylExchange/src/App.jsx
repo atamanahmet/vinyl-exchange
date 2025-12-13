@@ -40,7 +40,7 @@ function App() {
         <Route path="/listings" element={<ListingsPage />} />
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/edit" element={<EditListing />} />
-        <Route path="/itempage" element={<ItemPage />} />
+        <Route path="/listing/:listingId" element={<ItemPage />} />
         <Route path="/cart" element={<CartPage />} />
       </Routes>
     </>

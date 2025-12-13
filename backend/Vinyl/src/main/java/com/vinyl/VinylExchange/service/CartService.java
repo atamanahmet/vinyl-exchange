@@ -1,28 +1,40 @@
 package com.vinyl.VinylExchange.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.vinyl.VinylExchange.domain.dto.CartDTO;
+import com.vinyl.VinylExchange.domain.dto.CartItemDTO;
 import com.vinyl.VinylExchange.domain.entity.Cart;
+import com.vinyl.VinylExchange.domain.entity.CartItem;
+import com.vinyl.VinylExchange.domain.entity.Listing;
 import com.vinyl.VinylExchange.domain.entity.User;
+import com.vinyl.VinylExchange.exception.CartItemNotFoundException;
+import com.vinyl.VinylExchange.exception.InsufficientStockException;
 import com.vinyl.VinylExchange.repository.CartRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
+@Transactional
 public class CartService {
 
     private final CartRepository cartRepository;
+    private final ListingService listingService;
 
-    public CartService(CartRepository cartRepository) {
+    public CartService(CartRepository cartRepository, ListingService listingService) {
 
         this.cartRepository = cartRepository;
+        this.listingService = listingService;
     }
 
-    public Cart getOrCreateCart(User user) {
+    public CartDTO getCartDTO(User user) {
 
-        return cartRepository
-                .findByUserId(user.getId())
+        Cart cart = cartRepository
+                .findByUser(user)
                 .orElseGet(() -> {
 
                     Cart newCart = new Cart();
@@ -31,30 +43,111 @@ public class CartService {
 
                     return cartRepository.save(newCart);
                 });
+        return new CartDTO(cart);
+    }
+
+    public Cart getOrCreateCart(User user) {
+
+        return cartRepository
+                .findByUser(user)
+                .orElseGet(() -> {
+
+                    Cart newCart = new Cart();
+
+                    newCart.setUser(user);
+                    user.setCart(newCart);
+
+                    return cartRepository.save(newCart);
+                });
     }
 
     public Cart addToCart(User user, UUID listingId) {
 
-        Cart userCart = getOrCreateCart(user);
+        Listing listing = listingService.getListingById(listingId);
 
-        userCart.getListingIds().add(listingId);
+        if (listing.getQuantity() < 1) {
+            throw new InsufficientStockException();
+        }
 
-        return cartRepository.save(userCart);
+        Cart cart = getOrCreateCart(user);
+
+        CartItem cartItem = cart.getItems()
+                .stream()
+                .filter(item -> item.getListing().getId().equals(listingId)).findFirst()
+                .orElse(null);
+
+        if (cartItem == null) {
+
+            cartItem = new CartItem(cart, listing);
+            cart.getItems().add(cartItem);
+
+        } else {
+
+            if (cartItem.getQuantity() + 1 > listing.getQuantity()) {
+                throw new InsufficientStockException();
+            }
+
+            cartItem.setQuantity(cartItem.getQuantity() + 1);
+        }
+
+        return cartRepository.save(cart);
     }
 
-    public Cart removeFromCart(User user, UUID listingId) {
+    public void removeFromCart(User user, UUID cartItemId) {
 
-        Cart userCart = getOrCreateCart(user);
+        Cart cart = getOrCreateCart(user);
 
-        userCart.getListingIds().remove(listingId);
+        if (cart.getItems().isEmpty()) {
+            throw new CartItemNotFoundException("Cart is empty");
+        }
 
-        return cartRepository.save(userCart);
+        CartItem cartItem = cart
+                .getItems()
+                .stream()
+                .filter(item -> item.getId().equals(cartItemId))
+                .findFirst()
+                .orElseThrow(() -> new CartItemNotFoundException());
+
+        cart.getItems().remove(cartItem);
+
+        cartRepository.save(cart);
     }
 
-    public List<UUID> getListingIds(User user) {
+    public void decreaseItemQuantity(User user, UUID cartItemId) {
 
-        Cart userCart = getOrCreateCart(user);
+        Cart cart = getOrCreateCart(user);
 
-        return userCart.getListingIds();
+        if (cart.getItems().isEmpty()) {
+            throw new CartItemNotFoundException("Cart is already empty");
+        }
+
+        CartItem cartItem = cart
+                .getItems()
+                .stream()
+                .filter(item -> item.getId().equals(cartItemId))
+                .findFirst()
+                .orElseThrow(() -> new CartItemNotFoundException());
+
+        if (cartItem.getQuantity() == 1) {
+
+            cart.getItems().remove(cartItem);
+        } else {
+
+            cartItem.setQuantity(cartItem.getQuantity() - 1);
+        }
+
+        cartRepository.save(cart);
+    }
+
+    public List<CartItemDTO> getCartItems(User user) {
+
+        Cart cart = getOrCreateCart(user);
+
+        List<CartItemDTO> cartItemDTOs = new ArrayList<>();
+
+        cart.getItems()
+                .forEach(item -> cartItemDTOs.add(new CartItemDTO(item)));
+
+        return cartItemDTOs;
     }
 }

@@ -19,6 +19,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -53,9 +55,16 @@ public class Listing {
 
     private Boolean tradeable;
 
-    private Double price;
-    private Double tradeValue;
-    private Double discount;
+    @Column(name = "price_kurus")
+    private long priceKurus; // samllest unit, cent/kurus
+    private long tradeValue;
+
+    @Min(0)
+    @Max(10_000)
+    @Column(name = "discount_bp")
+    private int discountBP = 0; // as basePoint, /10_000
+
+    private int quantity;
 
     @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TradePreference> tradePreferences = new ArrayList<>();

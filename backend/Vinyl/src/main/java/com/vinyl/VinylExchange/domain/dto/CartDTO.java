@@ -2,8 +2,12 @@ package com.vinyl.VinylExchange.domain.dto;
 
 import java.util.List;
 
-import com.vinyl.VinylExchange.domain.entity.Listing;
+import com.vinyl.VinylExchange.domain.entity.Cart;
+import com.vinyl.VinylExchange.domain.entity.CartItem;
 
-public record CartDTO(List<Listing> cartListings) {
+public record CartDTO(List<CartItem> cartItems) {
 
+    public CartDTO(Cart cart) {
+        this(cart.getItems());
+    }
 }
