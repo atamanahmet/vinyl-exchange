@@ -427,6 +427,8 @@ export default function NewListing() {
                 <input
                   type="number"
                   name="price"
+                  step="0.01"
+                  min="0"
                   value={listing.price}
                   onChange={handleChange}
                   className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"

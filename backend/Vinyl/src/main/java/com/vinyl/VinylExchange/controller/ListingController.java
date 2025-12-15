@@ -1,6 +1,7 @@
 package com.vinyl.VinylExchange.controller;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,9 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.vinyl.VinylExchange.domain.dto.ListingDTO;
+import com.vinyl.VinylExchange.domain.dto.PricePreviewRequestDTO;
 import com.vinyl.VinylExchange.domain.entity.Listing;
 import com.vinyl.VinylExchange.domain.entity.User;
+import com.vinyl.VinylExchange.domain.money.MoneyCalculator;
 import com.vinyl.VinylExchange.service.ListingService;
+import com.vinyl.VinylExchange.service.PricePreviewService;
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,11 +33,12 @@ import jakarta.servlet.http.HttpServletResponse;
 @RestController
 public class ListingController {
         private final ListingService listingService;
+        private final PricePreviewService pricePreviewService;
 
-        public ListingController(
-                        ListingService listingService) {
+        public ListingController(ListingService listingService, PricePreviewService pricePreviewService) {
 
                 this.listingService = listingService;
+                this.pricePreviewService = pricePreviewService;
         }
 
         @PostMapping(value = "/newlisting", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -87,6 +92,19 @@ public class ListingController {
                 return ResponseEntity
                                 .status(HttpStatus.NO_CONTENT)
                                 .build();
+        }
+
+        @PostMapping("/price/preview")
+        public BigDecimal previewPrice(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal,
+                        PricePreviewRequestDTO pricePreviewRequestDTO) {
+
+                System.out.println(pricePreviewRequestDTO.toString());
+
+                // return pricePreviewService.previewDiscountedPrice(
+                // pricePreviewRequestDTO.priceTL(),
+                // BigDecimal.valueOf(pricePreviewRequestDTO.discountPercent()));
+                return BigDecimal.ZERO;
         }
 
 }

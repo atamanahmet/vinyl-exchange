@@ -6,6 +6,14 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.vinyl.VinylExchange.config.json.DiscountDeserializer;
+import com.vinyl.VinylExchange.config.json.DiscountSerializer;
+import com.vinyl.VinylExchange.config.json.PriceKurusDeserializer;
+import com.vinyl.VinylExchange.config.json.PriceTlSerializer;
+import com.vinyl.VinylExchange.domain.money.MoneyCalculator;
 import com.vinyl.VinylExchange.domain.pojo.Label;
 
 import jakarta.persistence.CascadeType;
@@ -19,6 +27,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
@@ -55,14 +64,27 @@ public class Listing {
 
     private Boolean tradeable;
 
+    @JsonProperty("price")
+    @JsonDeserialize(using = PriceKurusDeserializer.class)
+    @JsonSerialize(using = PriceTlSerializer.class)
     @Column(name = "price_kurus")
     private long priceKurus; // samllest unit, cent/kurus
     private long tradeValue;
 
     @Min(0)
     @Max(10_000)
+    @JsonProperty("discount")
+    @JsonDeserialize(using = DiscountDeserializer.class)
+    @JsonSerialize(using = DiscountSerializer.class)
     @Column(name = "discount_bp")
-    private int discountBP = 0; // as basePoint, /10_000
+    private int discountBP = 0; // as basisPoint, /10_000
+
+    @Transient
+    @JsonProperty("discountedPrice")
+    @JsonSerialize(using = PriceTlSerializer.class)
+    public long getDiscountedPriceKurus() {
+        return MoneyCalculator.discounted(priceKurus, discountBP);
+    }
 
     private int quantity;
 
@@ -98,4 +120,5 @@ public class Listing {
     public void setImagePaths(List<String> paths) {
         this.imagePaths = (paths != null) ? new ArrayList<>(paths) : new ArrayList<>();
     }
+
 }

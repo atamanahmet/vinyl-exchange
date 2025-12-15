@@ -8,6 +8,8 @@ export default function EditListing() {
   const listingId = location.state.id;
   //   console.log(listingId);
 
+  const [previewPrice, setPreviewPrice] = useState(null);
+
   const [images, setImages] = useState([]);
 
   const [listing, setListing] = useState({
@@ -73,6 +75,21 @@ export default function EditListing() {
     getListing();
   }, []);
 
+  const fetchPricePreview = async (price, discount) => {
+    console.log("price: " + price + " discount: " + discount);
+    try {
+      const res = await axios.post(
+        "http://localhost:8080/price/preview",
+        { priceTL: price, discountPercent: discount },
+        { withCredentials: true }
+      );
+      console.log(res.data);
+      setPreviewPrice(res.data); // BigDecimal (number)
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -81,6 +98,11 @@ export default function EditListing() {
         ...prev,
         [name]: type === "checkbox" ? checked : value,
       };
+
+      // for price preview after discount
+      if (name === "price" || name === "discount") {
+        fetchPricePreview(updated.price, updated.discount);
+      }
 
       // tradeable disabled, clear prefs
       if (name === "tradeable" && checked === false) {
@@ -121,6 +143,18 @@ export default function EditListing() {
     setListing((prev) => ({
       ...prev,
       tradePreferences: prev.tradePreferences.filter((_, i) => i !== index),
+    }));
+  };
+
+  const setDiscountPercent = (percent) => {
+    const newPrice = listing.price; // current price
+    const newDiscount = percent; // new discount
+
+    fetchPricePreview(newPrice, newDiscount);
+
+    setListing((prev) => ({
+      ...prev,
+      discount: percent, // update
     }));
   };
 
@@ -359,9 +393,49 @@ export default function EditListing() {
                 <input
                   type="number"
                   name="price"
-                  value={listing.price}
+                  value={previewPrice ? previewPrice : listing.price}
                   onChange={handleChange}
                   className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                />
+              </div>
+              <label className="block mb-1">Discount</label>
+
+              <div className="space-x-2">
+                <button
+                  type="button"
+                  className="px-2 py-1 rounded-md border bg-indigo-700 "
+                  onClick={() => setDiscountPercent(10)}
+                >
+                  10%
+                </button>
+                <button
+                  type="button"
+                  className="px-2 py-1 rounded-md border bg-indigo-700 "
+                  onClick={() => setDiscountPercent(20)}
+                >
+                  20%
+                </button>
+                <button
+                  type="button"
+                  className="px-2 py-1 rounded-md border bg-indigo-700 "
+                  onClick={() => setDiscountPercent(30)}
+                >
+                  30%
+                </button>
+                <button
+                  type="button"
+                  className="px-2 py-1 rounded-md border bg-indigo-700 "
+                  onClick={() => setDiscountPercent(40)}
+                >
+                  40%
+                </button>
+                <input
+                  type="number"
+                  name="discount"
+                  value={listing.discount}
+                  placeholder={listing.discount == 0 ? "0.0" : listing.discount}
+                  onChange={handleChange}
+                  className="input w-19 input-bordered border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
                 />
               </div>
               <label className="inline-flex items-center gap-2 mt-5">

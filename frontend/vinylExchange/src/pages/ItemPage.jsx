@@ -41,6 +41,7 @@ export default function ItemPage({}) {
     tradeable: false,
     price: 0,
     discount: 0,
+    discountedPrice: 0,
     tradePreferences: [],
   });
 
@@ -60,6 +61,7 @@ export default function ItemPage({}) {
     tradeable: data.tradeable ?? false,
     price: data.price ?? 0,
     discount: data.discount ?? 0,
+    discountedPrice: data.discountedPrice ?? 0,
     imagePaths: data.imagePaths ?? [],
     labelName: data.labelName ?? "",
     condition: data.condition ?? "",
@@ -83,6 +85,7 @@ export default function ItemPage({}) {
       );
       if (res.status == 200) {
         setListing(normalize(res.data));
+        console.log(res.data);
       }
     } catch (error) {
       console.log(error);
@@ -90,12 +93,10 @@ export default function ItemPage({}) {
   }
 
   switch (listing.format) {
-    case listing.format:
-      "33";
+    case "33":
       format = `12" LP - 33 RPM`;
       break;
-    case listing.format:
-      "45";
+    case "45":
       format = `7" EP - 45 RPM`;
       break;
 
@@ -157,19 +158,15 @@ export default function ItemPage({}) {
             <div className="discount-price items-center flex">
               <div className="price text-3xl ">
                 <span className="text-green-400">
-                  {" "}
-                  {listing.discount != 0
-                    ? listing.price - (listing.price * listing.discount) / 100
-                    : listing.price}{" "}
-                  ₺
+                  {listing.discountedPrice + " ₺"}
                 </span>
               </div>
               <div className="discount text-green bg-pale-orange w-max px-2 rounded mx-5 h-6">
-                {listing.discount != 0 ? listing.discount : null}%
+                {listing.discount != 0 ? listing.discount + "%" : null}
               </div>
             </div>
             <div className="original-price text-grayish-blue line-through lg:mt-2">
-              {listing.discount != 0 ? listing.price : null} ₺
+              {listing.discount != 0 ? listing.price + "₺" : null}
             </div>
           </div>
           <div className="sm:flex lg:mt-8 w-full">
