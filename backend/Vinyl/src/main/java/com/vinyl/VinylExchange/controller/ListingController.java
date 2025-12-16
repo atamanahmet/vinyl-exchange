@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
@@ -14,15 +15,16 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.vinyl.VinylExchange.domain.dto.CartListingsDTO;
 import com.vinyl.VinylExchange.domain.dto.ListingDTO;
 import com.vinyl.VinylExchange.domain.dto.PricePreviewRequestDTO;
 import com.vinyl.VinylExchange.domain.entity.Listing;
 import com.vinyl.VinylExchange.domain.entity.User;
-import com.vinyl.VinylExchange.domain.money.MoneyCalculator;
 import com.vinyl.VinylExchange.service.ListingService;
 import com.vinyl.VinylExchange.service.PricePreviewService;
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
@@ -39,6 +41,15 @@ public class ListingController {
 
                 this.listingService = listingService;
                 this.pricePreviewService = pricePreviewService;
+        }
+
+        @GetMapping("/")
+        public ResponseEntity<?> getListings() {
+                List<Listing> listings = listingService.getListings();
+
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(listings);
         }
 
         @PostMapping(value = "/newlisting", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -97,14 +108,20 @@ public class ListingController {
         @PostMapping("/price/preview")
         public BigDecimal previewPrice(
                         @AuthenticationPrincipal UserPrincipal userPrincipal,
-                        PricePreviewRequestDTO pricePreviewRequestDTO) {
+                        @RequestBody PricePreviewRequestDTO pricePreviewRequestDTO,
+                        HttpServletRequest request) throws IOException {
 
                 System.out.println(pricePreviewRequestDTO.toString());
 
-                // return pricePreviewService.previewDiscountedPrice(
-                // pricePreviewRequestDTO.priceTL(),
-                // BigDecimal.valueOf(pricePreviewRequestDTO.discountPercent()));
-                return BigDecimal.ZERO;
+                return pricePreviewService.previewDiscountedPrice(
+                                pricePreviewRequestDTO.priceTL(),
+                                pricePreviewRequestDTO.discountPercent());
         }
+
+        @GetMapping("/cart/listings/")
+        public List<Listing> getCartListings(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                        @RequestBody CartListingsDTO cartListingsDTO){
+                                List<Listing> listings = listingService.getListingsByIds(cartListingsDTO.listingIdList())
+                        }
 
 }

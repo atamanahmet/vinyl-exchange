@@ -8,9 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vinyl.VinylExchange.domain.dto.ListingDTO;
 import com.vinyl.VinylExchange.domain.entity.Vinyl;
 import com.vinyl.VinylExchange.domain.pojo.Release;
 import com.vinyl.VinylExchange.domain.pojo.RootResponse;
@@ -36,63 +34,64 @@ public class MainController {
         boolean connect = false;
         boolean onlyListings = true;
 
-        @GetMapping("/")
-        public ResponseEntity<String> mainPage() throws JsonProcessingException {
+        // @GetMapping("/")
+        // public ResponseEntity<String> mainPage() throws JsonProcessingException {
 
-                ObjectMapper mapper = new ObjectMapper();
+        // ObjectMapper mapper = new ObjectMapper();
 
-                String response;
+        // String response;
 
-                List<ListingDTO> allListingDTOs = listingService.getListingsDTOs();
+        // List<ListingDTO> allListingDTOs = listingService.getListingsDTOs();
 
-                try {
-                        if (connect) {
-                                WebClient client = WebClient.builder()
-                                                .baseUrl("https://musicbrainz.org/ws/2/release")
-                                                .defaultHeader("User-Agent", "testApp/0.1 (foxitrot42@gmail.com)")
-                                                .build();
+        // try {
+        // if (connect) {
+        // WebClient client = WebClient.builder()
+        // .baseUrl("https://musicbrainz.org/ws/2/release")
+        // .defaultHeader("User-Agent", "testApp/0.1 (foxitrot42@gmail.com)")
+        // .build();
 
-                                RootResponse result = client.get()
-                                                .uri(uriBuilder -> uriBuilder
-                                                                .queryParam("query", "artist:david_bowie")
-                                                                .queryParam("fmt", "json")
-                                                                .queryParam("inc", "ratings")
-                                                                .queryParam("limit", 100)
-                                                                .build())
-                                                .retrieve()
-                                                .bodyToMono(RootResponse.class)
-                                                .retryWhen(Retry.backoff(3, Duration.ofSeconds(2))
-                                                                .maxBackoff(Duration.ofSeconds(10))
-                                                                .filter(throwable -> throwable instanceof WebClientResponseException
-                                                                                || throwable.getMessage().contains(
-                                                                                                "Connection reset")))
-                                                .timeout(Duration.ofSeconds(30)) // Add timeout
-                                                .block();
+        // RootResponse result = client.get()
+        // .uri(uriBuilder -> uriBuilder
+        // .queryParam("query", "artist:david_bowie")
+        // .queryParam("fmt", "json")
+        // .queryParam("inc", "ratings")
+        // .queryParam("limit", 100)
+        // .build())
+        // .retrieve()
+        // .bodyToMono(RootResponse.class)
+        // .retryWhen(Retry.backoff(3, Duration.ofSeconds(2))
+        // .maxBackoff(Duration.ofSeconds(10))
+        // .filter(throwable -> throwable instanceof WebClientResponseException
+        // || throwable.getMessage().contains(
+        // "Connection reset")))
+        // .timeout(Duration.ofSeconds(30)) // Add timeout
+        // .block();
 
-                                if (result != null) {
-                                        // rate limit for mb api
-                                        Thread.sleep(1000);
+        // if (result != null) {
+        // // rate limit for mb api
+        // Thread.sleep(1000);
 
-                                        vinylService.saveReleases(result);
-                                } else {
-                                        return new ResponseEntity<>("No data received from API",
-                                                        HttpStatus.NO_CONTENT);
-                                }
-                        }
-                        if (onlyListings) {
-                                response = mapper.writeValueAsString(allListingDTOs);
+        // vinylService.saveReleases(result);
+        // } else {
+        // return new ResponseEntity<>("No data received from API",
+        // HttpStatus.NO_CONTENT);
+        // }
+        // }
+        // if (onlyListings) {
+        // response = mapper.writeValueAsString(allListingDTOs);
 
-                        } else {
-                                response = mapper.writeValueAsString(vinylService.getAllVinyl());
+        // } else {
+        // response = mapper.writeValueAsString(vinylService.getAllVinyl());
 
-                        }
-                        return new ResponseEntity<>(response, HttpStatus.OK);
+        // }
+        // return new ResponseEntity<>(response, HttpStatus.OK);
 
-                } catch (Exception e) {
-                        System.out.println("Connection Error" + e.getLocalizedMessage());
-                        return new ResponseEntity<>("Wait for refresh", HttpStatus.BANDWIDTH_LIMIT_EXCEEDED);
-                }
-        }
+        // } catch (Exception e) {
+        // System.out.println("Connection Error" + e.getLocalizedMessage());
+        // return new ResponseEntity<>("Wait for refresh",
+        // HttpStatus.BANDWIDTH_LIMIT_EXCEEDED);
+        // }
+        // }
 
         @GetMapping("/search/{query}")
         public ResponseEntity<String> search(@PathVariable(name = "query", required = true) String query) {

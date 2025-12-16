@@ -1,6 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
+import { useCart } from "../context/UseCart";
 
 export default function Card({ vinyl }) {
+  const { addToCart } = useCart();
   const navigate = useNavigate();
   const coverUrl = `https://coverartarchive.org/release/${vinyl.id}/front-250`;
   let date;
@@ -21,12 +24,13 @@ export default function Card({ vinyl }) {
       }
     }
   }
+  // console.log(vinyl);
 
   const navigateItemWithId = () => {
-    console.log(vinyl.id);
+    // console.log(vinyl.id);
     navigate(`/listing/${vinyl.id}`);
   };
-  
+
   return (
     <button
       onClick={() => {
@@ -55,6 +59,10 @@ export default function Card({ vinyl }) {
 
         <p className="text-body">{label || "No Label info"}</p>
 
+        <p className="text-body text-xl mt-5 text-green-500">
+          {vinyl.discountedPrice ? vinyl.discountedPrice : vinyl.price} ₺
+        </p>
+
         <div className="flex flex-row gap-3 justify-center">
           <a
             href="#"
@@ -63,10 +71,10 @@ export default function Card({ vinyl }) {
             Trade
           </a>
           <a
-            href="#"
-            className="text-body mt-5 rounded-xl bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-10"
+            onClick={() => addToCart()}
+            className=" mt-5 rounded-xl bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-4"
           >
-            Buy
+            Add to Cart
           </a>
         </div>
       </div>

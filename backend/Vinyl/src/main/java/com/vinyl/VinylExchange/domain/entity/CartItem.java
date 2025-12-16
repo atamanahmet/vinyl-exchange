@@ -31,9 +31,7 @@ public class CartItem {
     @Min(1)
     private int quantity;
 
-    private long priceKurus; // samllest unit, cent/kurus
-
-    private int discountBP; // basePoint/10_000
+    private String mainImagePath;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
@@ -47,7 +45,6 @@ public class CartItem {
         this.cart = cart;
         this.listing = listing;
         this.quantity = 1;
-        this.priceKurus = listing.getPriceKurus();
-        this.discountBP = listing.getDiscountBP();
+        this.mainImagePath = listing.getImagePaths().get(0);
     }
 }

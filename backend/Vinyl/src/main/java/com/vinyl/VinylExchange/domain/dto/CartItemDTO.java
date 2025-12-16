@@ -5,19 +5,18 @@ import java.util.UUID;
 import com.vinyl.VinylExchange.domain.entity.CartItem;
 
 public record CartItemDTO(
-        UUID itemId,
+        UUID id,
         UUID listingId,
-        long priceKurus,
-        int discountBp,
-        int quantity
+        int quantity,
+        String mainImagePath
 
 ) {
     public CartItemDTO(CartItem cartItem) {
         this(
                 cartItem.getId(),
                 cartItem.getListing().getId(),
-                cartItem.getPriceKurus(),
-                cartItem.getDiscountBP(),
-                cartItem.getQuantity());
+                cartItem.getQuantity(),
+                cartItem.getMainImagePath());
     }
+
 }

@@ -76,7 +76,16 @@ export default function EditListing() {
   }, []);
 
   const fetchPricePreview = async (price, discount) => {
-    console.log("price: " + price + " discount: " + discount);
+    console.log(
+      "price: " +
+        price +
+        " " +
+        typeof price +
+        " discount: " +
+        discount +
+        " " +
+        typeof discount
+    );
     try {
       const res = await axios.post(
         "http://localhost:8080/price/preview",
@@ -388,7 +397,7 @@ export default function EditListing() {
           <div className="">
             <h3 className="text-3xl font-bold">Trade stuff</h3>
             <div className="mt-5">
-              <div className="formItem mt-5">
+              <div className="formItem mt-5 relative">
                 <label className="block mb-1">Direct Sell price</label>
                 <input
                   type="number"
@@ -397,6 +406,7 @@ export default function EditListing() {
                   onChange={handleChange}
                   className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
                 />
+                <span className="absolute right-12 top-8.5"> ₺</span>
               </div>
               <label className="block mb-1">Discount</label>
 

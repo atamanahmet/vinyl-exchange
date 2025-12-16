@@ -3,10 +3,11 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import ImageGallery from "../comps/ImageGallery";
 import { useUser } from "../context/UserContext";
+import { useCart } from "../context/UseCart";
 
 export default function ItemPage({}) {
   const { listingId } = useParams();
-  const { addToCart } = useUser();
+  const { addToCart } = useCart();
 
   const location = useLocation();
 

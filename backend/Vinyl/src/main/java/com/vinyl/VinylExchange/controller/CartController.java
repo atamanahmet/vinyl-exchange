@@ -38,10 +38,13 @@ public class CartController {
 
                 CartDTO cartDTO = cartService.getCartDTO(userPrincipal.getUser());
 
+                System.out.println(cartDTO);
+
                 return ResponseEntity
                                 .status(HttpStatus.OK)
                                 .body(cartDTO);
         }
+
 
         @PostMapping("/items")
         public ResponseEntity<?> addToCart(@AuthenticationPrincipal UserPrincipal userPrincipal,
