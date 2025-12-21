@@ -21,6 +21,8 @@ import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -48,7 +50,11 @@ public class Listing {
     private UUID id;
 
     private String title;
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ListingStatus status;
+
     private String date;
     private String country;
     private String barcode;
@@ -69,6 +75,10 @@ public class Listing {
     @JsonSerialize(using = PriceTlSerializer.class)
     @Column(name = "price_kurus")
     private long priceKurus; // samllest unit, cent/kurus
+
+    @JsonDeserialize(using = PriceKurusDeserializer.class)
+    @JsonSerialize(using = PriceTlSerializer.class)
+    @Column(name = "trade_value")
     private long tradeValue;
 
     @Min(0)
@@ -86,7 +96,7 @@ public class Listing {
         return MoneyCalculator.discounted(priceKurus, discountBP);
     }
 
-    private int quantity;
+    private int stockQuantity;
 
     @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TradePreference> tradePreferences = new ArrayList<>();
@@ -119,6 +129,14 @@ public class Listing {
 
     public void setImagePaths(List<String> paths) {
         this.imagePaths = (paths != null) ? new ArrayList<>(paths) : new ArrayList<>();
+    }
+
+    public boolean hasEnoughStock(int requestedQuantity) {
+        return stockQuantity >= requestedQuantity;
+    }
+
+    public boolean isAvailable() {
+        return status == ListingStatus.AVAILABLE && stockQuantity > 0;
     }
 
 }

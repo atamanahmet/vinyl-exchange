@@ -18,12 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vinyl.VinylExchange.domain.dto.AddToCartRequestDTO;
 import com.vinyl.VinylExchange.domain.dto.CartDTO;
-import com.vinyl.VinylExchange.domain.entity.Cart;
+import com.vinyl.VinylExchange.domain.dto.UpdateCartItemRequest;
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
 import com.vinyl.VinylExchange.service.CartService;
 
 @RestController
-@RequestMapping("/cart")
+@RequestMapping("/api/cart")
 public class CartController {
 
         private final CartService cartService;
@@ -33,57 +33,67 @@ public class CartController {
                 this.cartService = cartService;
         }
 
-        @GetMapping("/items")
-        public ResponseEntity<?> getCart(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        @GetMapping
+        public ResponseEntity<CartDTO> getCart(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-                CartDTO cartDTO = cartService.getCartDTO(userPrincipal.getUser());
-
-                System.out.println(cartDTO);
+                CartDTO cartDTO = cartService.getCartDTO(userPrincipal.getId());
 
                 return ResponseEntity
                                 .status(HttpStatus.OK)
                                 .body(cartDTO);
         }
 
-
         @PostMapping("/items")
-        public ResponseEntity<?> addToCart(@AuthenticationPrincipal UserPrincipal userPrincipal,
+        public ResponseEntity<?> addToCart(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal,
                         @RequestBody AddToCartRequestDTO requestDTO) {
 
-                Cart cart = cartService.addToCart(
-                                userPrincipal.getUser(),
-                                requestDTO.listingId());
-
-                System.out.println(cart.getId() + " " + cart.getItems().toString());
+                CartDTO cartDTO = cartService.addToCart(
+                                userPrincipal.getId(), // UUID
+                                requestDTO.listingId(), // UUID
+                                requestDTO.quantity()); // int
 
                 return ResponseEntity
                                 .status(HttpStatus.OK)
-                                .build();
+                                .body(cartDTO);
         }
 
         @DeleteMapping("/items/{cartItemId}")
-        public ResponseEntity<?> removeFromCart(@AuthenticationPrincipal UserPrincipal userPrincipal,
+        public ResponseEntity<?> removeFromCart(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal,
                         @PathVariable(name = "cartItemId", required = true) UUID cartItemId) {
 
-                cartService.removeFromCart(
-                                userPrincipal.getUser(),
+                CartDTO cartDTO = cartService.removeItemFromCart(
+                                userPrincipal.getId(),
                                 cartItemId);
 
                 return ResponseEntity
                                 .status(HttpStatus.NO_CONTENT)
-                                .build();
+                                .body(cartDTO);
         }
 
-        @PatchMapping("/items/{cartItemId}")
-        public ResponseEntity<?> decreaseFromCart(@AuthenticationPrincipal UserPrincipal userPrincipal,
-                        @PathVariable(name = "cartItemId", required = true) UUID cartItemId) {
+        @PatchMapping("/items/")
+        public ResponseEntity<?> updateCart(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                        @PathVariable(name = "cartItemId", required = true) UUID cartItemId,
+                        @RequestBody UpdateCartItemRequest request) {
 
-                cartService.decreaseItemQuantity(
-                                userPrincipal.getUser(),
-                                cartItemId);
+                cartService.updateCartItem(
+                                userPrincipal.getId(),
+                                cartItemId,
+                                request);
 
                 return ResponseEntity
                                 .status(HttpStatus.OK)
+                                .build();
+        }
+
+        @DeleteMapping
+        public ResponseEntity<Void> clearCart(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+                cartService.clearCart(userPrincipal.getId());
+
+                return ResponseEntity
+                                .noContent()
                                 .build();
         }
 }

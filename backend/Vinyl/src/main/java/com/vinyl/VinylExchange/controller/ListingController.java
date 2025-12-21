@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
@@ -20,11 +19,11 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.vinyl.VinylExchange.domain.dto.CartListingsDTO;
 import com.vinyl.VinylExchange.domain.dto.ListingDTO;
 import com.vinyl.VinylExchange.domain.dto.PricePreviewRequestDTO;
 import com.vinyl.VinylExchange.domain.entity.Listing;
 import com.vinyl.VinylExchange.domain.entity.User;
+// import com.vinyl.VinylExchange.service.CartService;
 import com.vinyl.VinylExchange.service.ListingService;
 import com.vinyl.VinylExchange.service.PricePreviewService;
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
@@ -36,11 +35,17 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ListingController {
         private final ListingService listingService;
         private final PricePreviewService pricePreviewService;
+        // private final CartService cartService;
 
-        public ListingController(ListingService listingService, PricePreviewService pricePreviewService) {
+        public ListingController(
+                        ListingService listingService,
+                        PricePreviewService pricePreviewService
+        // ,CartService cartService
+        ) {
 
                 this.listingService = listingService;
                 this.pricePreviewService = pricePreviewService;
+                // this.cartService = cartService;
         }
 
         @GetMapping("/")
@@ -117,11 +122,4 @@ public class ListingController {
                                 pricePreviewRequestDTO.priceTL(),
                                 pricePreviewRequestDTO.discountPercent());
         }
-
-        @GetMapping("/cart/listings/")
-        public List<Listing> getCartListings(@AuthenticationPrincipal UserPrincipal userPrincipal,
-                        @RequestBody CartListingsDTO cartListingsDTO){
-                                List<Listing> listings = listingService.getListingsByIds(cartListingsDTO.listingIdList())
-                        }
-
 }

@@ -4,8 +4,18 @@ import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.vinyl.VinylExchange.config.json.DiscountDeserializer;
+import com.vinyl.VinylExchange.config.json.DiscountSerializer;
+import com.vinyl.VinylExchange.config.json.PriceKurusDeserializer;
+import com.vinyl.VinylExchange.config.json.PriceTlSerializer;
 import com.vinyl.VinylExchange.domain.entity.Listing;
 
+import jakarta.persistence.Column;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,11 +27,18 @@ import lombok.Setter;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ListingDTO {
+    
     private UUID id;
     private String title;
     private String status;
     private String barcode;
+
+    @JsonProperty("price")
+    @JsonDeserialize(using = PriceKurusDeserializer.class)
+    @JsonSerialize(using = PriceTlSerializer.class)
+    @Column(name = "price_kurus")
     private long priceKurus;
+
     private Boolean tradeable;
     private List<String> imagePaths;
     private List<TradePreferenceDTO> tradePreferences;
@@ -29,7 +46,15 @@ public class ListingDTO {
     private String date;
     private Integer trackCount;
     private long tradeValue;
+
+    @Min(0)
+    @Max(10_000)
+    @JsonProperty("discount")
+    @JsonDeserialize(using = DiscountDeserializer.class)
+    @JsonSerialize(using = DiscountSerializer.class)
+    @Column(name = "discount_bp")
     private int discountBP; // bp
+
     private String condition;
     private String artistName;
     private String labelName;
