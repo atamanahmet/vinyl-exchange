@@ -53,18 +53,21 @@ public class Listing {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ListingStatus status;
+    private ListingStatus status = ListingStatus.AVAILABLE;
+
+    private String packaging;
 
     private String date;
     private String country;
     private String barcode;
-    private String packaging; // size
     private String format;
     private String description;
     private String artistName;
     private String artistId;
     private String labelName;
     private String condition;
+
+    private int stockQuantity = 5;
 
     private Integer trackCount;
 
@@ -95,8 +98,6 @@ public class Listing {
     public long getDiscountedPriceKurus() {
         return MoneyCalculator.discounted(priceKurus, discountBP);
     }
-
-    private int stockQuantity;
 
     @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TradePreference> tradePreferences = new ArrayList<>();

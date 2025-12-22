@@ -71,7 +71,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Set<Role> roles = new HashSet<>();
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Cart cart;
+    // @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    // private Cart cart;
 
 }

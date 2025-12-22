@@ -12,7 +12,7 @@ import jakarta.transaction.Transactional;
 
 @Repository
 public interface CartRepository extends JpaRepository<Cart, UUID> {
-    Optional<Cart> findByUser_Id(UUID userId);
+    Optional<Cart> findByUserId(UUID userId);
 
     @Transactional
     void deleteByUserId(UUID userId);

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import ImageGallery from "../comps/ImageGallery";
 import { useUser } from "../context/UserContext";
-import { useCart } from "../context/UseCart";
+import { useCart } from "../context/CartContext";
 
 export default function ItemPage({}) {
   const { listingId } = useParams();

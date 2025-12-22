@@ -72,15 +72,13 @@ public class CartController {
                                 .body(cartDTO);
         }
 
-        @PatchMapping("/items/")
+        @PatchMapping("/items/{cartItemId}")
         public ResponseEntity<?> updateCart(@AuthenticationPrincipal UserPrincipal userPrincipal,
-                        @PathVariable(name = "cartItemId", required = true) UUID cartItemId,
-                        @RequestBody UpdateCartItemRequest request) {
+                        @PathVariable(name = "cartItemId", required = true) UUID cartItemId) {
 
-                cartService.updateCartItem(
+                cartService.decreaseItemQuantity(
                                 userPrincipal.getId(),
-                                cartItemId,
-                                request);
+                                cartItemId);
 
                 return ResponseEntity
                                 .status(HttpStatus.OK)

@@ -5,7 +5,7 @@ import { useUser } from "../context/UserContext";
 
 import { AuthModal } from "./AuthModal";
 import { use } from "react";
-import { useCart } from "../context/UseCart";
+import { useCart } from "../context/CartContext";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -178,7 +178,7 @@ export default function Navbar() {
                     </svg>
                   </a>
                   <p className="text-indigo-900 absolute -top-2 right-10 bg-white rounded-full w-6">
-                    {cartItemCount ?? cartItemCount}
+                    {cartItemCount ?? 0}
                   </p>
                 </div>
                 <button

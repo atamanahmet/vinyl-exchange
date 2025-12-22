@@ -32,6 +32,11 @@ public class CartDTO {
     @JsonSerialize(using = PriceTlSerializer.class)
     private long totalPriceKurus; // samllest unit, cent/kurus
 
+    @JsonProperty("discountedPrice")
+    @JsonDeserialize(using = PriceKurusDeserializer.class)
+    @JsonSerialize(using = PriceTlSerializer.class)
+    private long totalDiscountedPriceKurus; // samllest unit, cent/kurus
+
     // @Min(0)
     // @Max(10_000)
     // @JsonProperty("discount")

@@ -34,6 +34,7 @@ public class CartItemDTO {
     private boolean committed;
 
     private String title;
+    private String artistName;
 
     @JsonProperty("unitPrice")
     @JsonDeserialize(using = PriceKurusDeserializer.class)

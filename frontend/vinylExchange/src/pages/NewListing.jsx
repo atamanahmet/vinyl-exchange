@@ -10,11 +10,12 @@ export default function NewListing() {
 
   const [listing, setListing] = useState({
     title: "",
-    status: "",
+    // status: "",
     date: "",
     country: "",
     barcode: "",
     condition: "",
+    packaging: "",
     labelName: "",
     format: "",
     trackCount: 0,
@@ -142,7 +143,6 @@ export default function NewListing() {
                 required
               />
             </div>
-
             <div className="formItem">
               <label className="block mb-1">Artist / Band</label>
               <input
@@ -154,30 +154,41 @@ export default function NewListing() {
               />
             </div>
 
-            <div className="formItem my-3">
-              <h2 className="mb-1 text-white">Status</h2>
+            {/* packaging */}
+            <div className="formItem my-3 ">
+              <h2 className="mb-2 text-white">Packaging</h2>
               <label className="inline-flex items-center gap-2 ">
                 <input
                   type="radio"
-                  name="status"
-                  value="Used"
-                  checked={listing.status === "Used"}
+                  name="packaging"
+                  value="SEALED"
+                  checked={listing.packaging === "SEALED"}
                   onChange={handleChange}
                   className="radio radio-primary border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
                 />
-                <span>Used</span>
+                <span>Sealed</span>
                 <input
                   type="radio"
-                  name="status"
-                  value="New"
-                  checked={listing.status === "New"}
+                  name="packaging"
+                  value="OPENED"
+                  checked={listing.packaging === "OPENED"}
                   onChange={handleChange}
                   className="ml-5 radio radio-primary border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
                 />
-                <span>New</span>
+                <span>Opened</span>
+              </label>
+              <label className="inline-flex items-center gap-2 ">
+                <input
+                  type="radio"
+                  name="packaging"
+                  value="RESEALED"
+                  checked={listing.packaging === "RESEALED"}
+                  onChange={handleChange}
+                  className="ml-5 radio radio-primary border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                />
+                <span>Resealed</span>
               </label>
             </div>
-
             <div className="formItem mt-3">
               <label className="block mb-1">Release Date</label>
               <input
@@ -188,7 +199,6 @@ export default function NewListing() {
                 className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
               />
             </div>
-
             <div className="formItem">
               <label className="block mb-1">Country</label>
               <input
@@ -209,7 +219,6 @@ export default function NewListing() {
                 className="input w-75 input-bordered border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
               />
             </div>
-
             <div className="formItem">
               <label className="block mb-1">Barcode / Catalog No.</label>
               <input
@@ -220,7 +229,6 @@ export default function NewListing() {
                 className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
               />
             </div>
-
             {/* <div className="formItem">
               <label className="block mb-1">Packaging</label>
               <input
@@ -231,7 +239,6 @@ export default function NewListing() {
                 className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
               />
             </div> */}
-
             <div className="formItem">
               <label className="block mb-1">Track Count</label>
               <input
@@ -242,7 +249,6 @@ export default function NewListing() {
                 className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
               />
             </div>
-
             <button
               type="submit"
               className="btn btn-primary border-2 bg-indigo-800 text-white border-amber-50 ring-1 py-2 ring-indigo-800 rounded-md px-2 mt-2"
@@ -331,6 +337,7 @@ export default function NewListing() {
                 <span>Other</span>
               </label>
             </div>
+            {/* condition */}
             <label className="block mb-1 mt-5 font-bold ">Condition</label>
 
             <div className="flex flex-col gap-2">

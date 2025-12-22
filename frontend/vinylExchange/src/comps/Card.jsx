@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
-import { useCart } from "../context/UseCart";
+import { useCart } from "../context/CartContext";
 
 export default function Card({ vinyl }) {
   const { addToCart } = useCart();
@@ -71,7 +71,7 @@ export default function Card({ vinyl }) {
             Trade
           </a>
           <a
-            onClick={() => addToCart()}
+            onClick={() => addToCart(vinyl.id)}
             className=" mt-5 rounded-xl bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-4"
           >
             Add to Cart

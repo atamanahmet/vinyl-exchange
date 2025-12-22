@@ -45,7 +45,7 @@ public class CartService {
     private Cart getOrCreateCart(UUID userId) {
 
         return cartRepository
-                .findByUser_Id(userId)
+                .findByUserId(userId)
                 .orElseGet(() -> {
 
                     Cart newCart = new Cart(userId);
@@ -151,6 +151,31 @@ public class CartService {
         return getCartDTO(userId);
     }
 
+    public CartDTO decreaseItemQuantity(UUID userId, UUID cartItemId) {
+
+        Cart cart = getOrCreateCart(userId);
+
+        CartItem cartItem = cart.getCartItems().stream()
+                .filter(item -> item.getCartItemId().equals(cartItemId))
+                .findFirst()
+                .orElseThrow(() -> new CartItemNotFoundException("Cart item not found"));
+
+        Listing listing = listingService.getListingById(cartItem.getListingId());
+
+        int currentOrderQuantity = cartItem.getOrderQuantity();
+
+        if (currentOrderQuantity == 1 || !listing.hasEnoughStock(currentOrderQuantity - 1)) {
+
+            removeItemFromCart(userId, cartItemId);
+        } else {
+
+            cartItem.setOrderQuantity(cartItem.getOrderQuantity() - 1);
+            cartItemRepository.save(cartItem);
+        }
+
+        return getCartDTO(userId);
+    }
+
     public CartValidationResult validateAndFixCart(UUID userId) {
 
         Cart cart = getOrCreateCart(userId);
@@ -240,6 +265,7 @@ public class CartService {
 
         List<CartItemDTO> cartItemDTOs = new ArrayList<>();
 
+        Long cartTotalDiscountedPrice = 0L;
         Long cartTotalPrice = 0L;
 
         for (CartItem cartItem : cart.getCartItems()) {
@@ -254,7 +280,9 @@ public class CartService {
                     .id(cartItem.getCartItemId())
                     .listingId(listing.getId())
                     .title(listing.getTitle())
+                    .artistName(listing.getArtistName())
                     .pricePerUnit(listing.getPriceKurus())
+                    .orderQuantity(cartItem.getOrderQuantity())
                     .itemTotalPriceKurus(listing.getPriceKurus() * cartItem.getOrderQuantity())
                     .discountPerUnit(listing.getDiscountBP())
                     .discountedTotalPrice(listing.getDiscountedPriceKurus() * cartItem.getOrderQuantity())
@@ -263,13 +291,16 @@ public class CartService {
 
             cartItemDTOs.add(cartItemDTO);
 
-            cartTotalPrice += cartItemDTO.getDiscountedTotalPrice();
+            cartTotalDiscountedPrice += cartItemDTO.getDiscountedTotalPrice();
+            cartTotalPrice += cartItemDTO.getItemTotalPriceKurus();
 
         }
 
         return CartDTO.builder()
+                .cartId(cart.getId())
                 .items(cartItemDTOs)
                 .totalPriceKurus(cartTotalPrice)
+                .totalDiscountedPriceKurus(cartTotalDiscountedPrice)
                 .totalItems(cartItemDTOs.size())
                 .build();
     }

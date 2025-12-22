@@ -35,7 +35,7 @@ public class CartItem {
 
     @Min(1)
     @Column(nullable = false)
-    private int orderQuantity;
+    private int orderQuantity = 1;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
@@ -47,11 +47,11 @@ public class CartItem {
     @Column(name = "added_at", nullable = false, updatable = false)
     private LocalDateTime addedAt;
 
-    @Column(name = "updated_at", nullable = false, updatable = true)
+    @Column(name = "updated_at", updatable = true)
     private LocalDateTime updatedAt;
 
     @Column(name = "committed")
-    private boolean committed;
+    private boolean committed = true;
 
     public CartItem(UUID listingId, int orderQuantity) {
         this.listingId = listingId;
@@ -61,6 +61,7 @@ public class CartItem {
     @PrePersist
     protected void onCreate() {
         addedAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
