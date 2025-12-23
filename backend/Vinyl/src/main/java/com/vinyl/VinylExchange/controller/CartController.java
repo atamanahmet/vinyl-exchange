@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vinyl.VinylExchange.domain.dto.AddToCartRequestDTO;
 import com.vinyl.VinylExchange.domain.dto.CartDTO;
-import com.vinyl.VinylExchange.domain.dto.UpdateCartItemRequest;
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
 import com.vinyl.VinylExchange.service.CartService;
 
@@ -83,6 +82,7 @@ public class CartController {
                 return ResponseEntity
                                 .status(HttpStatus.OK)
                                 .build();
+
         }
 
         @DeleteMapping

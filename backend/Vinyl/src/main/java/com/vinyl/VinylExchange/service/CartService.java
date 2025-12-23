@@ -151,24 +151,23 @@ public class CartService {
         return getCartDTO(userId);
     }
 
-    public CartDTO decreaseItemQuantity(UUID userId, UUID cartItemId) {
+    public CartDTO decreaseItemQuantity(UUID userId, UUID listingId) {
 
         Cart cart = getOrCreateCart(userId);
 
         CartItem cartItem = cart.getCartItems().stream()
-                .filter(item -> item.getCartItemId().equals(cartItemId))
+                .filter(item -> item.getListingId().equals(listingId))
                 .findFirst()
                 .orElseThrow(() -> new CartItemNotFoundException("Cart item not found"));
 
-        Listing listing = listingService.getListingById(cartItem.getListingId());
+        Listing listing = listingService.getListingById(listingId);
 
         int currentOrderQuantity = cartItem.getOrderQuantity();
 
         if (currentOrderQuantity == 1 || !listing.hasEnoughStock(currentOrderQuantity - 1)) {
 
-            removeItemFromCart(userId, cartItemId);
+            removeItemFromCart(userId, cartItem.getCartItemId());
         } else {
-
             cartItem.setOrderQuantity(cartItem.getOrderQuantity() - 1);
             cartItemRepository.save(cartItem);
         }
@@ -318,149 +317,4 @@ public class CartService {
 
         return listingMap;
     }
-
-    // List<UUID> listingIds = cart.getCartItems()
-    // .stream()
-    // .map(item -> item.getListingId())
-    // .collect(Collectors.toList());
-
-    // System.out.println(listingId.toString());
-
-    // public CartDTO getCartDTO(User user) {
-
-    // Cart cart = cartRepository
-    // .findByUser(user)
-    // .orElseGet(() -> {
-
-    // Cart newCart = new Cart();
-
-    // newCart.setUser(user);
-
-    // return cartRepository.save(newCart);
-    // });
-    // return new CartDTO(cart);
-    // }
-
-    // public Cart getOrCreateCart(User user) {
-
-    // return cartRepository
-    // .findByUser(user)
-    // .orElseGet(() -> {
-
-    // Cart newCart = new Cart();
-
-    // newCart.setUser(user);
-    // user.setCart(newCart);
-
-    // return cartRepository.save(newCart);
-    // });
-    // }
-
-    // public Cart addToCart(User user, UUID listingId) {
-
-    // Listing listing = listingService.getListingById(listingId);
-
-    // if (listing.getQuantity() < 1) {
-    // throw new InsufficientStockException();
-    // }
-
-    // Cart cart = getOrCreateCart(user);
-
-    // CartItem cartItem = cart.getCartItems()
-    // .stream()
-    // .filter(item -> item.getListingId().equals(listingId)).findFirst()
-    // .orElse(null);
-
-    // if (cartItem == null) {
-    // cartItem = new CartItem(cart, listing);
-    // cart.getCartItems().add(cartItem);
-
-    // } else {
-
-    // if (cartItem.getQuantity() + 1 > listing.getQuantity()) {
-    // throw new InsufficientStockException();
-    // }
-
-    // cartItem.setQuantity(cartItem.getQuantity() + 1);
-    // }
-
-    // return cartRepository.save(cart);
-    // }
-
-    // public void removeFromCart(User user, UUID cartItemId) {
-
-    // Cart cart = getOrCreateCart(user);
-
-    // if (cart.getCartItems().isEmpty()) {
-    // throw new CartItemNotFoundException("Cart is empty");
-    // }
-
-    // CartItem cartItem = cart
-    // .getCartItems()
-    // .stream()
-    // .filter(item -> item.getId().equals(cartItemId))
-    // .findFirst()
-    // .orElseThrow(() -> new CartItemNotFoundException());
-
-    // cart.getCartItems().remove(cartItem);
-
-    // cartRepository.save(cart);
-    // }
-
-    // public void decreaseItemQuantity(User user, UUID cartItemId) {
-
-    // Cart cart = getOrCreateCart(user);
-
-    // if (cart.getCartItems().isEmpty()) {
-    // throw new CartItemNotFoundException("Cart is already empty");
-    // }
-
-    // CartItem cartItem = cart
-    // .getCartItems()
-    // .stream()
-    // .filter(item -> item.getId().equals(cartItemId))
-    // .findFirst()
-    // .orElseThrow(() -> new CartItemNotFoundException());
-
-    // if (cartItem.getQuantity() == 1) {
-
-    // cart.getCartItems().remove(cartItem);
-    // } else {
-
-    // cartItem.setQuantity(cartItem.getQuantity() - 1);
-    // }
-
-    // cartRepository.save(cart);
-    // }
-
-    // public List<CartItemDTO> getCartItems(User user) {
-
-    // Cart cart = getOrCreateCart(user);
-
-    // List<CartItemDTO> cartItemDTOs = new ArrayList<>();
-
-    // cart.getCartItems()
-    // .forEach(item -> cartItemDTOs.add(new CartItemDTO(item)));
-
-    // return cartItemDTOs;
-    // }
-
-    // public List<CartListingDTO> getCartListings(User user) {
-    // Cart cart = getOrCreateCart(user);
-    // List<CartListingDTO> cartListingDTOs = new ArrayList<>();
-
-    // cart.getCartItems().forEach(item-> cartListingDTOs.add(new
-    // CartListingDTO(item.,listingService.getListingById(item.getListingId()))));
-    // }
-    // public List<Listing> getCartListings(User user) {
-
-    // Cart cart = getOrCreateCart(user);
-
-    // List<CartItemDTO> cartItemDTOs = new ArrayList<>();
-
-    // cart.getItems()
-    // .forEach(item -> cartItemDTOs.add(new CartItemDTO(item)));
-
-    // return cartItemDTOs;
-    // }
 }

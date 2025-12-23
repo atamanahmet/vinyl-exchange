@@ -19,7 +19,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor
-public class Vinyl {
+public class Vinyl extends BaseEntity {
 
     @Id
     private String id;

@@ -4,33 +4,71 @@ import { useNavigate } from "react-router-dom";
 
 export default function ListingItem({ item, onDelete }) {
   const [image, setImage] = useState("");
+
   const navigate = useNavigate();
+
+  const navigateItemWithId = () => {
+    navigate(`/listing/${item.id}`);
+  };
+
   const navigateToEditWithId = () => {
     navigate("/edit", { state: { id: item.id } });
   };
 
   return (
     <>
-      <div className="bg-neutral-primary-soft pb-5 border-b gap-5 border-default grid grid-cols-6 items-center">
-        <img
-          src={`http://localhost:8080/${item.imagePaths[0]}`}
-          onError={(e) => {
-            e.target.src = "/placeholder.png";
+      <div className="bg-neutral-primary-soft ml-1 pb-5  gap-5  grid grid-cols-6 border-b mb-5 items-center">
+        <button
+          onClick={() => {
+            navigateItemWithId();
           }}
-          alt="listing main image"
-          className="bg-black"
-        />
-        <p
-          scope="row"
-          className="px-6 py-4 font-medium text-heading flex flex-col overflow-auto "
         >
-          {item.title}
-        </p>
-        <p className="px-6 py-4">{item.date} </p>
-        <p className="px-6 py-4">{item.format} </p>
-        {/* <p className="px-6 py-4">{item.trackCount}</p> */}
+          <img
+            src={`http://localhost:8080/${item.imagePaths[0]}`}
+            onError={(e) => {
+              e.target.src = "/placeholder.png";
+            }}
+            alt="listing main image"
+            className="bg-black"
+          />
+        </button>
+        <button
+          onClick={() => {
+            navigateItemWithId();
+          }}
+        >
+          <p
+            scope="row"
+            className="px-6 py-4 font-medium text-heading flex flex-col overflow-auto "
+          >
+            {item.title}
+          </p>
+        </button>
 
-        <p className="px-6 py-4">{item.price}</p>
+        <p className="px-6 py-4">{item.date} </p>
+        <p className={"px-6 py-4"}>{item.format} </p>
+        {/* <p className="px-6 py-4">{item.trackCount}</p> */}
+        <div className="">
+          <p
+            className={`px-6 ${
+              item.discount > 0
+                ? "text-base font-bold text-gray-900 dark:text-white line-through"
+                : "text-base font-bold text-gray-900 dark:text-white"
+            }`}
+          >
+            {item.price + " ₺"}
+          </p>
+          <p
+            className={`px-6 ${
+              item.discount > 0
+                ? "text-base font-bold text-green-900 dark:text-green-400"
+                : "text-base font-bold text-green-900 dark:text-green-400"
+            }`}
+          >
+            {item.discount > 0 ? item.discountedPrice + " ₺" : null}
+          </p>
+        </div>
+        {/* <p className="px-6 py-4">{item.price}</p> */}
 
         <div className="px-6 py-4 text-right">
           <div className="flex flex-col justify-center items-center -mt-5">

@@ -41,7 +41,12 @@ public class JWTAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
-            
+
+            // without jwt header?
+            if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
             String token = jwtCookieUtil.extractTokenFromRequest(request);
 
             if (token == null) {

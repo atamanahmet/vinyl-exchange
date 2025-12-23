@@ -43,20 +43,14 @@ import lombok.Setter;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor
-public class Listing {
+public class Listing extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String title;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ListingStatus status = ListingStatus.AVAILABLE;
-
     private String packaging;
-
     private String date;
     private String country;
     private String barcode;
@@ -72,6 +66,10 @@ public class Listing {
     private Integer trackCount;
 
     private Boolean tradeable;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ListingStatus status = ListingStatus.AVAILABLE;
 
     @JsonProperty("price")
     @JsonDeserialize(using = PriceKurusDeserializer.class)

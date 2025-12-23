@@ -64,7 +64,7 @@ public class SecurityConfig implements WebMvcConfigurer {
                         .requestMatchers("/register", "/login", "/", "/search/**", "/uploads/listings/**",
                                 "/listing/**")
                         .permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/logout").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/cart/items/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/newlisting").authenticated()

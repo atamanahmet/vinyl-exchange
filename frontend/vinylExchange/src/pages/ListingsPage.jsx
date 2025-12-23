@@ -11,10 +11,9 @@ export default function ListingsPage() {
 
   async function fetchListings() {
     try {
-      const res = await axios.get("http://localhost:8080/mylistings", {
+      const res = await axios.get("http://localhost:8080/api/listings/my", {
         withCredentials: true,
       });
-      console.log(res.data);
       setListings(res.data);
     } catch (error) {
       console.log(error);
@@ -22,11 +21,9 @@ export default function ListingsPage() {
   }
 
   const deleteListing = async (id) => {
-    const res = await axios.delete(`http://localhost:8080/delete/${id}`, {
+    const res = await axios.delete(`http://localhost:8080/api/listings/${id}`, {
       withCredentials: true,
     });
-
-    // console.log(res.status);
 
     if (res.status == 204) {
       fetchListings();

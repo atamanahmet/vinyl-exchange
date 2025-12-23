@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import com.vinyl.VinylExchange.security.enums.Role;
 
 import jakarta.persistence.CascadeType;
@@ -20,8 +21,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -70,8 +71,4 @@ public class User {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Set<Role> roles = new HashSet<>();
-
-    // @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    // private Cart cart;
-
 }

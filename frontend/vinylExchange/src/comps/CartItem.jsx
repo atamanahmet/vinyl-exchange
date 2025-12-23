@@ -1,14 +1,12 @@
+import { useState } from "react";
 import { useCart } from "../context/CartContext";
 
 export default function CartItem({ item }) {
   const { decreaseFromCart, addToCart } = useCart();
-
-  let favColor = "";
+  const [favButtonColor, setFavButtonColor] = useState();
 
   function handleFav() {
-    console.log("hadnlegfavv");
-    favColor = "#cc0000";
-    console.log(favColor);
+    setFavButtonColor("#cc0000");
   }
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:p-6">
@@ -23,11 +21,6 @@ export default function CartItem({ item }) {
             }
             alt="imac image"
           />
-          {/* <img
-            className="hidden h-20 w-20 dark:block"
-            src="https://flowbite.s3.amazonaws.com/blocks/e-commerce/apple-watch-dark.svg"
-            alt="imac image"
-          /> */}
         </a>
 
         <label htmlFor="counter-input" className="sr-only">
@@ -40,7 +33,7 @@ export default function CartItem({ item }) {
               id="decrement-button-2"
               data-input-counter-decrement="counter-input-2"
               className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
-              onClick={() => decreaseFromCart(item.id)}
+              onClick={() => decreaseFromCart(item.listingId)}
             >
               <svg
                 className="h-2.5 w-2.5 text-gray-900 dark:text-white"
@@ -63,8 +56,8 @@ export default function CartItem({ item }) {
               id="counter-input-2"
               data-input-counter
               className="w-10 shrink-0 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 dark:text-white"
-              placeholder=""
-              value={item.quantity}
+              placeholder={item.quantity}
+              value=""
               required
             />
             <button
@@ -72,7 +65,7 @@ export default function CartItem({ item }) {
               id="increment-button-2"
               data-input-counter-increment="counter-input-2"
               className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
-              onClick={() => addToCart(item.id)}
+              onClick={() => addToCart(item.listingId)}
             >
               <svg
                 className="h-2.5 w-2.5 text-gray-900 dark:text-white"
@@ -127,7 +120,8 @@ export default function CartItem({ item }) {
           <div className="flex gap-5 ">
             <button
               type="button"
-              className="inline-flex text-sm font-medium text-gray-500 hover:text-gray-900 hover:underline dark:text-gray-400 dark:hover:text-white border-0 transition-none focus:outline-0 focus:ring-0 active:outline-0 focus:border-0  active:border-0"
+              className="inline-flex text-sm font-medium text-gray-500 hover:text-gray-900 hover:underline dark:text-gray-400 dark:hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-300 focus-visible:ring-offset-2 rounded"
+              style={{ outline: "none", border: "none" }}
               onClick={handleFav}
             >
               <svg
@@ -136,7 +130,7 @@ export default function CartItem({ item }) {
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
                 height="24"
-                fill={favColor}
+                fill={favButtonColor}
                 viewBox="0 0 24 24"
               >
                 <path
@@ -152,7 +146,8 @@ export default function CartItem({ item }) {
 
             <button
               type="button"
-              className="inline-flex items-center text-sm font-medium text-red-600 hover:underline dark:text-red-500"
+              style={{ outline: "none", border: "none" }}
+              className="inline-flex items-center text-sm font-medium text-red-600 hover:underline dark:text-red-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2 rounded"
             >
               <svg
                 className="me-1.5 h-5 w-5"

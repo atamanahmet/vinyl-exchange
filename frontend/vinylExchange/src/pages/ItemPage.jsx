@@ -32,6 +32,7 @@ export default function ItemPage({}) {
     barcode: "",
     packaging: "",
     format: "",
+    discountedPrice: 0,
     trackCount: 0,
     description: "",
     artistName: "",
@@ -53,6 +54,7 @@ export default function ItemPage({}) {
     date: data.date ?? "",
     description: data.description ?? "",
     country: data.country ?? "",
+    discountedPrice: data.discountedPrice ?? data.price,
     barcode: data.barcode ?? "",
     packaging: data.packaging ?? "",
     format: data.format ?? "",
@@ -79,14 +81,14 @@ export default function ItemPage({}) {
   async function getListing() {
     try {
       const res = await axios.get(
-        `http://localhost:8080/listing/${listingId}`,
+        `http://localhost:8080/api/listings/${listingId}`,
         {
           withCredentials: true,
         }
       );
       if (res.status == 200) {
-        setListing(normalize(res.data));
         console.log(res.data);
+        setListing(normalize(res.data));
       }
     } catch (error) {
       console.log(error);
@@ -123,13 +125,9 @@ export default function ItemPage({}) {
   }
 
   const [mainImage, setMainImage] = useState();
-  // `http://localhost:8080/${listing.imagePaths[0]}`
 
   return (
     <>
-      {/* {listing && (
-        
-      )} */}
       <div className="grid grid-cols-2 gap-10 text-left">
         <ImageGallery imagePaths={listing.imagePaths} />
         <div>
@@ -159,7 +157,9 @@ export default function ItemPage({}) {
             <div className="discount-price items-center flex">
               <div className="price text-3xl ">
                 <span className="text-green-400">
-                  {listing.discountedPrice + " ₺"}
+                  {listing.discount == 0
+                    ? listing.price + " ₺"
+                    : listing.discountedPrice + " ₺"}
                 </span>
               </div>
               <div className="discount text-green bg-pale-orange w-max px-2 rounded mx-5 h-6">

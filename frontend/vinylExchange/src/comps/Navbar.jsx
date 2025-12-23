@@ -111,7 +111,7 @@ export default function Navbar() {
               placeholder="Search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyPress}
             />
           </div>
 
@@ -177,8 +177,14 @@ export default function Navbar() {
                       </g>
                     </svg>
                   </a>
-                  <p className="text-indigo-900 absolute -top-2 right-10 bg-white rounded-full w-6">
-                    {cartItemCount ?? 0}
+                  <p
+                    className={
+                      cartItemCount == 0
+                        ? "hidden"
+                        : "text-indigo-900 absolute -top-2 right-10 bg-white rounded-full w-6"
+                    }
+                  >
+                    {cartItemCount}
                   </p>
                 </div>
                 <button

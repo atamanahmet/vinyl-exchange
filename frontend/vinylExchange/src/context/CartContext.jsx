@@ -1,9 +1,13 @@
 import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
+import { useUser } from "./UserContext";
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
+  const { user, loading } = useUser();
+
+  const [loggedIn, setLoggedIn] = useState(false);
   const [cart, setCart] = useState({
     cartId: "",
     items: [],
@@ -28,8 +32,21 @@ export function CartProvider({ children }) {
   }
 
   useEffect(() => {
-    fetchCart();
-  }, []);
+    if (loading) {
+      return;
+    }
+    if (user?.username) {
+      setLoggedIn(true);
+      fetchCart();
+    } else {
+      setLoggedIn(false);
+      setCart();
+    }
+  }, [user?.username, loading]);
+
+  // useEffect(() => {
+  //   fetchCart();
+  // }, [loggedIn == true]);
 
   async function addToCart(id) {
     try {
@@ -50,6 +67,7 @@ export function CartProvider({ children }) {
     try {
       const res = await axios.patch(
         `http://localhost:8080/api/cart/items/${id}`,
+        {},
         { withCredentials: true }
       );
       if (res.status === 200) {

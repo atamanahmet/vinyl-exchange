@@ -92,6 +92,7 @@ export function Register() {
           <a
             href="/terms"
             className="text-cyan-600 hover:underline dark:text-cyan-500"
+            required
           >
             Terms and Contitions
           </a>

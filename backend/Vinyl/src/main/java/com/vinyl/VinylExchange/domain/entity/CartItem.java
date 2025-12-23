@@ -1,6 +1,5 @@
 package com.vinyl.VinylExchange.domain.entity;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -11,12 +10,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import jakarta.validation.constraints.Min;
+
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,8 +26,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table(name = "cart_items", uniqueConstraints = @UniqueConstraint(columnNames = { "cart_id", "listing_id" }))
-public class CartItem {
+public class CartItem extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -35,6 +36,7 @@ public class CartItem {
 
     @Min(1)
     @Column(nullable = false)
+    @Builder.Default
     private int orderQuantity = 1;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,13 +46,8 @@ public class CartItem {
     @Column(name = "listing_id", nullable = false)
     private UUID listingId;
 
-    @Column(name = "added_at", nullable = false, updatable = false)
-    private LocalDateTime addedAt;
-
-    @Column(name = "updated_at", updatable = true)
-    private LocalDateTime updatedAt;
-
     @Column(name = "committed")
+    @Builder.Default
     private boolean committed = true;
 
     public CartItem(UUID listingId, int orderQuantity) {
@@ -58,14 +55,4 @@ public class CartItem {
         this.orderQuantity = orderQuantity;
     }
 
-    @PrePersist
-    protected void onCreate() {
-        addedAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 }

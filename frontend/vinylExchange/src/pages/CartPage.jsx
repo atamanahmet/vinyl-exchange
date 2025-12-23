@@ -4,15 +4,8 @@ import { useEffect, useState } from "react";
 import CartItem from "../comps/CartItem";
 
 export default function CartPage() {
-  const { cart, addToCart, decreaseFromCart, removeFromCart, fetchCart } =
-    useCart();
-  const [items, setItems] = useState();
+  const { cart, addToCart, decreaseFromCart, removeFromCart } = useCart();
 
-  // useEffect(() => {
-  //   fetchCart;
-  // }, []);
-
-  console.log("CartPage cart: ", cart);
   return (
     <>
       <section className="bg-white py-8 antialiased dark:bg-gray-900 md:py-16">

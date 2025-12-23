@@ -1,11 +1,14 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useEffectEvent } from "react";
+
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [loggedIn, setLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isFetching, setIsFetching] = useState(false);
@@ -58,9 +61,8 @@ export const UserProvider = ({ children }) => {
 
       if (response.status === 200) {
         setAuthResponse("Logged in succesfully. Redirecting...");
-
+        setLoggedIn(true);
         const { username, email } = response.data;
-
         setTimeout(function () {
           setUser({ username, email });
         }, 2000);
@@ -93,7 +95,8 @@ export const UserProvider = ({ children }) => {
     }
   }
 
-  async function currentUser() {
+  async function checkAuth() {
+    setLoading(true);
     const url = "http://localhost:8080/api/me";
     try {
       const res = await axios.get(url, {
@@ -102,26 +105,32 @@ export const UserProvider = ({ children }) => {
 
       if (res.status === 200) {
         setUser(res.data);
-      } else {
-        console.log("No current user present");
-        // navigate("/");
-        // setOpenLogin(true);
       }
     } catch (error) {
-      console.log("Please login: ", error);
-      // navigate("/");
-      // setOpenLogin(true);
+      setUser(null);
+      console.log("Not authenticated: ", error);
+    } finally {
+      setLoading(false);
     }
   }
-
   useEffect(() => {
-    currentUser();
-  }, [location.pathname]);
+    checkAuth();
+  }, []);
+
+  // useEffect(() => {
+  //   if (loading) {
+  //     return;
+  //   }
+  //   if (user != null) {
+  //     console.log("there is user");
+  //     currentUser();
+  //   }
+  // }, [location.pathname, loading]);
 
   const fetchData = async () => {
     if (isFetching) return;
     setIsFetching(true);
-    const url = "http://localhost:8080";
+    const url = "http://localhost:8080/api/listings";
 
     try {
       const res = await axios.get(url, {
@@ -149,6 +158,8 @@ export const UserProvider = ({ children }) => {
       });
       if (res.status === 204) {
         console.log("Logged out");
+        setLoggedIn(false);
+
         sessionStorage.clear();
         setUser(null);
       }
@@ -177,11 +188,10 @@ export const UserProvider = ({ children }) => {
   );
 };
 
-// Custom hook for easy access
 export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) {
-    throw new Error("useUser must be used within a UserProvider");
+    throw new Error("UserProvider??");
   }
   return context;
 };

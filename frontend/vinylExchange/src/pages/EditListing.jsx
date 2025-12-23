@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import ImageUploader from "../comps/ImageUploader";
-import { useLocation } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
 export default function EditListing() {
+  const navigate = useNavigate();
   const location = useLocation();
   const listingId = location.state.id;
   //   console.log(listingId);
@@ -35,7 +36,7 @@ export default function EditListing() {
   const normalize = (data) => ({
     id: data.id ?? "",
     title: data.title ?? "",
-    status: data.status ?? "",
+    status: data.status ?? "AVAILABLE",
     date: data.date ?? "",
     country: data.country ?? "",
     barcode: data.barcode ?? "",
@@ -60,7 +61,7 @@ export default function EditListing() {
   async function getListing() {
     try {
       const res = await axios.get(
-        `http://localhost:8080/listing/${listingId}`,
+        `http://localhost:8080/api/listings/${listingId}`,
         {
           withCredentials: true,
         }
@@ -90,12 +91,11 @@ export default function EditListing() {
     );
     try {
       const res = await axios.post(
-        "http://localhost:8080/price/preview",
+        "http://localhost:8080/api/listings/price/preview",
         { priceTL: price, discountPercent: discount },
         { withCredentials: true }
       );
-      console.log(res.data);
-      setPreviewPrice(res.data); // BigDecimal (number)
+      setPreviewPrice(res.data); // BigDecimal
     } catch (err) {
       console.error(err);
     }
@@ -197,18 +197,19 @@ export default function EditListing() {
 
     try {
       const res = await axios.post(
-        `http://localhost:8080/newlisting`,
+        `http://localhost:8080/api/listings`,
         formData,
         {
           withCredentials: true,
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
-
-      alert("Listing saved successfully!");
+      if (res.status === 201) {
+        alert(res.data);
+        navigate("/");
+      }
     } catch (err) {
-      console.error(err);
-      alert("ServerError");
+      alert(err.response.data);
     }
   };
 
@@ -295,17 +296,6 @@ export default function EditListing() {
                 type="text"
                 name="barcode"
                 value={listing.barcode}
-                onChange={handleChange}
-                className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
-              />
-            </div>
-
-            <div className="formItem">
-              <label className="block mb-1">Packaging</label>
-              <input
-                type="text"
-                name="packaging"
-                value={listing.packaging}
                 onChange={handleChange}
                 className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
               />
