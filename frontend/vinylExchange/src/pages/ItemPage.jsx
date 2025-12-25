@@ -87,7 +87,6 @@ export default function ItemPage({}) {
         }
       );
       if (res.status == 200) {
-        console.log(res.data);
         setListing(normalize(res.data));
       }
     } catch (error) {
@@ -148,7 +147,12 @@ export default function ItemPage({}) {
               {label}
             </span>
             <span className="block  mt-5 text-2xl">{format}</span>
-            <span className="block  mt-5 text-2xl">{listing.condition}</span>
+            <span className="block  mt-5 text-2xl">
+              <span className="italic font-normal text-amber-200">
+                Condition:{" "}
+              </span>
+              {listing.condition}
+            </span>
           </h3>
           <p className="text-dark-grayish-blue pb-6 lg:py-7 lg:leading-6">
             {listing.description}

@@ -42,7 +42,7 @@ public class CartService {
         this.cartItemRepository = cartItemRepository;
     }
 
-    private Cart getOrCreateCart(UUID userId) {
+    public Cart getOrCreateCart(UUID userId) {
 
         return cartRepository
                 .findByUserId(userId)

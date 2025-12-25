@@ -1,5 +1,6 @@
 package com.vinyl.VinylExchange.domain.entity;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -63,6 +64,8 @@ public class Listing extends BaseEntity {
 
     private int stockQuantity = 5;
 
+    private boolean onHold = false;
+
     private Integer trackCount;
 
     private Boolean tradeable;
@@ -114,6 +117,10 @@ public class Listing extends BaseEntity {
     @Column(name = "image_path")
     private List<String> imagePaths = new ArrayList<>();
 
+    @Column(nullable = false)
+    // @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private boolean promote = false;
+
     // helper
     public void addTradePreference(TradePreference newTradePreference) {
         newTradePreference.setListing(this);
@@ -137,5 +144,10 @@ public class Listing extends BaseEntity {
     public boolean isAvailable() {
         return status == ListingStatus.AVAILABLE && stockQuantity > 0;
     }
+
+    // hasRole.ADMIN
+    private UUID promotedById;
+    private String promotedBy;
+    private LocalDateTime promotedAt;
 
 }

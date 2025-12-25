@@ -41,7 +41,7 @@ export const UserProvider = ({ children }) => {
       }
     } catch (error) {
       console.log(error);
-      setResponse("Got some issue. Try again");
+      setAuthResponse("Register issues, try again or change credentials");
     }
   }
 
@@ -69,7 +69,7 @@ export const UserProvider = ({ children }) => {
       }
     } catch (error) {
       console.log(error);
-      setAuthResponse("Got some issue. Try again");
+      setAuthResponse("Wrong credentials. Try again or register");
     }
   }
 

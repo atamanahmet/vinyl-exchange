@@ -8,6 +8,7 @@ export function CartProvider({ children }) {
   const { user, loading } = useUser();
 
   const [loggedIn, setLoggedIn] = useState(false);
+
   const [cart, setCart] = useState({
     cartId: "",
     items: [],
@@ -15,6 +16,9 @@ export function CartProvider({ children }) {
     totalItems: 0,
     validationIssues: [],
   });
+
+  const [promotedListings, setPromotedListings] = useState([]);
+
   const [cartItemCount, setCartItemCount] = useState(0);
 
   async function fetchCart() {
@@ -30,6 +34,25 @@ export function CartProvider({ children }) {
       console.log(e);
     }
   }
+  async function fetchPromotedListings() {
+    try {
+      const res = await axios.get(
+        "http://localhost:8080/api/listings/promote",
+        {
+          withCredentials: true,
+        }
+      );
+      if (res.status === 200) {
+        // console.log(res.data);
+        setPromotedListings(res.data);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+  useEffect(() => {
+    fetchPromotedListings();
+  }, [cart]);
 
   useEffect(() => {
     if (loading) {
@@ -38,8 +61,10 @@ export function CartProvider({ children }) {
     if (user?.username) {
       setLoggedIn(true);
       fetchCart();
+      fetchPromotedListings();
     } else {
       setLoggedIn(false);
+      setPromotedListings();
       setCart();
     }
   }, [user?.username, loading]);
@@ -89,6 +114,7 @@ export function CartProvider({ children }) {
         decreaseFromCart,
         setCart,
         setCartItemCount,
+        promotedListings,
       }}
     >
       {children}

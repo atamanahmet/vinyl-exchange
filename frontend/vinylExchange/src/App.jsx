@@ -22,6 +22,7 @@ import {
   useLocation,
   useParams,
 } from "react-router-dom";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   const { user, data } = useUser();
@@ -42,6 +43,7 @@ function App() {
         <Route path="/edit" element={<EditListing />} />
         <Route path="/listing/:listingId" element={<ItemPage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </>
   );

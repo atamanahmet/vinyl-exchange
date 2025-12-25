@@ -15,26 +15,29 @@ export default function ImageGallery({ imagePaths }) {
 
   return (
     <div className="w-full">
-      {mainImg && (
+      {
         <img
-          src={`http://localhost:8080/${mainImg}`}
-          onError={(e) => {
-            e.target.src = "/placeholder.png";
-          }}
+          src={
+            mainImg ? `http://localhost:8080/${mainImg}` : "/placeholder.png"
+          }
+          // onError={(e) => {
+          //   e.target.src = "/placeholder.png";
+          // }}
           alt="main"
           className="w-auto h-130 object-fit rounded-md mb-4"
         />
-      )}
+      }
 
       <div className="flex gap-4.5 flex-wrap">
-        {imagePaths.map((img, i) => (
-          <img
-            key={i}
-            src={`http://localhost:8080/${img}`}
-            onClick={() => handleClick(img)}
-            className="w-20 h-20 object-cover cursor-pointer rounded-md border"
-          />
-        ))}
+        {imagePaths &&
+          imagePaths.map((img, i) => (
+            <img
+              key={i}
+              src={`http://localhost:8080/${img}`}
+              onClick={() => handleClick(img)}
+              className="w-20 h-20 object-cover cursor-pointer rounded-md border"
+            />
+          ))}
       </div>
     </div>
   );

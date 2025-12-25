@@ -61,7 +61,8 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/register", "/login", "/", "/search/**", "/uploads/listings/**",
+                        .requestMatchers("/register", "/api/listings", "/login", "/", "/search/**",
+                                "/uploads/listings/**",
                                 "/listing/**")
                         .permitAll()
                         // .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

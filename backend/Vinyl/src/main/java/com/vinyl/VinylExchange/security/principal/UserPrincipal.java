@@ -10,7 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.vinyl.VinylExchange.domain.entity.User;
-import com.vinyl.VinylExchange.security.enums.Role;
+import com.vinyl.VinylExchange.domain.enums.RoleName;
 
 public class UserPrincipal implements UserDetails {
 
@@ -21,7 +21,7 @@ public class UserPrincipal implements UserDetails {
         this.user = user;
         this.authorities = user.getRoles()
                 .stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
+                .map(role -> new SimpleGrantedAuthority(role.getName().name()))
                 .collect(Collectors.toSet());
     }
 
@@ -52,8 +52,17 @@ public class UserPrincipal implements UserDetails {
         return user.getEmail();
     }
 
-    public Set<Role> getRoles() {
-        return user.getRoles();
+    public Set<RoleName> getRoles() {
+        return authorities
+                .stream()
+                .map(authority -> RoleName.valueOf(authority.getAuthority()))
+                .collect(Collectors.toSet());
+    }
+
+    public boolean hasRole(RoleName roleName) {
+        return authorities
+                .stream()
+                .anyMatch(authority -> authority.getAuthority().equals(roleName.name()));
     }
 
     @Override

@@ -13,9 +13,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.vinyl.VinylExchange.domain.entity.User;
-
+import com.vinyl.VinylExchange.domain.enums.RoleName;
 import com.vinyl.VinylExchange.security.config.JwtConfig;
-import com.vinyl.VinylExchange.security.enums.Role;
 
 @Component
 public class JwtTokenUtil {
@@ -38,7 +37,7 @@ public class JwtTokenUtil {
                 .withSubject(user.getId().toString())
                 .withClaim("username", user.getUsername())
                 .withClaim("roles", user.getRoles().stream()
-                        .map(role -> role.name())
+                        .map(role -> role.getName())
                         .collect(Collectors.toList()))
                 .withIssuedAt(Date.from(now))
                 .withExpiresAt(Date.from(expiry))
@@ -49,16 +48,16 @@ public class JwtTokenUtil {
         return token;
     }
 
-    public String generateToken(UUID id, String username, Set<Role> roles) {
+    public String generateToken(UUID id, String username, Set<RoleName> roles) {
 
         Instant now = Instant.now();
         Instant expiry = now.plusMillis(jwtConfig.getExpiration());
 
         String token = JWT.create()
                 .withSubject(id.toString())
-                // .withClaim("roles", roles.stream()
-                // .map(role -> role.name())
-                // .collect(Collectors.toList()))
+                .withClaim("roles", roles.stream()
+                        .map(role -> role.name())
+                        .collect(Collectors.toList()))
                 .withIssuedAt(Date.from(now))
                 .withExpiresAt(Date.from(expiry))
                 .sign(Algorithm.HMAC512(jwtConfig.getSECRET()));

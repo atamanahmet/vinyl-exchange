@@ -13,4 +13,6 @@ public interface ListingRepository extends JpaRepository<Listing, UUID> {
     List<Listing> findAllByOwner_Id(UUID ownerId);
 
     List<Listing> findAllByIdIn(List<UUID> listingIds);
+
+    List<Listing> findByPromoteTrue();
 }

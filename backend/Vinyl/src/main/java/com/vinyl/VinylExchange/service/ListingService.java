@@ -1,12 +1,16 @@
 package com.vinyl.VinylExchange.service;
 
 import java.beans.PropertyDescriptor;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,19 +30,49 @@ import com.vinyl.VinylExchange.security.principal.UserPrincipal;
 import jakarta.transaction.Transactional;
 
 @Service
+@Transactional
 public class ListingService {
     private final ListingRepository listingRepository;
     private FileStorageService fileStorageService;
+    private final CartService cartService;
 
-    public ListingService(ListingRepository listingRepository, FileStorageService fileStorageService) {
+    public ListingService(
+            ListingRepository listingRepository,
+            FileStorageService fileStorageService,
+            @Lazy CartService cartService) {
 
         this.listingRepository = listingRepository;
         this.fileStorageService = fileStorageService;
+        this.cartService = cartService;
     }
 
     public List<Listing> getListings() {
 
         return listingRepository.findAll();
+    }
+
+    public List<Listing> getPromotedListings() {
+
+        return listingRepository.findByPromoteTrue();
+    }
+
+    public List<Listing> getFilteredPromotedListings(UUID userId) {
+
+        Set<UUID> cartListingIds = cartService
+                .getOrCreateCart(userId)
+                .getCartItems()
+                .stream()
+                .map(item -> item.getListingId()).collect(Collectors.toSet());
+
+        List<Listing> promotedListings = listingRepository.findByPromoteTrue();
+
+        // only first 3 item to fit in cartPage
+        List<Listing> filteredPromotedList = promotedListings.stream()
+                .filter(listing -> !cartListingIds.contains(listing.getId()))
+                .limit(3)
+                .collect(Collectors.toList());
+
+        return filteredPromotedList;
     }
 
     public List<Listing> getListingsByIds(List<UUID> listingIds) {
@@ -214,7 +248,8 @@ public class ListingService {
                     || name.equals("id")
                     || name.equals("imagePaths")
                     || name.equals("owner")
-                    || name.equals("tradePreferences")) {
+                    || name.equals("tradePreferences")
+                    || name.equals("promote")) {
                 continue;
             }
 
@@ -227,5 +262,32 @@ public class ListingService {
                 targetWrap.setPropertyValue(name, value);
             }
         }
+    }
+
+    // admin panel
+    public void promoteListing(UUID listingId, Boolean action, UserPrincipal currentUser) {
+
+        Listing listing = listingRepository.findById(listingId)
+                .orElseThrow(() -> new ListingNotFoundException("Listing not found to promote"));
+
+        listing.setPromote(action);
+        listing.setPromotedBy(currentUser.getUsername());
+        listing.setPromotedById(currentUser.getId());
+        listing.setPromotedAt(LocalDateTime.now());
+
+        listingRepository.save(listing);
+    }
+
+    public void freezeListing(UUID listingId, Boolean action, UserPrincipal currentUser) {
+
+        Listing listing = listingRepository.findById(listingId)
+                .orElseThrow(() -> new ListingNotFoundException("Listing not found to promote"));
+
+        listing.setOnHold(action);
+        // listing.setPromotedBy(currentUser.getUsername());
+        // listing.setPromotedById(currentUser.getId());
+        // listing.setPromotedAt(LocalDateTime.now());
+
+        listingRepository.save(listing);
     }
 }

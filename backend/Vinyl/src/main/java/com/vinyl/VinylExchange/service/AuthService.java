@@ -1,5 +1,6 @@
 package com.vinyl.VinylExchange.service;
 
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,13 +15,12 @@ import com.vinyl.VinylExchange.domain.dto.AuthResponseDTO;
 import com.vinyl.VinylExchange.domain.dto.LoginRequestDTO;
 import com.vinyl.VinylExchange.domain.dto.RegisterRequestDTO;
 import com.vinyl.VinylExchange.domain.dto.UserDTO;
+import com.vinyl.VinylExchange.domain.entity.Role;
 import com.vinyl.VinylExchange.domain.entity.User;
-
+import com.vinyl.VinylExchange.domain.enums.RoleName;
 import com.vinyl.VinylExchange.exception.NoCurrentUserException;
 import com.vinyl.VinylExchange.exception.RegistrationValidationException;
-
 import com.vinyl.VinylExchange.repository.UserRepository;
-import com.vinyl.VinylExchange.security.enums.Role;
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
 import com.vinyl.VinylExchange.security.util.JwtTokenUtil;
 
@@ -31,17 +31,20 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final JwtTokenUtil jwtTokenUtil;
+    private final RoleService roleService;
 
     public AuthService(
             AuthenticationManager authenticationManager,
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
-            JwtTokenUtil jwtTokenUtil) {
+            JwtTokenUtil jwtTokenUtil,
+            RoleService roleService) {
 
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenUtil = jwtTokenUtil;
+        this.roleService = roleService;
     }
 
     public AuthResponseDTO authenticateUser(LoginRequestDTO loginRequestDTO) {
@@ -71,19 +74,17 @@ public class AuthService {
         user.setUsername(registerRequest.username());
         user.setEmail(registerRequest.email());
         user.setPassword(passwordEncoder.encode(registerRequest.password()));
-        user.getRoles().add(Role.USER);
-        try {
-            User savedUser = userRepository.save(user);
 
-            String token = jwtTokenUtil.generateToken(savedUser);
+        Role userRole = roleService.getRoleByName(RoleName.ROLE_USER);
 
-            return new AuthResponseDTO(
-                    new UserDTO(savedUser.getUsername(), savedUser.getEmail()), token);
+        user.setRoles(Set.of(userRole));
 
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return null;
-        }
+        User savedUser = userRepository.save(user);
+
+        String token = jwtTokenUtil.generateToken(savedUser);
+
+        return new AuthResponseDTO(
+                new UserDTO(savedUser.getUsername(), savedUser.getEmail()), token);
     }
 
     public void validateRegistration(RegisterRequestDTO registerRequest) {
