@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useCart } from "../context/CartContext";
 
 export default function CartItem({ item }) {
-  const { decreaseFromCart, addToCart } = useCart();
+  const { decreaseFromCart, addToCart, removeFromCart, updateItemQuantity } =
+    useCart();
   const [favButtonColor, setFavButtonColor] = useState();
 
   function handleFav() {
@@ -56,9 +57,10 @@ export default function CartItem({ item }) {
               id="counter-input-2"
               data-input-counter
               className="w-10 shrink-0 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 dark:text-white"
-              placeholder={item.quantity}
-              value=""
+              value={item.quantity}
               required
+              readOnly
+              // onChange={()=>updateItemQuantity(item.id, item.quantity)}
             />
             <button
               type="button"
@@ -95,7 +97,9 @@ export default function CartItem({ item }) {
                   : "text-base font-bold text-gray-900 dark:text-white "
               }
             >
-              {item.totalPrice ? item.totalPrice + " ₺" : 0}
+              {item.totalPrice
+                ? item.totalPrice.toLocaleString("tr-TR") + " ₺"
+                : 0}
             </p>
             <p
               className={
@@ -106,7 +110,7 @@ export default function CartItem({ item }) {
               }
             >
               {item.discountPerUnit > 0
-                ? item.discountedTotalPrice + " ₺"
+                ? item.discountedTotalPrice.toLocaleString("tr-TR") + " ₺"
                 : null}
             </p>
           </div>
@@ -147,6 +151,7 @@ export default function CartItem({ item }) {
             <button
               type="button"
               style={{ outline: "none", border: "none" }}
+              onClick={() => removeFromCart(item.id)}
               className="inline-flex items-center text-sm font-medium text-red-600 hover:underline dark:text-red-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2 rounded"
             >
               <svg

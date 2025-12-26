@@ -162,8 +162,8 @@ export default function ItemPage({}) {
               <div className="price text-3xl ">
                 <span className="text-green-400">
                   {listing.discount == 0
-                    ? listing.price + " ₺"
-                    : listing.discountedPrice + " ₺"}
+                    ? listing.price.toLocaleString("tr-TR") + " ₺"
+                    : listing.discountedPrice.toLocaleString("tr-TR") + " ₺"}
                 </span>
               </div>
               <div className="discount text-green bg-pale-orange w-max px-2 rounded mx-5 h-6">
@@ -171,7 +171,9 @@ export default function ItemPage({}) {
               </div>
             </div>
             <div className="original-price text-grayish-blue line-through lg:mt-2">
-              {listing.discount != 0 ? listing.price + "₺" : null}
+              {listing.discount != 0
+                ? listing.price.toLocaleString("tr-TR") + "₺"
+                : null}
             </div>
           </div>
           <div className="sm:flex lg:mt-8 w-full">

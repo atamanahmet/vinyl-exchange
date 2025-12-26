@@ -61,7 +61,7 @@ export default function CartPage() {
                         Original price
                       </dt>
                       <dd className="text-base font-medium text-gray-900 dark:text-white">
-                        {cart && cart.price + " ₺"}
+                        {cart && cart.price.toLocaleString("tr-TR") + " ₺"}
                       </dd>
                     </dl>
 
@@ -70,7 +70,10 @@ export default function CartPage() {
                         Savings
                       </dt>
                       <dd className="text-base font-medium text-green-600">
-                        {cart && cart.discountedPrice - cart.price + " ₺"}
+                        {cart &&
+                          (cart.discountedPrice - cart.price).toLocaleString(
+                            "tr-TR"
+                          ) + " ₺"}
                       </dd>
                     </dl>
                   </div>
@@ -80,7 +83,9 @@ export default function CartPage() {
                       Total
                     </dt>
                     <dd className="text-base font-bold text-gray-900 dark:text-white">
-                      {cart && cart.discountedPrice + " ₺"}
+                      {cart &&
+                        cart.discountedPrice &&
+                        cart.discountedPrice.toLocaleString("tr-TR") + " ₺"}
                     </dd>
                   </dl>
                 </div>

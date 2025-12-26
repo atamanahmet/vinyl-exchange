@@ -69,7 +69,7 @@ export default function AdminItem({
                 : "text-base font-bold text-gray-900 dark:text-white"
             }`}
           >
-            {item.price + " ₺"}
+            {item.price.toLocaleString("tr-TR") + " ₺"}
           </p>
           <p
             className={`px-6 ${
@@ -78,7 +78,9 @@ export default function AdminItem({
                 : "text-base font-bold text-green-900 dark:text-green-400"
             }`}
           >
-            {item.discount > 0 ? item.discountedPrice + " ₺" : null}
+            {item.discount > 0
+              ? item.discountedPrice.toLocaleString("tr-TR") + " ₺"
+              : null}
           </p>
         </div>
         {/* <p className="px-6 py-4">{item.price}</p> */}

@@ -49,7 +49,19 @@ public class ListingController {
         @GetMapping
         public ResponseEntity<?> getListings() {
 
-                List<Listing> listings = listingService.getListings();
+                List<Listing> listings = listingService.getAvailableListings();
+
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(listings);
+        }
+
+        // admin
+        @PreAuthorize("hasRole('ADMIN')")
+        @GetMapping("/all")
+        public ResponseEntity<?> getAllListings() {
+
+                List<Listing> listings = listingService.getAllListings();
 
                 return ResponseEntity
                                 .status(HttpStatus.OK)
@@ -83,25 +95,6 @@ public class ListingController {
                                 .status(HttpStatus.CREATED)
                                 .body("Listing created");
         }
-
-        // @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-        // public ResponseEntity<?> updateListing(
-        // @AuthenticationPrincipal UserPrincipal currentUserPrincipal,
-        // @RequestPart("listing") String listingJson,
-        // @RequestPart(value = "images", required = false) List<MultipartFile> images)
-        // {
-
-        // User user = currentUserPrincipal.getUser();
-
-        // listingService.updateListing(
-        // listingJson,
-        // images,
-        // user);
-
-        // return ResponseEntity
-        // .status(HttpStatus.CREATED)
-        // .body("Listing updated");
-        // }
 
         @GetMapping("/my")
         public ResponseEntity<?> getMyListings(@AuthenticationPrincipal UserPrincipal currentUserPrincipal) {
@@ -142,9 +135,12 @@ public class ListingController {
                         @AuthenticationPrincipal UserPrincipal currentUserPrincipal,
                         @RequestBody PricePreviewRequestDTO pricePreviewRequestDTO) {
 
-                return pricePreviewService.previewDiscountedPrice(
-                                pricePreviewRequestDTO.priceTL(),
-                                pricePreviewRequestDTO.discountPercent());
+                if (pricePreviewRequestDTO.priceTL() != null) {
+                        return pricePreviewService.previewDiscountedPrice(
+                                        pricePreviewRequestDTO.priceTL(),
+                                        pricePreviewRequestDTO.discountPercent());
+                }
+                return null;
         }
 
         // admin
@@ -179,6 +175,11 @@ public class ListingController {
                 System.out.println("Curret User ROles: " + currentUserPrincipal.getRoles());
 
                 listingService.freezeListing(listingId, freezeRequest.action(), currentUserPrincipal);
+
+                if (freezeRequest.action()) {
+
+                        listingService.promoteListing(listingId, false, currentUserPrincipal);
+                }
 
                 return ResponseEntity
                                 .status(HttpStatus.OK)

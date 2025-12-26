@@ -15,4 +15,6 @@ public interface ListingRepository extends JpaRepository<Listing, UUID> {
     List<Listing> findAllByIdIn(List<UUID> listingIds);
 
     List<Listing> findByPromoteTrue();
+
+    List<Listing> findByOnHoldFalse();
 }

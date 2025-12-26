@@ -34,6 +34,8 @@ public class ListingDTO {
     private String status;
     private String barcode;
 
+    private String packaging;
+
     @JsonProperty("price")
     @JsonDeserialize(using = PriceKurusDeserializer.class)
     @JsonSerialize(using = PriceTlSerializer.class)
@@ -47,6 +49,7 @@ public class ListingDTO {
     private List<String> imagePaths;
     private List<TradePreferenceDTO> tradePreferences;
     private String format;
+    private String description;
     private String date;
     private Integer trackCount;
     private long tradeValue;
@@ -65,12 +68,14 @@ public class ListingDTO {
     public ListingDTO(Listing listing, List<TradePreferenceDTO> tradePreferenceDTOs) {
         this.id = listing.getId();
         this.title = listing.getTitle();
+        this.description = listing.getDescription();
         this.date = listing.getDate();
         this.priceKurus = listing.getPriceKurus();
         this.tradeable = listing.getTradeable();
         this.discountedPrice = listing.getDiscountedPriceKurus();
         this.imagePaths = listing.getImagePaths();
         this.format = listing.getFormat();
+        this.packaging = listing.getPackaging();
         this.trackCount = listing.getTrackCount();
         this.tradePreferences = tradePreferenceDTOs;
         this.discountBP = listing.getDiscountBP();

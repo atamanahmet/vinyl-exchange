@@ -7,7 +7,6 @@ export default function EditListing() {
   const navigate = useNavigate();
   const location = useLocation();
   const listingId = location.state.id;
-  //   console.log(listingId);
 
   const [previewPrice, setPreviewPrice] = useState(null);
 
@@ -26,36 +25,12 @@ export default function EditListing() {
     trackCount: 0,
     artistName: "",
     tradeValue: 0,
+    description: "",
 
     tradeable: false,
     price: 0,
     discount: 0,
     tradePreferences: [],
-  });
-
-  const normalize = (data) => ({
-    id: data.id ?? "",
-    title: data.title ?? "",
-    status: data.status ?? "AVAILABLE",
-    date: data.date ?? "",
-    country: data.country ?? "",
-    barcode: data.barcode ?? "",
-    packaging: data.packaging ?? "",
-    condition: data.condition ?? "",
-    format: data.format ?? "",
-    trackCount: data.trackCount ?? 0,
-    artistName: data.artistName ?? "",
-    tradeValue: data.tradeValue ?? 0,
-    tradeable: data.tradeable ?? false,
-    price: data.price ?? 0,
-    discount: data.discount ?? 0,
-    tradePreferences: Array.isArray(data.tradePreferences)
-      ? data.tradePreferences.map((p) => ({
-          desiredItem: p.desiredItem ?? "",
-          paymentDirection: p.paymentDirection ?? "NO_EXTRA",
-          extraAmount: p.extraAmount ?? 0,
-        }))
-      : [],
   });
 
   async function getListing() {
@@ -67,7 +42,7 @@ export default function EditListing() {
         }
       );
       if (res.status == 200) {
-        setListing(normalize(res.data));
+        setListing(res.data);
       }
     } catch (error) {
       console.log(error);
@@ -79,16 +54,6 @@ export default function EditListing() {
   }, []);
 
   const fetchPricePreview = async (price, discount) => {
-    console.log(
-      "price: " +
-        price +
-        " " +
-        typeof price +
-        " discount: " +
-        discount +
-        " " +
-        typeof discount
-    );
     try {
       const res = await axios.post(
         "http://localhost:8080/api/listings/price/preview",
@@ -111,8 +76,17 @@ export default function EditListing() {
       };
 
       // for price preview after discount
-      if (name === "price" || name === "discount") {
-        fetchPricePreview(updated.price, updated.discount);
+      if (name === "price") {
+        setPreviewPrice(null);
+        updated.price = value;
+        updated.discount = 0;
+      }
+      if (name === "discount") {
+        if (value == 0) {
+          setPreviewPrice(null);
+        } else {
+          fetchPricePreview(updated.price, updated.discount);
+        }
       }
 
       // tradeable disabled, clear prefs
@@ -158,10 +132,14 @@ export default function EditListing() {
   };
 
   const setDiscountPercent = (percent) => {
-    const newPrice = listing.price; // current price
-    const newDiscount = percent; // new discount
+    if (percent == 0) {
+      setPreviewPrice(null);
+    } else {
+      const newPrice = listing.price; // current price
+      const newDiscount = percent; // new discount
 
-    fetchPricePreview(newPrice, newDiscount);
+      fetchPricePreview(newPrice, newDiscount);
+    }
 
     setListing((prev) => ({
       ...prev,
@@ -215,7 +193,7 @@ export default function EditListing() {
 
   return (
     <div className="mt-10 -ml-5">
-      <h2 className="text-3xl font-bold text-left mt-15 ml-4">Edit Listing</h2>
+      <h2 className="text-3xl font-bold text-left ml-4">Edit Listing</h2>
       <form onSubmit={handleSubmit} className=" p-4 space-y-4 text-left">
         <div className="grid grid-cols-[0.9fr_0.5fr_1fr_1fr]">
           <div className="">
@@ -279,6 +257,17 @@ export default function EditListing() {
               </label>
             </div>
 
+            <div className="formItem mt-3">
+              <label className="block mb-1">Release Date</label>
+              <input
+                type="date"
+                name="date"
+                value={listing.date}
+                onChange={handleChange}
+                className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+              />
+            </div>
+
             <div className="formItem">
               <label className="block mb-1">Country</label>
               <input
@@ -289,9 +278,19 @@ export default function EditListing() {
                 className="input w-75 input-bordered border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
               />
             </div>
+            <div className="formItem">
+              <label className="block mb-1">Label</label>
+              <input
+                type="text"
+                name="labelName"
+                value={listing.labelName}
+                onChange={handleChange}
+                className="input w-75 input-bordered border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+              />
+            </div>
 
             <div className="formItem">
-              <label className="block mb-1">Barcode</label>
+              <label className="block mb-1">Barcode / Catalog No.</label>
               <input
                 type="text"
                 name="barcode"
@@ -309,17 +308,6 @@ export default function EditListing() {
                 value={listing.trackCount}
                 onChange={handleChange}
                 className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
-              />
-            </div>
-
-            <div className="formItem">
-              <label className="block mb-1">Artist Name</label>
-              <input
-                type="text"
-                name="artistName"
-                value={listing.artistName}
-                onChange={handleChange}
-                className="input w-75 input-bordered border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
               />
             </div>
 
@@ -498,8 +486,8 @@ export default function EditListing() {
               </label>
             </div>
           </div>
-          <div className="">
-            <h3 className="text-3xl font-bold">Trade stuff</h3>
+          <div className="ml-5">
+            <h3 className="text-2xl font-bold">Trade Information</h3>
             <div className="mt-5">
               <div className="formItem mt-5 relative">
                 <label className="block mb-1">Direct Sell price</label>
@@ -508,11 +496,25 @@ export default function EditListing() {
                   name="price"
                   value={previewPrice ? previewPrice : listing.price}
                   onChange={handleChange}
-                  className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                  className="input w-75 input-bordered  border-2 text-green-400 font-bold border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
                 />
-                <span className="absolute right-12 top-8.5"> ₺</span>
+                {previewPrice && (
+                  <span className="line-through absolute right-16 top-8.5 text-red-500">
+                    {listing.price}
+                  </span>
+                )}
+
+                <span className="absolute text-xl right-12 top-7.5"> ₺</span>
               </div>
-              <label className="block mb-1">Discount</label>
+              <label className="block mb-1">
+                Discount
+                <a
+                  className="px-1.5 py-0.5 rounded-full bg-red-600 text-white ml-2"
+                  onClick={() => setDiscountPercent(0)}
+                >
+                  ↺
+                </a>
+              </label>
 
               <div className="space-x-2">
                 <button
@@ -549,7 +551,7 @@ export default function EditListing() {
                   value={listing.discount}
                   placeholder={listing.discount == 0 ? "0.0" : listing.discount}
                   onChange={handleChange}
-                  className="input w-19 input-bordered border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                  className="input w-19 input-bordered border-2   border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
                 />
               </div>
               <label className="inline-flex items-center gap-2 mt-5">
@@ -735,9 +737,33 @@ export default function EditListing() {
             </div>
           </div>
           <div>
-            <h3 className="text-3xl font-bold mb-5">Upload images</h3>
+            <div className="formItem ">
+              <label className="block text-2xl font-bold mb-2">
+                Description
+              </label>
+              <textarea
+                type="text"
+                name="description"
+                rows="5"
+                value={listing.description}
+                onChange={handleChange}
+                maxLength="255"
+                className="input w-87 input-bordered border-2 mt-5 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+              />
+              <p
+                className="text-right"
+                style={{
+                  color: listing.description.length <= 255 ? "green" : "red",
+                }}
+              >
+                {listing.description.length}/255
+              </p>
+            </div>
+            <div>
+              <h3 className="text-3xl font-bold mb-5 mt-5">Upload images</h3>
 
-            <ImageUploader images={images} setImages={setImages} />
+              <ImageUploader images={images} setImages={setImages} />
+            </div>
           </div>
         </div>
       </form>

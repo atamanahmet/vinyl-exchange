@@ -60,7 +60,10 @@ export default function Card({ vinyl }) {
         <p className="text-body">{label || "No Label info"}</p>
 
         <p className="text-body text-xl mt-5 text-green-500">
-          {vinyl.discountedPrice ? vinyl.discountedPrice : vinyl.price} ₺
+          {vinyl.discountedPrice
+            ? vinyl.discountedPrice.toLocaleString("tr-TR")
+            : vinyl.price.toLocaleString("tr-TR")}{" "}
+          ₺
         </p>
 
         <div className="flex flex-row gap-3 justify-center">

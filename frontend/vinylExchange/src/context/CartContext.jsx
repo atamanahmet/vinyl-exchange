@@ -43,7 +43,6 @@ export function CartProvider({ children }) {
         }
       );
       if (res.status === 200) {
-        // console.log(res.data);
         setPromotedListings(res.data);
       }
     } catch (e) {
@@ -73,11 +72,11 @@ export function CartProvider({ children }) {
   //   fetchCart();
   // }, [loggedIn == true]);
 
-  async function addToCart(id) {
+  async function addToCart(listingId) {
     try {
       const res = await axios.post(
         "http://localhost:8080/api/cart/items",
-        { listingId: id, quantity: 1 },
+        { listingId: listingId, quantity: 1 },
         { withCredentials: true }
       );
       if (res.status === 200) {
@@ -88,14 +87,29 @@ export function CartProvider({ children }) {
       console.log(e);
     }
   }
-  async function decreaseFromCart(id) {
+  async function decreaseFromCart(cartItemId) {
     try {
       const res = await axios.patch(
-        `http://localhost:8080/api/cart/items/${id}`,
+        `http://localhost:8080/api/cart/items/${cartItemId}`,
         {},
         { withCredentials: true }
       );
       if (res.status === 200) {
+        // refresh shared cart after change
+        fetchCart();
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  async function removeFromCart(cartItemId) {
+    try {
+      const res = await axios.delete(
+        `http://localhost:8080/api/cart/items/${cartItemId}`,
+        { withCredentials: true }
+      );
+      if (res.status === 204) {
         // refresh shared cart after change
         fetchCart();
       }
@@ -115,6 +129,7 @@ export function CartProvider({ children }) {
         setCart,
         setCartItemCount,
         promotedListings,
+        removeFromCart,
       }}
     >
       {children}

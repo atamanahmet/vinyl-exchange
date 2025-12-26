@@ -46,9 +46,14 @@ public class ListingService {
         this.cartService = cartService;
     }
 
-    public List<Listing> getListings() {
+    public List<Listing> getAllListings() {
 
         return listingRepository.findAll();
+    }
+
+    public List<Listing> getAvailableListings() {
+
+        return listingRepository.findByOnHoldFalse();
     }
 
     public List<Listing> getPromotedListings() {

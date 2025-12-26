@@ -8,7 +8,7 @@ export default function AdminDashboard() {
 
   async function fetchListings() {
     try {
-      const res = await axios.get("http://localhost:8080/api/listings", {
+      const res = await axios.get("http://localhost:8080/api/listings/all", {
         withCredentials: true,
       });
       setListings(res.data);

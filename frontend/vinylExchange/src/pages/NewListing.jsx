@@ -429,7 +429,7 @@ export default function NewListing() {
           <div className="ml-5">
             <h3 className="text-2xl font-bold ">Trade Information</h3>
             <div className="mt-5">
-              <div className="formItem mt-5">
+              <div className="formItem mt-5 relative">
                 <label className="block mb-1">Direct Sell price</label>
                 <input
                   type="number"
@@ -440,6 +440,7 @@ export default function NewListing() {
                   onChange={handleChange}
                   className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
                 />
+                <span className="absolute text-xl right-12 top-7.5"> ₺</span>
               </div>
               <label className="inline-flex items-center gap-2 mt-5">
                 <input

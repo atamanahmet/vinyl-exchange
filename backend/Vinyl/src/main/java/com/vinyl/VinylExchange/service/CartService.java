@@ -1,6 +1,7 @@
 package com.vinyl.VinylExchange.service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -282,6 +283,7 @@ public class CartService {
                     .artistName(listing.getArtistName())
                     .pricePerUnit(listing.getPriceKurus())
                     .orderQuantity(cartItem.getOrderQuantity())
+                    .createdAt(cartItem.getCreatedAt())
                     .itemTotalPriceKurus(listing.getPriceKurus() * cartItem.getOrderQuantity())
                     .discountPerUnit(listing.getDiscountBP())
                     .discountedTotalPrice(listing.getDiscountedPriceKurus() * cartItem.getOrderQuantity())
@@ -294,6 +296,8 @@ public class CartService {
             cartTotalPrice += cartItemDTO.getItemTotalPriceKurus();
 
         }
+
+        cartItemDTOs.sort(Comparator.comparing(CartItemDTO::getCreatedAt));
 
         return CartDTO.builder()
                 .cartId(cart.getId())
