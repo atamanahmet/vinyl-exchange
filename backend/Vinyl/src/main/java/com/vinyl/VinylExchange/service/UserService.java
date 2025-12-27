@@ -1,39 +1,58 @@
 package com.vinyl.VinylExchange.service;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.vinyl.VinylExchange.domain.entity.User;
+import com.vinyl.VinylExchange.domain.entity.UserStatus;
+import com.vinyl.VinylExchange.domain.entity.UserStatusHistory;
+import com.vinyl.VinylExchange.exception.InvalidStatusTransitionException;
 import com.vinyl.VinylExchange.repository.UserRepository;
+import com.vinyl.VinylExchange.repository.UserStatusHistoryRepository;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserStatusHistoryRepository statusHistoryRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, UserStatusHistoryRepository statusHistoryRepository) {
 
         this.userRepository = userRepository;
+        this.statusHistoryRepository = statusHistoryRepository;
     }
 
-    public void deleteUser(UUID userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public User changeUserStatus(UUID userId, UserStatus newStatus, UUID changedById, String changedBy, String reason) {
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not exist"));
 
-        user.setEnabled(false);
+        UserStatus oldStatus = user.getStatus();
 
-        userRepository.save(user);
-    }
+        if (!oldStatus.canTransitionTo(newStatus)) {
+            throw new InvalidStatusTransitionException(oldStatus, newStatus);
+        }
 
-    public void banUser(UUID userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.setStatus(newStatus);
 
-        user.setAccountNonLocked(false);
+        User saveDUser = userRepository.save(user);
 
-        userRepository.save(user);
+        UserStatusHistory history = UserStatusHistory.builder()
+                .userId(userId)
+                .status(newStatus)
+                .previousStatus(oldStatus)
+                .changedAt(LocalDateTime.now())
+                .changedBy(changedBy)
+                .changedById(changedById)
+                .reason(reason).build();
+
+        statusHistoryRepository.save(history);
+
+        return saveDUser;
+
     }
 
 }

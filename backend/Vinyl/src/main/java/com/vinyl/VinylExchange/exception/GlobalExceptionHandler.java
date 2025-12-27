@@ -108,4 +108,9 @@ public class GlobalExceptionHandler {
                 .body(exception.getMessage());
     }
 
+    @ExceptionHandler(InvalidStatusTransitionException.class)
+    public void handleInvalidStatusTransitionException(InvalidStatusTransitionException exception) {
+        System.out.println(exception.getMessage());
+    }
+
 }

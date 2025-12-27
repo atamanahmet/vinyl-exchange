@@ -1,5 +1,6 @@
 package com.vinyl.VinylExchange.domain.entity;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -32,7 +33,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
-public class User {
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -59,6 +60,10 @@ public class User {
     @Column(nullable = false)
     private boolean credentialsNonExpired = true;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private UserStatus status = UserStatus.PENDING;
+
     @JsonIgnore
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Listing> listings;
@@ -69,4 +74,47 @@ public class User {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Set<Role> roles = new HashSet<>();
+
+    @Column(name = "activated_at")
+    private LocalDateTime activatedAt;
+
+    @Column(name = "deactivated_at")
+    private LocalDateTime deactivatedAt;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    @Column(name = "suspended_at")
+    private LocalDateTime suspendedAt;
+
+    @Column(name = "banned_at")
+    private LocalDateTime bannedAt;
+
+    private void updateStatusTimeStamps(UserStatus userStatus) {
+        switch (userStatus) {
+            case ACTIVE:
+                this.activatedAt = LocalDateTime.now();
+                break;
+            case INACTIVE:
+                this.deactivatedAt = LocalDateTime.now();
+                break;
+            case DELETED:
+                this.deletedAt = LocalDateTime.now();
+                break;
+            case SUSPENDED:
+                this.suspendedAt = LocalDateTime.now();
+                break;
+            case BANNED:
+                this.bannedAt = LocalDateTime.now();
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    public void setStatus(UserStatus newStatus) {
+        this.status = newStatus;
+        updateStatusTimeStamps(newStatus);
+    }
 }

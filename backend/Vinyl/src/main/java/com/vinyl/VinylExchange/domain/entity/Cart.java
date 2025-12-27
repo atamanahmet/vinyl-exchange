@@ -34,6 +34,8 @@ public class Cart extends BaseEntity {
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> cartItems = new ArrayList<>();
 
+    // private long totalPrice;
+
     public void addItem(CartItem item) {
         cartItems.add(item);
         item.setCart(this);
@@ -47,4 +49,11 @@ public class Cart extends BaseEntity {
     public Cart(UUID userId) {
         this.userId = userId;
     }
+
+    // public Long calculateTotalPrice(){
+    // long totalPrice = 0L;
+    // for (CartItem cartItem : cartItems) {
+    // long itemPriceWithQuantity = cartItem.get
+    // }
+    // }
 }
