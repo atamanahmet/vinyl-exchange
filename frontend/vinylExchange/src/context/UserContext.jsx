@@ -97,6 +97,7 @@ export const UserProvider = ({ children }) => {
 
   async function checkAuth() {
     setLoading(true);
+
     const url = "http://localhost:8080/api/me";
     try {
       const res = await axios.get(url, {
@@ -108,7 +109,7 @@ export const UserProvider = ({ children }) => {
       }
     } catch (error) {
       setUser(null);
-      console.log("Not authenticated: ", error);
+      navigate("/");
     } finally {
       setLoading(false);
     }
@@ -116,16 +117,6 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     checkAuth();
   }, []);
-
-  // useEffect(() => {
-  //   if (loading) {
-  //     return;
-  //   }
-  //   if (user != null) {
-  //     console.log("there is user");
-  //     currentUser();
-  //   }
-  // }, [location.pathname, loading]);
 
   const fetchData = async () => {
     if (isFetching) return;

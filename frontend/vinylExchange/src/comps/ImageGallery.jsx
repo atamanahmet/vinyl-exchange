@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export default function ImageGallery({ imagePaths }) {
+export default function ImageGallery({ imagePaths, openFunc }) {
   const [mainImg, setMainImg] = useState();
 
   const handleClick = (clickedImg) => {
@@ -24,7 +24,8 @@ export default function ImageGallery({ imagePaths }) {
           //   e.target.src = "/placeholder.png";
           // }}
           alt="main"
-          className="w-auto h-130 object-fit rounded-md mb-4"
+          className="w-130 h-130 object-cover rounded-md mb-4"
+          onClick={() => openFunc(`http://localhost:8080/${mainImg}`)}
         />
       }
 

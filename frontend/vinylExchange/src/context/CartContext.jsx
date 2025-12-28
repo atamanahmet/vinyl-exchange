@@ -35,20 +35,23 @@ export function CartProvider({ children }) {
     }
   }
   async function fetchPromotedListings() {
-    try {
-      const res = await axios.get(
-        "http://localhost:8080/api/listings/promote",
-        {
-          withCredentials: true,
+    if (user) {
+      try {
+        const res = await axios.get(
+          "http://localhost:8080/api/listings/promote",
+          {
+            withCredentials: true,
+          }
+        );
+        if (res.status === 200) {
+          setPromotedListings(res.data);
         }
-      );
-      if (res.status === 200) {
-        setPromotedListings(res.data);
+      } catch (e) {
+        console.log(e);
       }
-    } catch (e) {
-      console.log(e);
     }
   }
+
   useEffect(() => {
     fetchPromotedListings();
   }, [cart]);
@@ -67,10 +70,6 @@ export function CartProvider({ children }) {
       setCart();
     }
   }, [user?.username, loading]);
-
-  // useEffect(() => {
-  //   fetchCart();
-  // }, [loggedIn == true]);
 
   async function addToCart(listingId) {
     try {

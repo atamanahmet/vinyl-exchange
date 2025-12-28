@@ -64,10 +64,13 @@ public class ListingService {
     public List<Listing> getFilteredPromotedListings(UUID userId) {
 
         Set<UUID> cartListingIds = cartService
-                .getOrCreateCart(userId)
-                .getCartItems()
+                .getCartDTO(userId)
+                .getItems()
                 .stream()
                 .map(item -> item.getListingId()).collect(Collectors.toSet());
+        if (cartListingIds.isEmpty()) {
+            return null;
+        }
 
         List<Listing> promotedListings = listingRepository.findByPromoteTrue();
 

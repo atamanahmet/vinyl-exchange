@@ -52,7 +52,6 @@ public class UserService {
         statusHistoryRepository.save(history);
 
         return saveDUser;
-
     }
 
 }

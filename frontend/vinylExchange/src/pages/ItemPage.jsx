@@ -4,17 +4,30 @@ import axios from "axios";
 import ImageGallery from "../comps/ImageGallery";
 import { useUser } from "../context/UserContext";
 import { useCart } from "../context/CartContext";
+import { ImageModal } from "../comps/ImageModal";
 
 export default function ItemPage({}) {
   const { listingId } = useParams();
   const { addToCart } = useCart();
 
+  const [imageUrlForModal, setImageUrlForModal] = useState();
+
+  const [openModalImage, setOpenModalImage] = useState(false);
+
   const location = useLocation();
+
+  function openModal(modelUrl) {
+    if (openModal) {
+      setOpenModalImage(false);
+      setImageUrlForModal(null);
+    } else {
+      setOpenModalImage(true);
+      setImageUrlForModal(modelUrl);
+    }
+  }
 
   let label;
   let format;
-
-  // const [label, setLabel] = useState();
 
   const navigate = useNavigate();
 
@@ -128,7 +141,8 @@ export default function ItemPage({}) {
   return (
     <>
       <div className="grid grid-cols-2 gap-10 text-left">
-        <ImageGallery imagePaths={listing.imagePaths} />
+        {openModalImage && <ImageModal></ImageModal>}
+        <ImageGallery imagePaths={listing.imagePaths} openFunc={openModal} />
         <div>
           <h2 className="company uppercase text-orange font-bold text-sm sm:text-md tracking-wider pb-3 sm:pb-5">
             {listing.labelName}

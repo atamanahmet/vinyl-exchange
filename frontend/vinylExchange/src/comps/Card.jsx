@@ -1,11 +1,21 @@
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import { useCart } from "../context/CartContext";
+import { useState } from "react";
 
 export default function Card({ vinyl }) {
-  const { addToCart } = useCart();
+  const { addToCart, cart } = useCart();
+
+  const [inCart, setInCart] = useState(false);
+
   const navigate = useNavigate();
+
   const coverUrl = `https://coverartarchive.org/release/${vinyl.id}/front-250`;
+
+  // console.log(cart.items.includes(vinyl));
+
+  // if (cart.items.contains(vinyl.id)) {
+  // }
   let date;
   let label;
   if (vinyl.date) {
@@ -37,7 +47,7 @@ export default function Card({ vinyl }) {
         navigateItemWithId();
       }}
     >
-      <div className="bg-neutral-primary-soft  max-w-sm p-6 border border-default rounded-2xl shadow-xs flex flex-col justify-center">
+      <div className="bg-neutral-primary-soft  hover:-translate-y-1 duration-200 ease-in-out p-4 border border-default rounded-2xl shadow-xs flex flex-col justify-center">
         <img
           className="rounded-md h-60 w-60 object-fill"
           src={

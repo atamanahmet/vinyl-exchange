@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.vinyl.VinylExchange.domain.entity.Role;
 import com.vinyl.VinylExchange.domain.enums.RoleName;
+import com.vinyl.VinylExchange.service.AuthService;
 import com.vinyl.VinylExchange.service.RoleService;
 
 import jakarta.transaction.Transactional;
@@ -18,14 +19,17 @@ import lombok.extern.slf4j.Slf4j;
 public class RoleInitializer implements ApplicationRunner {
 
     private final RoleService roleService;
+    private final AuthService authService;
 
     private static final Map<RoleName, String> ROLE_DESCRIPTIONS = Map.of(
             RoleName.ROLE_USER, "Regular user with basic permissions",
             RoleName.ROLE_ADMIN, "Administrator with full system access",
             RoleName.ROLE_MODERATOR, "Moderator with content management permissions");
 
-    public RoleInitializer(RoleService roleService) {
+    public RoleInitializer(RoleService roleService, AuthService authService) {
         this.roleService = roleService;
+        this.authService = authService;
+
     }
 
     @Override
@@ -48,6 +52,7 @@ public class RoleInitializer implements ApplicationRunner {
             }
         });
         log.info("Role creation completed.");
+        System.out.println("Givin roles = " + authService.giveUserAdminRole("admin"));
     }
 
 }

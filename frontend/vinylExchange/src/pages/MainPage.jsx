@@ -7,7 +7,7 @@ export default function MainPage({ data }) {
   // console.log(data);
   return (
     <>
-      <div className="grid grid-cols-4 gap-4 ">
+      <div className="flex gap-5 flex-row flex-wrap  w-350 mt-15 ">
         {data && data.map((item) => <Card key={item.id} vinyl={item} />)}
       </div>
     </>

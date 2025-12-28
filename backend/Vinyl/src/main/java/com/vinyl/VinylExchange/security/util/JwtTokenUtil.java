@@ -37,7 +37,7 @@ public class JwtTokenUtil {
                 .withSubject(user.getId().toString())
                 .withClaim("username", user.getUsername())
                 .withClaim("roles", user.getRoles().stream()
-                        .map(role -> role.getName())
+                        .map(role -> role.getName().name())
                         .collect(Collectors.toList()))
                 .withIssuedAt(Date.from(now))
                 .withExpiresAt(Date.from(expiry))

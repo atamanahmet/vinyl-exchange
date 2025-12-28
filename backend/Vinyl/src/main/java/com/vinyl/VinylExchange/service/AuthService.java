@@ -17,6 +17,7 @@ import com.vinyl.VinylExchange.domain.dto.RegisterRequestDTO;
 import com.vinyl.VinylExchange.domain.dto.UserDTO;
 import com.vinyl.VinylExchange.domain.entity.Role;
 import com.vinyl.VinylExchange.domain.entity.User;
+import com.vinyl.VinylExchange.domain.entity.UserStatus;
 import com.vinyl.VinylExchange.domain.enums.RoleName;
 import com.vinyl.VinylExchange.exception.NoCurrentUserException;
 import com.vinyl.VinylExchange.exception.RegistrationValidationException;
@@ -24,7 +25,10 @@ import com.vinyl.VinylExchange.repository.UserRepository;
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
 import com.vinyl.VinylExchange.security.util.JwtTokenUtil;
 
+import jakarta.transaction.Transactional;
+
 @Service
+@Transactional
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
@@ -74,10 +78,13 @@ public class AuthService {
         user.setUsername(registerRequest.username());
         user.setEmail(registerRequest.email());
         user.setPassword(passwordEncoder.encode(registerRequest.password()));
+        user.setStatus(UserStatus.PENDING);
 
         Role userRole = roleService.getRoleByName(RoleName.ROLE_USER);
 
         user.setRoles(Set.of(userRole));
+
+        System.out.println(user.getRoles());
 
         User savedUser = userRepository.save(user);
 
@@ -129,5 +136,18 @@ public class AuthService {
                 .orElseThrow(() -> new NoCurrentUserException());
 
         return user;
+    }
+
+    public Set<Role> giveUserAdminRole(String username) {
+
+        User user = userRepository.findByUsername(username).orElseGet(null);
+
+        if (user != null) {
+            Role adminRole = roleService.getRoleByName(RoleName.ROLE_ADMIN);
+            user.getRoles().add(adminRole);
+            userRepository.save(user);
+        }
+        return user.getRoles();
+
     }
 }
