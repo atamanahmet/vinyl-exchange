@@ -61,11 +61,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NoCurrentUserException.class)
-    public ResponseEntity<?> handleNoCurrentUserException(NoCurrentUserException exception) {
-
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(exception.getMessage());
+    public void handleNoCurrentUserException(NoCurrentUserException exception) {
+        System.out.println("No user");
+        // return ResponseEntity
+        // .status(HttpStatus.NOT_FOUND)
+        // .body(exception.getMessage());
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)
@@ -111,6 +111,32 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidStatusTransitionException.class)
     public void handleInvalidStatusTransitionException(InvalidStatusTransitionException exception) {
         System.out.println(exception.getMessage());
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public void handleOrderNotFoundException(OrderNotFoundException exception) {
+        System.out.println(exception.getMessage());
+    }
+
+    @ExceptionHandler(EmptyCartException.class)
+    public void handleEmptyCartException(EmptyCartException exception) {
+        System.out.println(exception.getMessage());
+    }
+
+    @ExceptionHandler(CheckOutValidationException.class)
+    public ResponseEntity<?> handleCheckOutValidationException(CheckOutValidationException exception) {
+        System.out.println(exception.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(exception.getMessage());
+    }
+
+    @ExceptionHandler(CheckOutProcessingException.class)
+    public void handleCheckOutProcessingException(CheckOutProcessingException exception) {
+
+        System.out.println(exception.getMessage());
+
     }
 
 }

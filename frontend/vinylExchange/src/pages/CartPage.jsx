@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import CartItem from "../comps/CartItem";
 import PromotedItem from "../comps/PromotedItem";
 import ListingItem from "../comps/ListingItem";
+import axios from "axios";
 
 export default function CartPage() {
   const {
@@ -13,6 +14,22 @@ export default function CartPage() {
     removeFromCart,
     promotedListings,
   } = useCart();
+
+  const testCheckout = async () => {
+    console.log("checkout");
+    try {
+      const res = await axios.post(
+        "http://localhost:8080/checkout",
+        {},
+        { withCredentials: true }
+      );
+
+      if (res.status == 200) {
+        console.log(res.status);
+        console.log(res);
+      }
+    } catch (error) {}
+  };
 
   return (
     <>
@@ -90,12 +107,12 @@ export default function CartPage() {
                   </dl>
                 </div>
 
-                <a
-                  href="/checkout"
+                <button
+                  onClick={testCheckout}
                   className="flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
                 >
                   Proceed to Checkout
-                </a>
+                </button>
 
                 <div className="flex items-center justify-center gap-2">
                   <span className="text-sm font-normal text-gray-500 dark:text-gray-400">

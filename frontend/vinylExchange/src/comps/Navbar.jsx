@@ -26,8 +26,6 @@ export default function Navbar() {
     if (e) e.preventDefault();
     navigate("/");
     searchHandler(query);
-    console.log("Searching for:", query);
-    // e.g., axios.get(`/api/search?query=${query}`)
   };
 
   const handleKeyPress = (e) => {
@@ -306,7 +304,7 @@ export default function Navbar() {
                 placeholder="Search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyPress}
               />
             </div>
           )}
@@ -335,6 +333,14 @@ export default function Navbar() {
                 className="block py-2 px-3 text-heading rounded hover:bg-neutral-tertiary md:hover:bg-transparent md:border-0 md:hover:text-fg-brand md:p-0"
               >
                 Services
+              </a>
+            </li>
+            <li>
+              <a
+                href="/orders"
+                className="block py-2 px-3 text-heading rounded hover:bg-neutral-tertiary md:hover:bg-transparent md:border-0 md:hover:text-fg-brand md:p-0"
+              >
+                Orders
               </a>
             </li>
             <li>

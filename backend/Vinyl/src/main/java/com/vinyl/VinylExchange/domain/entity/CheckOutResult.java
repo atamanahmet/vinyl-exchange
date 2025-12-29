@@ -1,22 +1,22 @@
 package com.vinyl.VinylExchange.domain.entity;
 
-import java.util.List;
-
-import com.vinyl.VinylExchange.domain.dto.CartDTO;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Builder
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class CartValidationResult {
-    private CartDTO cartDTO;
-    private List<CartValidationIssue> issues;
-    private boolean hasErrors;
+public class CheckOutResult {
+
+    private Boolean success;
+
+    private Order order;
+
+    private String message;
+
 }

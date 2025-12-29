@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
+import {
+  Button,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+} from "flowbite-react";
 
-export default function ImageGallery({ imagePaths, openFunc }) {
+export default function ImageGallery({ imagePaths, openModal }) {
   const [mainImg, setMainImg] = useState();
 
   const handleClick = (clickedImg) => {
@@ -13,6 +20,10 @@ export default function ImageGallery({ imagePaths, openFunc }) {
     }
   }, [imagePaths]);
 
+  function handleModal(url) {
+    openModal(url);
+  }
+
   return (
     <div className="w-full">
       {
@@ -20,12 +31,9 @@ export default function ImageGallery({ imagePaths, openFunc }) {
           src={
             mainImg ? `http://localhost:8080/${mainImg}` : "/placeholder.png"
           }
-          // onError={(e) => {
-          //   e.target.src = "/placeholder.png";
-          // }}
           alt="main"
           className="w-130 h-130 object-cover rounded-md mb-4"
-          onClick={() => openFunc(`http://localhost:8080/${mainImg}`)}
+          onClick={() => handleModal(`http://localhost:8080/${mainImg}`)}
         />
       }
 

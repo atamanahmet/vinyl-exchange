@@ -21,7 +21,7 @@ import com.vinyl.VinylExchange.domain.dto.TradePreferenceDTO;
 import com.vinyl.VinylExchange.domain.entity.Listing;
 import com.vinyl.VinylExchange.domain.entity.TradePreference;
 import com.vinyl.VinylExchange.domain.entity.User;
-
+import com.vinyl.VinylExchange.exception.InsufficientStockException;
 import com.vinyl.VinylExchange.exception.ListingNotFoundException;
 
 import com.vinyl.VinylExchange.repository.ListingRepository;
@@ -84,6 +84,11 @@ public class ListingService {
     }
 
     public List<Listing> getListingsByIds(List<UUID> listingIds) {
+
+        return listingRepository.findAllByIdIn(listingIds);
+    }
+
+    public List<Listing> getListingsByIdsWithLock(List<UUID> listingIds) {
 
         return listingRepository.findAllByIdIn(listingIds);
     }
@@ -298,4 +303,19 @@ public class ListingService {
 
         listingRepository.save(listing);
     }
+
+    public void decreaseItemQuantity(UUID listingId, int quantity) {
+        Listing listing = listingRepository.findById(listingId)
+                .orElseThrow(() -> new ListingNotFoundException());
+
+        if (!listing.hasEnoughStock(quantity)) {
+            throw new InsufficientStockException();
+        }
+
+        listing.setStockQuantity(listing.getStockQuantity() - quantity);
+
+        listingRepository.save(listing);
+
+    }
+
 }

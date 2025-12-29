@@ -140,14 +140,16 @@ public class AuthService {
 
     public Set<Role> giveUserAdminRole(String username) {
 
-        User user = userRepository.findByUsername(username).orElseGet(null);
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new NoCurrentUserException());
 
         if (user != null) {
             Role adminRole = roleService.getRoleByName(RoleName.ROLE_ADMIN);
             user.getRoles().add(adminRole);
             userRepository.save(user);
+            return user.getRoles();
+
         }
-        return user.getRoles();
+        return null;
 
     }
 }

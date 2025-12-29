@@ -13,6 +13,7 @@ import ListingsPage from "./pages/ListingsPage";
 import EditListing from "./pages/EditListing";
 import ItemPage from "./pages/ItemPage";
 import CartPage from "./pages/CartPage";
+import OrderPage from "./pages/OrderPage";
 
 import { useUser } from "./context/UserContext";
 import {
@@ -44,6 +45,7 @@ function App() {
         <Route path="/listing/:listingId" element={<ItemPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/orders" element={<OrderPage />} />
       </Routes>
     </>
   );

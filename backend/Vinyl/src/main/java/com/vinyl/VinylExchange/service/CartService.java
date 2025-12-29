@@ -12,21 +12,21 @@ import org.springframework.stereotype.Service;
 
 import com.vinyl.VinylExchange.domain.dto.CartDTO;
 import com.vinyl.VinylExchange.domain.dto.CartItemDTO;
-import com.vinyl.VinylExchange.domain.dto.CartValidationIssue;
 import com.vinyl.VinylExchange.domain.dto.UpdateCartItemRequest;
 import com.vinyl.VinylExchange.domain.entity.Cart;
 import com.vinyl.VinylExchange.domain.entity.CartItem;
+import com.vinyl.VinylExchange.domain.entity.CartValidationIssue;
 import com.vinyl.VinylExchange.domain.entity.CartValidationResult;
 import com.vinyl.VinylExchange.domain.entity.Listing;
 import com.vinyl.VinylExchange.domain.entity.ListingStatus;
 import com.vinyl.VinylExchange.exception.CartItemNotFoundException;
+import com.vinyl.VinylExchange.exception.EmptyCartException;
 import com.vinyl.VinylExchange.repository.CartItemRepository;
 import com.vinyl.VinylExchange.repository.CartRepository;
 
 import jakarta.transaction.Transactional;
 
 @Service
-@Transactional
 public class CartService {
 
     private final CartRepository cartRepository;
@@ -43,16 +43,31 @@ public class CartService {
         this.cartItemRepository = cartItemRepository;
     }
 
+    @Transactional
     public Cart getOrCreateCart(UUID userId) {
 
+        Optional<Cart> existingCart = cartRepository
+                .findByUserId(userId);
+
+        if (existingCart.isPresent()) {
+            return existingCart.get();
+        }
+        try {
+            Cart newCart = new Cart(userId);
+
+            return cartRepository.save(newCart);
+
+        } catch (Exception e) {
+            return cartRepository.findByUserId(userId)
+                    .orElseThrow(() -> new RuntimeException("CartIssues, getOrCreate: " + e.getMessage()));
+        }
+
+    }
+
+    public Cart getCart(UUID userId) {
+
         return cartRepository
-                .findByUserId(userId)
-                .orElseGet(() -> {
-
-                    Cart newCart = new Cart(userId);
-
-                    return cartRepository.save(newCart);
-                });
+                .findByUserId(userId).orElseThrow(() -> new EmptyCartException());
     }
 
     public CartDTO getCartDTO(UUID userId) {

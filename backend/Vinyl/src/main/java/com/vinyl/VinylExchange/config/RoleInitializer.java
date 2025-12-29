@@ -10,6 +10,7 @@ import com.vinyl.VinylExchange.domain.entity.Role;
 import com.vinyl.VinylExchange.domain.enums.RoleName;
 import com.vinyl.VinylExchange.service.AuthService;
 import com.vinyl.VinylExchange.service.RoleService;
+import com.vinyl.VinylExchange.service.UserService;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -20,15 +21,17 @@ public class RoleInitializer implements ApplicationRunner {
 
     private final RoleService roleService;
     private final AuthService authService;
+    private final UserService userService;
 
     private static final Map<RoleName, String> ROLE_DESCRIPTIONS = Map.of(
             RoleName.ROLE_USER, "Regular user with basic permissions",
             RoleName.ROLE_ADMIN, "Administrator with full system access",
             RoleName.ROLE_MODERATOR, "Moderator with content management permissions");
 
-    public RoleInitializer(RoleService roleService, AuthService authService) {
+    public RoleInitializer(RoleService roleService, AuthService authService, UserService userService) {
         this.roleService = roleService;
         this.authService = authService;
+        this.userService = userService;
 
     }
 
@@ -52,7 +55,14 @@ public class RoleInitializer implements ApplicationRunner {
             }
         });
         log.info("Role creation completed.");
-        System.out.println("Givin roles = " + authService.giveUserAdminRole("admin"));
+
+        if (userService.existByUsername("admin")) {
+
+            System.out.println("Givin roles = " + authService.giveUserAdminRole("admin"));
+        } else {
+            System.out.println("no admin");
+        }
+
     }
 
 }

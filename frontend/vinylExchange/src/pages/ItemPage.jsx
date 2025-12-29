@@ -4,7 +4,14 @@ import axios from "axios";
 import ImageGallery from "../comps/ImageGallery";
 import { useUser } from "../context/UserContext";
 import { useCart } from "../context/CartContext";
-import { ImageModal } from "../comps/ImageModal";
+
+import {
+  Button,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+} from "flowbite-react";
 
 export default function ItemPage({}) {
   const { listingId } = useParams();
@@ -12,18 +19,15 @@ export default function ItemPage({}) {
 
   const [imageUrlForModal, setImageUrlForModal] = useState();
 
-  const [openModalImage, setOpenModalImage] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [openModalUrl, setOpenModalUrl] = useState();
 
   const location = useLocation();
 
-  function openModal(modelUrl) {
-    if (openModal) {
-      setOpenModalImage(false);
-      setImageUrlForModal(null);
-    } else {
-      setOpenModalImage(true);
-      setImageUrlForModal(modelUrl);
-    }
+  function openModalImage(url) {
+    console.log(url);
+    setOpenModal((curr) => !curr);
+    setOpenModalUrl(url);
   }
 
   let label;
@@ -56,39 +60,7 @@ export default function ItemPage({}) {
     tradeable: false,
     price: 0,
     discount: 0,
-    discountedPrice: 0,
     tradePreferences: [],
-  });
-
-  const normalize = (data) => ({
-    id: data.id ?? "",
-    title: data.title ?? "",
-    status: data.status ?? "",
-    date: data.date ?? "",
-    description: data.description ?? "",
-    country: data.country ?? "",
-    discountedPrice: data.discountedPrice ?? data.price,
-    barcode: data.barcode ?? "",
-    packaging: data.packaging ?? "",
-    format: data.format ?? "",
-    trackCount: data.trackCount ?? 0,
-    artistName: data.artistName ?? "",
-    tradeValue: data.tradeValue ?? 0,
-    tradeable: data.tradeable ?? false,
-    price: data.price ?? 0,
-    discount: data.discount ?? 0,
-    discountedPrice: data.discountedPrice ?? 0,
-    imagePaths: data.imagePaths ?? [],
-    labelName: data.labelName ?? "",
-    condition: data.condition ?? "",
-
-    tradePreferences: Array.isArray(data.tradePreferences)
-      ? data.tradePreferences.map((p) => ({
-          desiredItem: p.desiredItem ?? "",
-          paymentDirection: p.paymentDirection ?? "NO_EXTRA",
-          extraAmount: p.extraAmount ?? 0,
-        }))
-      : [],
   });
 
   async function getListing() {
@@ -100,7 +72,7 @@ export default function ItemPage({}) {
         }
       );
       if (res.status == 200) {
-        setListing(normalize(res.data));
+        setListing(res.data);
       }
     } catch (error) {
       console.log(error);
@@ -140,9 +112,27 @@ export default function ItemPage({}) {
 
   return (
     <>
+      <div>
+        <Modal
+          dismissible
+          show={openModal}
+          onClose={() => setOpenModal(false)}
+          className="backdrop-blur-sm"
+        >
+          <div className="bg-gray-900 rounded-lg overflow-hidden">
+            <ModalHeader className="bg-gray-900 py-5 px-6"></ModalHeader>
+            <ModalBody className="space-y-6 bg-gray-900">
+              <img src={openModalUrl} alt="" className="h-full w-full" />
+            </ModalBody>
+            <ModalFooter className=" bg-gray-900"></ModalFooter>
+          </div>
+        </Modal>
+      </div>
       <div className="grid grid-cols-2 gap-10 text-left">
-        {openModalImage && <ImageModal></ImageModal>}
-        <ImageGallery imagePaths={listing.imagePaths} openFunc={openModal} />
+        <ImageGallery
+          imagePaths={listing.imagePaths}
+          openModal={openModalImage}
+        />
         <div>
           <h2 className="company uppercase text-orange font-bold text-sm sm:text-md tracking-wider pb-3 sm:pb-5">
             {listing.labelName}

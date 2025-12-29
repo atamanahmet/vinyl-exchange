@@ -10,6 +10,7 @@ import com.vinyl.VinylExchange.config.json.DiscountDeserializer;
 import com.vinyl.VinylExchange.config.json.DiscountSerializer;
 import com.vinyl.VinylExchange.config.json.PriceKurusDeserializer;
 import com.vinyl.VinylExchange.config.json.PriceTlSerializer;
+import com.vinyl.VinylExchange.domain.entity.CartValidationIssue;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
