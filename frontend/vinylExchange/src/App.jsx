@@ -13,7 +13,7 @@ import ListingsPage from "./pages/ListingsPage";
 import EditListing from "./pages/EditListing";
 import ItemPage from "./pages/ItemPage";
 import CartPage from "./pages/CartPage";
-import OrderPage from "./pages/OrderPage";
+import OrdersPage from "./pages/OrdersPage";
 
 import { useUser } from "./context/UserContext";
 import {
@@ -24,6 +24,8 @@ import {
   useParams,
 } from "react-router-dom";
 import AdminDashboard from "./pages/AdminDashboard";
+import ErrorPage from "./pages/ErrorPage";
+import OrderItemsPage from "./pages/OrderItemsPage";
 
 function App() {
   const { user, data } = useUser();
@@ -45,7 +47,9 @@ function App() {
         <Route path="/listing/:listingId" element={<ItemPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/orders" element={<OrderPage />} />
+        <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/error" element={<ErrorPage />} />
+        <Route path="/orderItems" element={<OrderItemsPage />} />
       </Routes>
     </>
   );

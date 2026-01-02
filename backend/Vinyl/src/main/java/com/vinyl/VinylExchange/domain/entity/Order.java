@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.vinyl.VinylExchange.config.json.PriceTlSerializer;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -42,6 +44,7 @@ public class Order extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
+    @JsonSerialize(using = PriceTlSerializer.class)
     private Long totalPrice;
 
 }

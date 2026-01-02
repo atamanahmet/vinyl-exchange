@@ -3,6 +3,8 @@ package com.vinyl.VinylExchange.domain.entity;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.vinyl.VinylExchange.config.json.PriceTlSerializer;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,8 +36,10 @@ public class OrderItem {
     @JoinColumn(name = "listing_id")
     private Listing listing;
 
+    @JsonSerialize(using = PriceTlSerializer.class)
     private Long unitPrice;
 
+    @JsonSerialize(using = PriceTlSerializer.class)
     private Long subTotal;
 
     private Integer quantity;

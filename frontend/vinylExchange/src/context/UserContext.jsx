@@ -6,6 +6,8 @@ import { useEffectEvent } from "react";
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
+  const [navbarActive, setNavbarActive] = useState(true);
+
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loggedIn, setLoggedIn] = useState(false);
@@ -129,8 +131,13 @@ export const UserProvider = ({ children }) => {
       });
 
       setData(res.data);
+      setNavbarActive(true);
     } catch (err) {
       console.error("Backend error:", err);
+      setNavbarActive(false);
+      console.log("deactivated");
+
+      navigate("/error");
     } finally {
       setIsFetching(false);
     }
@@ -172,6 +179,7 @@ export const UserProvider = ({ children }) => {
         loginUser,
         authResponse,
         openLogin,
+        navbarActive,
       }}
     >
       {children}
