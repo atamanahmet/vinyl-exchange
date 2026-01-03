@@ -28,4 +28,13 @@ public class OrderService {
     public Order saveOrder(Order order) {
         return orderRepository.save(order);
     }
+
+    public Order initializeOrder() {
+
+        Order order = new Order();
+
+        order.setOrderNumber(orderRepository.getNextOrderNumber());
+
+        return orderRepository.save(order);
+    }
 }

@@ -10,6 +10,7 @@ import com.vinyl.VinylExchange.domain.entity.User;
 import com.vinyl.VinylExchange.domain.entity.UserStatus;
 import com.vinyl.VinylExchange.domain.entity.UserStatusHistory;
 import com.vinyl.VinylExchange.exception.InvalidStatusTransitionException;
+import com.vinyl.VinylExchange.exception.NoCurrentUserException;
 import com.vinyl.VinylExchange.repository.UserRepository;
 import com.vinyl.VinylExchange.repository.UserStatusHistoryRepository;
 
@@ -56,6 +57,14 @@ public class UserService {
 
     public boolean existByUsername(String username) {
         return userRepository.existsByUsername(username);
+    }
+
+    public User getByUsername(String username) {
+        if (userRepository.existsByUsername(username)) {
+            return userRepository.findByUsername(username).orElseThrow(() -> new NoCurrentUserException());
+        }
+
+        return null;
     }
 
 }

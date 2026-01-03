@@ -34,6 +34,7 @@ import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -44,6 +45,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor
+@Builder
 public class Listing extends BaseEntity {
 
     @Id
@@ -62,14 +64,17 @@ public class Listing extends BaseEntity {
     private String labelName;
     private String condition;
 
+    @Builder.Default
     private int stockQuantity = 5;
 
+    @Builder.Default
     private boolean onHold = false;
 
     private Integer trackCount;
 
     private Boolean tradeable;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ListingStatus status = ListingStatus.AVAILABLE;
@@ -91,6 +96,8 @@ public class Listing extends BaseEntity {
     @JsonDeserialize(using = DiscountDeserializer.class)
     @JsonSerialize(using = DiscountSerializer.class)
     @Column(name = "discount_bp")
+    @Builder.Default
+
     private int discountBP = 0; // as basisPoint, /10_000
 
     @Transient
@@ -99,6 +106,8 @@ public class Listing extends BaseEntity {
     public long getDiscountedPriceKurus() {
         return MoneyCalculator.discounted(priceKurus, discountBP);
     }
+
+    @Builder.Default
 
     @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TradePreference> tradePreferences = new ArrayList<>();
@@ -112,10 +121,14 @@ public class Listing extends BaseEntity {
     @JsonIgnore
     private User owner;
 
+    @Builder.Default
+
     @ElementCollection
     @CollectionTable(name = "listing_images", joinColumns = @JoinColumn(name = "listing_id"))
     @Column(name = "image_path")
     private List<String> imagePaths = new ArrayList<>();
+
+    @Builder.Default
 
     @Column(nullable = false)
     // @JsonProperty(access = JsonProperty.Access.READ_ONLY)

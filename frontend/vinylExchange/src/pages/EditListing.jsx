@@ -753,10 +753,10 @@ export default function EditListing() {
               <p
                 className="text-right"
                 style={{
-                  color: listing.description.length <= 255 ? "green" : "red",
+                  color: listing.description?.length <= 255 ? "green" : "red",
                 }}
               >
-                {listing.description.length}/255
+                {listing.description?.length}/255
               </p>
             </div>
             <div>

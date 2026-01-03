@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.vinyl.VinylExchange.config.json.PriceTlSerializer;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -15,6 +16,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,6 +37,10 @@ public class Order extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "order_number", unique = true, nullable = false)
+    @SequenceGenerator(name = "orderNumberSeqGenerator", sequenceName = "orderNumberSequence", initialValue = 10000, allocationSize = 1)
+    private Long orderNumber;
+
     private UUID buyerId;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -46,5 +52,7 @@ public class Order extends BaseEntity {
 
     @JsonSerialize(using = PriceTlSerializer.class)
     private Long totalPrice;
+
+    // base entity createdAt etc.
 
 }

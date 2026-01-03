@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.vinyl.VinylExchange.domain.dto.CartDTO;
@@ -46,21 +47,17 @@ public class CartService {
     @Transactional
     public Cart getOrCreateCart(UUID userId) {
 
-        Optional<Cart> existingCart = cartRepository
-                .findByUserId(userId);
+        return cartRepository.findByUserId(userId).orElseGet(() -> {
+            try {
+                Cart newCart = new Cart(userId);
 
-        if (existingCart.isPresent()) {
-            return existingCart.get();
-        }
-        try {
-            Cart newCart = new Cart(userId);
+                return cartRepository.save(newCart);
 
-            return cartRepository.save(newCart);
-
-        } catch (Exception e) {
-            return cartRepository.findByUserId(userId)
-                    .orElseThrow(() -> new RuntimeException("CartIssues, getOrCreate: " + e.getMessage()));
-        }
+            } catch (DataIntegrityViolationException e) {
+                return cartRepository.findByUserId(userId)
+                        .orElseThrow(() -> new RuntimeException("CartIssues, getOrCreate: " + e.getMessage()));
+            }
+        });
 
     }
 

@@ -23,4 +23,6 @@ public interface ListingRepository extends JpaRepository<Listing, UUID> {
     List<Listing> findByPromoteTrue();
 
     List<Listing> findByOnHoldFalse();
+
+    boolean existsByTitle(String title);
 }

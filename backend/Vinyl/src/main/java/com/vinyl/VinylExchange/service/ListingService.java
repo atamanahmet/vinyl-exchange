@@ -83,6 +83,10 @@ public class ListingService {
         return filteredPromotedList;
     }
 
+    public void saveAllListing(List<Listing> listingList) {
+        listingRepository.saveAll(listingList);
+    }
+
     public List<Listing> getListingsByIds(List<UUID> listingIds) {
 
         return listingRepository.findAllByIdIn(listingIds);
@@ -316,6 +320,10 @@ public class ListingService {
 
         listingRepository.save(listing);
 
+    }
+
+    public boolean isExistByTitle(String title) {
+        return listingRepository.existsByTitle(title);
     }
 
 }
