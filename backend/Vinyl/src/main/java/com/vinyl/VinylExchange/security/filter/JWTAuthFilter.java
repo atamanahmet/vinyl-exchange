@@ -26,12 +26,14 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JWTAuthFilter extends OncePerRequestFilter {
+
     private final JwtTokenUtil jwtTokenUtil;
     private final JwtCookieUtil jwtCookieUtil;
     private final UserDetailsServiceImpl userDetailsServiceImpl;
 
     public JWTAuthFilter(JwtTokenUtil jwtTokenUtil, JwtCookieUtil jwtCookieUtil,
             UserDetailsServiceImpl userDetailsServiceImpl) {
+
         this.jwtTokenUtil = jwtTokenUtil;
         this.jwtCookieUtil = jwtCookieUtil;
         this.userDetailsServiceImpl = userDetailsServiceImpl;
@@ -40,6 +42,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
         try {
 
             // without jwt header?
@@ -62,9 +65,11 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             UUID userId = jwtTokenUtil.extractUserId(token);
 
             if (SecurityContextHolder.getContext().getAuthentication() != null) {
+
                 filterChain.doFilter(request, response);
                 return;
             }
+
             UserPrincipal userPrincipal = userDetailsServiceImpl.loadUserByUserId(userId);
 
             if (!userPrincipal.isEnabled() ||
@@ -85,15 +90,17 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authToken);
 
         } catch (JWTVerificationException e) {
+
             logger.warn("JWT verification failed: ", e);
 
         } catch (UsernameNotFoundException e) {
+
             logger.warn("User not found for JWT authentication: ", e);
         } catch (Exception e) {
+
             logger.error("Unexpected error during JWT authentication", e);
         }
 
         filterChain.doFilter(request, response);
     }
-
 }

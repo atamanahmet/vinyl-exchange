@@ -12,21 +12,17 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.vinyl.VinylExchange.domain.entity.User;
-import com.vinyl.VinylExchange.domain.enums.RoleName;
+import com.vinyl.VinylExchange.auth.enums.RoleName;
 import com.vinyl.VinylExchange.security.config.JwtConfig;
+import com.vinyl.VinylExchange.user.User;
 
 @Component
 public class JwtTokenUtil {
 
     private final JwtConfig jwtConfig;
-    // private final JwtCookieUtil jwtCookieUtil;
 
-    public JwtTokenUtil(JwtConfig jwtConfig
-    // , JwtCookieUtil jwtCookieUtil
-    ) {
+    public JwtTokenUtil(JwtConfig jwtConfig) {
         this.jwtConfig = jwtConfig;
-        // this.jwtCookieUtil = jwtCookieUtil;
     }
 
     public String generateToken(User user) {
@@ -43,7 +39,7 @@ public class JwtTokenUtil {
                 .withExpiresAt(Date.from(expiry))
                 .sign(Algorithm.HMAC512(jwtConfig.getSECRET()));
 
-        System.out.println("Created Token: " + token);
+        // System.out.println("Created Token: " + token);
 
         return token;
     }
@@ -62,13 +58,15 @@ public class JwtTokenUtil {
                 .withExpiresAt(Date.from(expiry))
                 .sign(Algorithm.HMAC512(jwtConfig.getSECRET()));
 
-        System.out.println("Created Token: " + token);
+        // System.out.println("Created Token: " + token);
 
         return token;
     }
 
     public boolean validateToken(String token) {
+
         try {
+
             JWT.require(Algorithm.HMAC512(jwtConfig.getSECRET()))
                     .build()
                     .verify(token);
@@ -76,6 +74,7 @@ public class JwtTokenUtil {
             return true;
 
         } catch (JWTVerificationException e) {
+
             System.out.println(e.getMessage());
             return false;
         }

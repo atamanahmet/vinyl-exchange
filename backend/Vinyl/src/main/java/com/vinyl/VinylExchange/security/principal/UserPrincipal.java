@@ -9,8 +9,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.vinyl.VinylExchange.domain.entity.User;
-import com.vinyl.VinylExchange.domain.enums.RoleName;
+import com.vinyl.VinylExchange.auth.enums.RoleName;
+import com.vinyl.VinylExchange.user.User;
+import com.vinyl.VinylExchange.user.UserStatus;
 
 public class UserPrincipal implements UserDetails {
 
@@ -18,6 +19,7 @@ public class UserPrincipal implements UserDetails {
     private final Collection<? extends GrantedAuthority> authorities;
 
     public UserPrincipal(User user) {
+
         this.user = user;
         this.authorities = user.getRoles()
                 .stream()
@@ -38,6 +40,10 @@ public class UserPrincipal implements UserDetails {
         return user;
     }
 
+    public UserStatus getUserStatus() {
+        return user.getStatus();
+    }
+
     @Override
     public String getPassword() {
         return user.getPassword();
@@ -53,6 +59,7 @@ public class UserPrincipal implements UserDetails {
     }
 
     public Set<RoleName> getRoles() {
+
         return authorities
                 .stream()
                 .map(authority -> RoleName.valueOf(authority.getAuthority()))
@@ -60,29 +67,10 @@ public class UserPrincipal implements UserDetails {
     }
 
     public boolean hasRole(RoleName roleName) {
+
         return authorities
                 .stream()
                 .anyMatch(authority -> authority.getAuthority().equals(roleName.name()));
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return user.isAccountNonExpired();
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return user.isAccountNonLocked();
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return user.isCredentialsNonExpired();
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return user.isEnabled();
     }
 
 }

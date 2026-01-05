@@ -9,11 +9,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vinyl.VinylExchange.domain.entity.Vinyl;
-import com.vinyl.VinylExchange.domain.pojo.Release;
-import com.vinyl.VinylExchange.domain.pojo.RootResponse;
-// import com.vinyl.VinylExchange.service.ListingService;
-import com.vinyl.VinylExchange.service.VinylService;
+import com.vinyl.VinylExchange.listing.Vinyl;
+import com.vinyl.VinylExchange.listing.VinylService;
+import com.vinyl.VinylExchange.shared.pojo.Release;
+import com.vinyl.VinylExchange.shared.pojo.dto.RootResponse;
 
 import reactor.util.retry.Retry;
 import java.time.Duration;
