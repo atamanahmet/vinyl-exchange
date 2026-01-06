@@ -75,7 +75,7 @@ export default function Card({ vinyl }) {
         </button>
         <div className="flex flex-row gap-3 justify-center">
           <a
-            href="#"
+            href="/messaging"
             className="text-body mt-5 rounded-xl bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-9"
           >
             Trade

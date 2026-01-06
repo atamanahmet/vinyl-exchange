@@ -184,7 +184,7 @@ export default function EditListing() {
       );
       if (res.status === 201) {
         alert(res.data);
-        navigate("/");
+        navigate("/listings");
       }
     } catch (err) {
       alert(err.response.data);

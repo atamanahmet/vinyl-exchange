@@ -32,6 +32,7 @@ import com.vinyl.VinylExchange.user.User;
 @RestController
 @RequestMapping("/api/listings")
 public class ListingController {
+
         private final ListingService listingService;
         private final PricePreviewService pricePreviewService;
 

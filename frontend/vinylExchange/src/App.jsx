@@ -26,6 +26,7 @@ import {
 import AdminDashboard from "./pages/AdminDashboard";
 import ErrorPage from "./pages/ErrorPage";
 import OrderItemsPage from "./pages/OrderItemsPage";
+import MessagingPage from "./pages/MessagingPage";
 
 function App() {
   const { user, data } = useUser();
@@ -37,20 +38,23 @@ function App() {
   return (
     <>
       <Navbar />
-      <Routes>
-        <Route path="/" element={<MainPage data={data} />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/newlisting" element={<NewListing />} />
-        <Route path="/listings" element={<ListingsPage />} />
-        <Route path="/terms" element={<TermsAndConditions />} />
-        <Route path="/edit" element={<EditListing />} />
-        <Route path="/listing/:listingId" element={<ItemPage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/orders" element={<OrdersPage />} />
-        <Route path="/error" element={<ErrorPage />} />
-        <Route path="/orderItems" element={<OrderItemsPage />} />
-      </Routes>
+      <div className="mt-15">
+        <Routes>
+          <Route path="/" element={<MainPage data={data} />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/newlisting" element={<NewListing />} />
+          <Route path="/listings" element={<ListingsPage />} />
+          <Route path="/terms" element={<TermsAndConditions />} />
+          <Route path="/edit" element={<EditListing />} />
+          <Route path="/listing/:listingId" element={<ItemPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/error" element={<ErrorPage />} />
+          <Route path="/orderItems" element={<OrderItemsPage />} />
+          <Route path="/messaging" element={<MessagingPage />} />
+        </Routes>
+      </div>
     </>
   );
 }

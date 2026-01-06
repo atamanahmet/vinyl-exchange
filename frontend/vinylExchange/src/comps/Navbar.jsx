@@ -57,7 +57,7 @@ export default function Navbar() {
   if (navbarActive) {
     return (
       <nav className="bg-black fixed w-full z-20 top-0 start-0 p-2 border-b border-default">
-        <div className="max-w-6xl flex flex-wrap items-center justify-between mx-auto p-1">
+        <div className="max-w-6xl flex max-h-14 items-center justify-between mx-auto p-1 flex-wrap">
           {/* Logo */}
           <a
             href="/"
@@ -77,7 +77,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
-              className="flex items-center justify-center md:hidden text-body hover:text-heading bg-transparent box-border border border-transparent hover:bg-neutral-secondary-medium focus:ring-2 focus:ring-neutral-tertiary font-medium leading-5 rounded-base text-sm w-10 h-10 focus:outline-none"
+              className="flex items-center justify-center md:hidden text-body hover:text-heading bg-transparent box-border border border-transparent hover:bg-neutral-secondary-medium focus:ring-2 focus:ring-neutral-tertiary font-medium leading-5 rounded-base text-sm w-10 h-10 focus:outline-none max-[499px]:hidden"
             >
               <svg
                 className="w-6 h-6"
@@ -97,10 +97,10 @@ export default function Navbar() {
             </button>
 
             {/* Desktop Search */}
-            <div className="relative hidden md:block">
-              <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+            <div className="relative hidden md:hidden">
+              <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none ">
                 <svg
-                  className="w-4 h-4 text-body"
+                  className="w-4 h-4 text-body "
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -116,7 +116,7 @@ export default function Navbar() {
               </div>
               <input
                 type="text"
-                className="block w-full ps-9 pe-3 py-2.5 bg-neutral-secondary-medium border rounded-md border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body"
+                className="block w-full ps-9 pe-3 py-2.5 bg-neutral-secondary-medium border rounded-md border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body "
                 placeholder="Search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -142,7 +142,7 @@ export default function Navbar() {
             {user != null && (
               <div>
                 <button
-                  className="rounded-lg py-2 px-3 text-amber-50 bg-indigo-600 hover:bg-indigo-800 hover:text-slate-200"
+                  className="rounded-lg py-2 px-3 text-amber-50 bg-indigo-600 hover:bg-indigo-800 hover:text-slate-200 max-[499px]:hidden"
                   onClick={() => navigate("/newlisting")}
                 >
                   New Listing
@@ -209,13 +209,20 @@ export default function Navbar() {
                     />
                   </button>
                 </div>
+                {/* Invisible backdrop */}
+                {isUserMenuOpen && (
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsUserMenuOpen(false)}
+                  />
+                )}
 
                 {/* User Dropdown */}
                 {isUserMenuOpen && (
-                  <div className="absolute bg-black right-0 mt-2 z-50 bg-neutral-primary-medium border border-default-medium rounded-xl shadow-lg w-44">
+                  <div className="absolute bg-black right-0 mt-2 z-50 bg-neutral-primary-medium border border-default-medium rounded-xl shadow-lg w-44 ">
                     <div className="px-4 py-3 text-sm border-b border-default">
                       <span className="block text-heading font-medium">
-                        {user?.username || "Joseph McFall"}
+                        {user?.username || ""}
                       </span>
                       <span className="block text-body truncate">
                         {user.email}
@@ -264,7 +271,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-body rounded-base md:hidden hover:bg-neutral-secondary-soft hover:text-heading focus:outline-none focus:ring-2 focus:ring-neutral-tertiary"
+              className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-body rounded-base min-[850px]:hidden hover:bg-neutral-secondary-soft hover:text-heading focus:outline-none focus:ring-2 focus:ring-neutral-tertiary"
             >
               <span className="sr-only">Open main menu</span>
               <svg
@@ -283,16 +290,22 @@ export default function Navbar() {
               </svg>
             </button>
           </div>
-
+          {/* Invisible backdrop */}
+          {/* {isMobileMenuOpen && (
+            <div
+              className="fixed inset-0 z-40"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+          )} */}
           {/* Navigation Links */}
           <div
             className={`${
               isMobileMenuOpen ? "block" : "hidden"
-            } w-full md:flex md:w-auto md:order-1`}
+            } w-full min-[850px]:flex min-[850px]:w-auto min-[850px]:order-1`}
           >
             {/* Mobile Search */}
             {isMobileSearchOpen && (
-              <div className="relative mt-3 md:hidden">
+              <div className="relative mt-3 min-[850px]:hidden">
                 <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                   <svg
                     className="w-4 h-4 text-body"
@@ -320,11 +333,11 @@ export default function Navbar() {
               </div>
             )}
 
-            <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 border border-default rounded-base bg-neutral-secondary-soft md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-neutral-primary">
+            <ul className="font-medium flex flex-col p-4 min-[850px]:p-0 mt-4 border border-default rounded-base bg-neutral-secondary-soft min-[850px]:flex-row min-[850px]:space-x-8 rtl:space-x-reverse min-[850px]:mt-0 min-[850px]:border-0 min-[850px]:bg-neutral-primary bg-black ">
               <li>
                 <a
                   href="/"
-                  className="block py-2 px-3 text-white bg-brand rounded md:bg-transparent md:text-fg-brand md:p-0"
+                  className="block py-2 px-3 text-white bg-brand rounded min-[850px]:bg-transparent min-[850px]:text-fg-brand min-[850px]:p-0 "
                   aria-current="page"
                 >
                   Home
@@ -333,7 +346,7 @@ export default function Navbar() {
               <li>
                 <a
                   href="/about"
-                  className="block py-2 px-3 text-heading rounded hover:bg-neutral-tertiary md:hover:bg-transparent md:border-0 md:hover:text-fg-brand md:p-0"
+                  className="block py-2 px-3 text-heading rounded hover:bg-neutral-tertiary min-[850px]:hover:bg-transparent min-[850px]:border-0 min-[850px]:hover:text-fg-brand min-[850px]:p-0"
                 >
                   About
                 </a>
@@ -341,7 +354,7 @@ export default function Navbar() {
               <li>
                 <a
                   href="#"
-                  className="block py-2 px-3 text-heading rounded hover:bg-neutral-tertiary md:hover:bg-transparent md:border-0 md:hover:text-fg-brand md:p-0"
+                  className="block py-2 px-3 text-heading rounded hover:bg-neutral-tertiary min-[850px]:hover:bg-transparent min-[850px]:border-0 min-[850px]:hover:text-fg-brand min-[850px]:p-0"
                 >
                   Services
                 </a>
@@ -349,7 +362,7 @@ export default function Navbar() {
               <li>
                 <a
                   href="/orders"
-                  className="block py-2 px-3 text-heading rounded hover:bg-neutral-tertiary md:hover:bg-transparent md:border-0 md:hover:text-fg-brand md:p-0"
+                  className="block py-2 px-3 text-heading rounded hover:bg-neutral-tertiary min-[850px]:hover:bg-transparent min-[850px]:border-0 min-[850px]:hover:text-fg-brand min-[850px]:p-0"
                 >
                   Orders
                 </a>
@@ -357,7 +370,7 @@ export default function Navbar() {
               <li>
                 <a
                   href="/admin"
-                  className="block py-2 px-3 text-heading rounded hover:bg-neutral-tertiary md:hover:bg-transparent md:border-0 md:hover:text-fg-brand md:p-0"
+                  className="block py-2 px-3 text-heading rounded hover:bg-neutral-tertiary min-[850px]:hover:bg-transparent min-[850px]:border-0 min-[850px]:hover:text-fg-brand min-[850px]:p-0"
                 >
                   AdminDash
                 </a>

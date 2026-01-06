@@ -66,11 +66,12 @@ public class RoleInitializer implements ApplicationRunner {
                                 log.info("Role already exists: " + roleName);
                         }
                 });
-                log.info("Role creation completed.");
+                log.info("Role initialization completed.");
 
                 if (userService.existByUsername("admin")) {
 
-                        System.out.println("Givin roles = " + authService.giveUserAdminRole("admin"));
+                        // System.out.println("Givin roles = " +
+                        // authService.giveUserAdminRole("admin"));
                 } else {
                         System.out.println("no admin");
                 }
