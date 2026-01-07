@@ -70,8 +70,8 @@ public class RoleInitializer implements ApplicationRunner {
 
                 if (userService.existByUsername("admin")) {
 
-                        // System.out.println("Givin roles = " +
-                        // authService.giveUserAdminRole("admin"));
+                        System.out.println("Givin admin roles = " +
+                                        authService.giveUserAdminRole("admin"));
                 } else {
                         System.out.println("no admin");
                 }
@@ -89,7 +89,6 @@ public class RoleInitializer implements ApplicationRunner {
                 } else {
                         log.info("admin is not present. create admin acc");
                 }
-
         }
 
         public List<Listing> generateMockListings(User adminUser) {

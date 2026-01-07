@@ -1,0 +1,33 @@
+package com.vinyl.VinylExchange.messaging.dto;
+
+import java.util.UUID;
+
+import com.vinyl.VinylExchange.messaging.enums.MessageType;
+
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Builder
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class SendMessageRequest {
+
+    @NotNull(message = "Conversation id is required")
+    private long conversationId;
+
+    @NotNull(message = "Receiver id is required")
+    private UUID receiverId;
+
+    @Size(min = 2, max = 2000, message = "Message must be between 2 and 2000 characters")
+    private String content;
+
+    @Builder.Default
+    private MessageType messageType = MessageType.TEXT;
+}
