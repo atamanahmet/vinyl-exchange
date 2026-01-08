@@ -3,11 +3,13 @@ package com.vinyl.VinylExchange.user;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.vinyl.VinylExchange.shared.exception.InvalidStatusTransitionException;
 import com.vinyl.VinylExchange.shared.exception.NoCurrentUserException;
+import com.vinyl.VinylExchange.shared.exception.UserNotFoundException;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
@@ -21,11 +23,17 @@ public class UserService {
         this.statusHistoryRepository = statusHistoryRepository;
     }
 
-    public User changeUserStatus(UUID userId, UserStatus newStatus, UUID changedById, String changedBy, String reason) {
+    @Transactional
+    public User changeUserStatus(
+            UUID userId,
+            UserStatus newStatus,
+            UUID changedById,
+            String changedBy,
+            String reason) {
 
         User user = userRepository
                 .findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not exist"));
+                .orElseThrow(() -> new UserNotFoundException());
 
         UserStatus oldStatus = user.getStatus();
 
@@ -57,12 +65,18 @@ public class UserService {
         return userRepository.existsByUsername(username);
     }
 
-    public User getByUsername(String username) {
+    public User findByUsername(String username) {
 
-        if (userRepository.existsByUsername(username)) {
+        return userRepository.findByUsername(username).orElseThrow(() -> new NoCurrentUserException());
+    }
 
-            return userRepository.findByUsername(username).orElseThrow(() -> new NoCurrentUserException());
-        }
-        return null;
+    public User findByUserId(UUID userId) {
+
+        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException());
+    }
+
+    public String findUsernameByUserId(UUID userId) {
+
+        return userRepository.findUsernameById(userId).orElseThrow(() -> new UserNotFoundException());
     }
 }

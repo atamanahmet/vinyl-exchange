@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -15,10 +16,13 @@ import com.vinyl.VinylExchange.auth.dto.AuthResponse;
 import com.vinyl.VinylExchange.auth.dto.LoginRequest;
 import com.vinyl.VinylExchange.auth.dto.RegisterRequest;
 import com.vinyl.VinylExchange.auth.enums.RoleName;
+
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
 import com.vinyl.VinylExchange.security.util.JwtTokenUtil;
+
 import com.vinyl.VinylExchange.shared.exception.NoCurrentUserException;
 import com.vinyl.VinylExchange.shared.exception.RegistrationValidationException;
+
 import com.vinyl.VinylExchange.user.User;
 import com.vinyl.VinylExchange.user.UserRepository;
 import com.vinyl.VinylExchange.user.UserStatus;

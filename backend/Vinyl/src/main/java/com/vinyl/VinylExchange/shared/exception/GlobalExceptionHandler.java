@@ -63,6 +63,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoCurrentUserException.class)
     public void handleNoCurrentUserException(NoCurrentUserException exception) {
         System.out.println("No user");
+    }
+
+    @ExceptionHandler(ConversationNotFoundException.class)
+    public void handleConversationNotFoundException(ConversationNotFoundException exception) {
+        System.out.println(exception.getMessage());
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public void handleUserNotFoundException(UserNotFoundException exception) {
+        System.out.println(exception.getMessage());
         // return ResponseEntity
         // .status(HttpStatus.NOT_FOUND)
         // .body(exception.getMessage());

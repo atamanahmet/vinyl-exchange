@@ -27,6 +27,10 @@ public class ConversationDTO {
 
     private UUID relatedListingId;
 
+    private String participantUsername;
+
+    private String participantAvatar;
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
@@ -35,13 +39,20 @@ public class ConversationDTO {
 
     private String lastMessagePreview;
 
-    public static ConversationDTO from(Conversation conversation) {
+    public ConversationDTO from(
+            Conversation conversation,
+            String participantUsername,
+            String participantAvatar,
+            String lastMessagePreview) {
 
         return ConversationDTO.builder()
                 .id(conversation.getId())
                 .initiatorId(conversation.getInitiatorId())
                 .participantId(conversation.getParticipantId())
+                .participantUsername(participantUsername)
+                .participantAvatar(participantAvatar)
                 .relatedListingId(conversation.getRelatedListingId())
+                .lastMessagePreview(lastMessagePreview)
                 .createdAt(conversation.getCreatedAt())
                 .lastMessageAt(conversation.getLastMessageAt())
                 .build();

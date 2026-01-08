@@ -73,7 +73,7 @@ public class Conversation {
             return this.initiatorId;
         }
 
-        throw new IllegalArgumentException("User is not part of the conversation");
+        throw new IllegalArgumentException("This User is not part of the conversation");
     }
 
     public void updateLastMessageTime() {

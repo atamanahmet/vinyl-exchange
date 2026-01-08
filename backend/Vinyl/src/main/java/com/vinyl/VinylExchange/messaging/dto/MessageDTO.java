@@ -6,7 +6,6 @@ import java.util.UUID;
 import com.vinyl.VinylExchange.messaging.Message;
 import com.vinyl.VinylExchange.messaging.enums.MessageType;
 
-import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
@@ -34,13 +33,13 @@ public class MessageDTO {
     private LocalDateTime timestamp;
     private boolean isRead;
 
-    public static MessageDTO from(Message message, String senderUserName) {
+    public MessageDTO from(Message message) {
 
         return MessageDTO.builder()
                 .conversationId(message.getConversationId())
                 .id(message.getId())
                 .senderId(message.getSenderId())
-                .senderUsername(senderUserName)
+                .senderUsername(message.getSenderUsername())
                 .messageType(message.getMessageType())
                 .content(message.getContent())
                 .isRead(message.isRead())

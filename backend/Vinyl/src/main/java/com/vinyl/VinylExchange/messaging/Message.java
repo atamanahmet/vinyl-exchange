@@ -59,7 +59,8 @@ public class Message {
     private LocalDateTime timestamp;
 
     @Column(nullable = false)
-    private boolean isRead;
+    @Builder.Default
+    private boolean isRead = false;
 
     public void markAsRead() {
         this.isRead = true;

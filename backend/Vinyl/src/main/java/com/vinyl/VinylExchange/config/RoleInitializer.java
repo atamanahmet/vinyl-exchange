@@ -76,7 +76,7 @@ public class RoleInitializer implements ApplicationRunner {
                         System.out.println("no admin");
                 }
 
-                User adminUser = userService.getByUsername("admin");
+                User adminUser = userService.findByUsername("admin");
 
                 if (adminUser != null) {
                         List<Listing> mockList = generateMockListings(adminUser);
