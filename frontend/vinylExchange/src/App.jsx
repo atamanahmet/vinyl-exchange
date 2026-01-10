@@ -52,7 +52,7 @@ function App() {
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/error" element={<ErrorPage />} />
           <Route path="/orderItems" element={<OrderItemsPage />} />
-          <Route path="/messaging" element={<MessagingPage />} />
+          <Route path="/messaging/:listingId" element={<MessagingPage />} />
         </Routes>
       </div>
     </>

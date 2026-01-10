@@ -19,11 +19,13 @@ import lombok.Setter;
 @NoArgsConstructor
 public class SendMessageRequest {
 
-    @NotNull(message = "Conversation id is required")
-    private long conversationId;
+    private UUID conversationId;
 
-    @NotNull(message = "Receiver id is required")
+    // @NotNull(message = "Receiver id is required")
     private UUID receiverId;
+
+    @NotNull(message = "Related Listing id is required")
+    private UUID relatedListingId;
 
     @Size(min = 2, max = 2000, message = "Message must be between 2 and 2000 characters")
     private String content;

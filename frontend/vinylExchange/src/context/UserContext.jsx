@@ -10,6 +10,7 @@ export const UserProvider = ({ children }) => {
 
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const [loggedIn, setLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -180,6 +181,7 @@ export const UserProvider = ({ children }) => {
         authResponse,
         openLogin,
         navbarActive,
+        currentUserId,
       }}
     >
       {children}

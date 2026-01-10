@@ -1,4 +1,4 @@
-package com.vinyl.VinylExchange.listing;
+package com.vinyl.VinylExchange.listing.enums;
 
 public enum ListingStatus {
     AVAILABLE,

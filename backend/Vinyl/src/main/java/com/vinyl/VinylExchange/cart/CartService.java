@@ -16,7 +16,7 @@ import com.vinyl.VinylExchange.cart.dto.CartItemDTO;
 import com.vinyl.VinylExchange.cart.dto.UpdateCartItemRequest;
 import com.vinyl.VinylExchange.listing.Listing;
 import com.vinyl.VinylExchange.listing.ListingService;
-import com.vinyl.VinylExchange.listing.ListingStatus;
+import com.vinyl.VinylExchange.listing.enums.ListingStatus;
 import com.vinyl.VinylExchange.shared.exception.CartItemNotFoundException;
 import com.vinyl.VinylExchange.shared.exception.EmptyCartException;
 
@@ -45,7 +45,7 @@ public class CartService {
         return cartRepository.findByUserId(userId).orElseGet(() -> {
 
             try {
-                
+
                 Cart newCart = new Cart(userId);
 
                 return cartRepository.save(newCart);

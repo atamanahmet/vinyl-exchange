@@ -13,6 +13,9 @@ export default function ListView({ item }) {
   const navigateItemWithId = () => {
     navigate(`/listing/${item.id}`);
   };
+  const navigateMessagingWithItemId = () => {
+    navigate(`/messaging/${item.id}`);
+  };
 
   const inCart = cart
     ? cart.items.some((element) => element.listingId === item.id)
@@ -85,7 +88,9 @@ export default function ListView({ item }) {
               {inCart ? "In Cart" : "Add to Cart"}
             </a>
             <a
-              href="/messaging"
+              onClick={() => {
+                navigateMessagingWithItemId();
+              }}
               className="text-body mt-2 rounded-xl bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-10.5"
             >
               Trade

@@ -8,54 +8,69 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.dao.DataIntegrityViolationException;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import org.springframework.transaction.annotation.Transactional;
+
+import com.vinyl.VinylExchange.listing.Listing;
+import com.vinyl.VinylExchange.listing.ListingService;
 
 import com.vinyl.VinylExchange.messaging.dto.ConversationDTO;
 import com.vinyl.VinylExchange.messaging.dto.MessageDTO;
-import com.vinyl.VinylExchange.messaging.dto.SendMessageRequest;
 import com.vinyl.VinylExchange.messaging.enums.MessageType;
+
 import com.vinyl.VinylExchange.shared.exception.ConversationNotFoundException;
+import com.vinyl.VinylExchange.shared.exception.ListingNotFoundException;
 import com.vinyl.VinylExchange.shared.exception.UnauthorizedActionException;
 import com.vinyl.VinylExchange.user.UserService;
 
+@Service
 public class MessagingService {
     private final MessagingRepository messagingRepository;
     private final ConversationRepository conversationRepository;
     private final UserService userService;
+    private final ListingService listingService;
 
     private static final Logger logger = LoggerFactory.getLogger(MessagingService.class);
 
     public MessagingService(
             MessagingRepository messagingRepository,
             ConversationRepository conversationRepository,
-            UserService userService) {
+            UserService userService,
+            ListingService listingService) {
 
         this.messagingRepository = messagingRepository;
         this.conversationRepository = conversationRepository;
         this.userService = userService;
+        this.listingService = listingService;
 
         logger.info("Messaging service ready.");
     }
 
-    public MessageDTO saveMessage(SendMessageRequest request){
-        Message message = new Message()
-    }
-
     @Transactional
-    public ConversationDTO startConversation(
+    public Conversation startConversation(
             UUID initiatorId,
-            UUID participantId,
             UUID relatedListingId) {
 
-        if (initiatorId.equals(participantId)) {
-            logger.warn("User tried to message themselves");
-            throw new IllegalArgumentException("Same id message initialization issue");
+        // if (initiatorId.equals(participantId)) {
+        // logger.warn("User tried to message themselves");
+        // throw new IllegalArgumentException("Same id message initialization issue");
+        // }
+
+        Listing listing = listingService.getListingById(relatedListingId);
+        // to check availability, throws exception if not exist or available
+        if (!listing.isAvailable()) {
+            throw new ListingNotFoundException("Listing is not available for trade, cannot start conversation");
         }
 
-        Conversation conversation = conversationRepository.findBetweenUsers(initiatorId, participantId)
+        UUID participantId = listing.getOwner().getId();
+
+        Conversation conversation = conversationRepository
+                .findBetweenUsers(initiatorId, participantId, relatedListingId)
                 .orElseGet(() -> {
 
                     try {
@@ -63,45 +78,48 @@ public class MessagingService {
 
                         return conversationRepository.save(newConversation);
 
-                        // if conversation exist, and got existing id error due to spamming, try again
-                        // to fetch
+                        // if conversation exist, but got existing id error due to spamming, try again
                     } catch (DataIntegrityViolationException e) {
 
-                        return conversationRepository.findBetweenUsers(initiatorId, participantId)
-                                .orElseThrow(() -> new RuntimeException("Conversation creation issues"));
+                        return conversationRepository.findBetweenUsers(initiatorId, participantId, relatedListingId)
+                                .orElseThrow(
+                                        () -> new RuntimeException("Conversation creation issues: MessagingService"));
                     }
                 });
 
-        return convertToDTO(conversation, initiatorId);
+        return conversation;
+        // return convertToDTO(conversation, initiatorId);
     }
 
     @Transactional
     public MessageDTO sendMessage(
-            Long conversationId,
             UUID senderId,
+            UUID relatedListingId,
             String content,
             MessageType messageType) {
 
-        Conversation conversation = conversationRepository.findById(conversationId)
-                .orElseThrow(() -> new ConversationNotFoundException());
+        Conversation conversation = getOrStartConversation(senderId, relatedListingId);
 
         if (!conversation.isUserParticipant(senderId)) {
             logger.warn("User is not part of this conversation, userId: " + senderId);
             throw new UnauthorizedActionException(senderId);
         }
 
+        UUID participantId = conversation.getOtherParticipant(senderId);
+
         Message message = Message.builder()
-                .conversationId(conversationId)
+                .conversationId(conversation.getId())
+                .senderId(senderId)
+                .senderUsername(userService.findUsernameById(senderId))
+                .receiverUsername(userService.findUsernameById(participantId))
                 .senderId(senderId)
                 .content(content)
-                .messageType(messageType)
+                .messageType(messageType == null ? MessageType.TEXT : messageType)
                 .build();
 
         Message savedMessage = messagingRepository.save(message);
 
-        UUID receiverId = conversation.getOtherParticipant(senderId);
-
-        conversation.increaseUnreadCount(receiverId);
+        conversation.increaseUnreadCount(participantId);
         conversation.updateLastMessageTime();
 
         conversationRepository.save(conversation);
@@ -109,18 +127,40 @@ public class MessagingService {
         return new MessageDTO().from(savedMessage);
     }
 
-    public MessageDTO sendMessage(
-            Long conversationId,
-            UUID senderId,
-            String content) {
+    // // without messageType method overloading
+    // public MessageDTO sendMessage(
+    // UUID conversationId,
+    // UUID senderId,
 
-        return sendMessage(conversationId, senderId, content, MessageType.TEXT);
-    }
+    // UUID relatedListingId,
+    // String content) {
 
-    public Page<MessageDTO> getMessages(Long conversationId, UUID userId, int page, int size) {
+    // return sendMessage(conversationId, senderId, relatedListingId, content,
+    // MessageType.TEXT);
+    // }
 
-        Conversation conversation = conversationRepository.findById(conversationId)
-                .orElseThrow(() -> new ConversationNotFoundException());
+    // @Transactional
+    // public MessageDTO sendMessage(
+    // UUID senderId,
+
+    // UUID relatedListingId,
+    // String content) {
+
+    // Conversation newConversation = startConversation(senderId, relatedListingId);
+
+    // return sendMessage(newConversation.getId(), senderId, relatedListingId,
+    // content, MessageType.TEXT);
+    // }
+
+    public Page<MessageDTO> getMessages(UUID userId, UUID listingId, int page, int size) {
+
+        System.out.println("getting messages...");
+
+        Conversation conversation = getOrStartConversation(userId, listingId);
+
+        System.out.println("conversation id " + conversation.getId());
+        System.out.println("initiator id " + conversation.getInitiatorId());
+        System.out.println("reciever id " + conversation.getParticipantId());
 
         if (!conversation.isUserParticipant(userId)) {
             throw new UnauthorizedActionException("User in not part of the conversation ", userId);
@@ -128,7 +168,7 @@ public class MessagingService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<Message> messagePage = messagingRepository.findByConversationIdOrderByTimestampDesc(conversationId,
+        Page<Message> messagePage = messagingRepository.findByConversationIdOrderByTimestampDesc(conversation.getId(),
                 pageable);
 
         Page<MessageDTO> messageDTOPage = messagePage.map(message -> new MessageDTO().from(message));
@@ -164,5 +204,36 @@ public class MessagingService {
                 .collect(Collectors.toList());
 
         return conversationDTOList;
+    }
+
+    public Conversation getOrStartConversation(UUID initiatorId, UUID relatedListingId) {
+
+        Listing listing = listingService.getListingById(relatedListingId);
+        // to check availability, throws exception if not exist or available
+        if (!listing.isAvailable()) {
+            throw new ListingNotFoundException("Listing is not available for trade, cannot start conversation");
+        }
+
+        UUID participantId = listing.getOwnerId();
+
+        Conversation conversation = conversationRepository
+                .findBetweenUsers(initiatorId, participantId, relatedListingId)
+                .orElseGet(() -> {
+
+                    try {
+                        Conversation newConversation = new Conversation(initiatorId, participantId, relatedListingId);
+
+                        return conversationRepository.save(newConversation);
+
+                        // if conversation exist, but got existing id error due to spamming, try again
+                    } catch (DataIntegrityViolationException e) {
+
+                        return conversationRepository.findBetweenUsers(initiatorId, participantId, relatedListingId)
+                                .orElseThrow(
+                                        () -> new RuntimeException("Conversation creation issues: MessagingService"));
+                    }
+                });
+
+        return conversation;
     }
 }

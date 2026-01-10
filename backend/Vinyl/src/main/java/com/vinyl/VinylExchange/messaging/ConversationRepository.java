@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface ConversationRepository extends JpaRepository<Conversation, Long> {
+public interface ConversationRepository extends JpaRepository<Conversation, UUID> {
 
         @Query("Select c from Conversation c " +
                         "WHERE c.initiatorId= :userId OR c.participantId = :userId " +
@@ -16,9 +16,14 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
         List<Conversation> findAllByUserId(@Param("userId") UUID userId);
 
         @Query("Select c from Conversation c " +
-                        "WHERE c.initiatorId= :userIdOne OR c.participantId = :userIdTwo " +
+                        "WHERE ((c.initiatorId= :userIdOne AND c.participantId = :userIdTwo) " +
+                        "OR (c.initiatorId= :userIdTwo AND c.participantId = :userIdOne)) " +
+                        "AND c.relatedListingId= :relatedListingId " +
                         "ORDER BY c.lastMessageAt DESC")
-        Optional<Conversation> findBetweenUsers(@Param("userIdOne") UUID userIdOne, @Param("userIdTwo") UUID userIdTwo);
+        Optional<Conversation> findBetweenUsers(
+                        @Param("userIdOne") UUID userIdOne,
+                        @Param("userIdTwo") UUID userIdTwo,
+                        @Param("relatedListingId") UUID relatedListingId);
 
         Optional<Conversation> findByRelatedListingId(UUID listingId);
 }

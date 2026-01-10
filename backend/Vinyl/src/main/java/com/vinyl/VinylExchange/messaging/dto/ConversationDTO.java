@@ -19,7 +19,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ConversationDTO {
 
-    private Long id;
+    private UUID id;
 
     private UUID initiatorId;
 

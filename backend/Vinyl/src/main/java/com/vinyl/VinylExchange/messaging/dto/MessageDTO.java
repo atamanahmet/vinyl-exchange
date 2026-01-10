@@ -22,9 +22,10 @@ import lombok.Setter;
 public class MessageDTO {
 
     private long id;
-    private long conversationId;
+    private UUID conversationId;
     private UUID senderId;
     private String senderUsername;
+    private String receiverUsername;
 
     @Enumerated(EnumType.STRING)
     private MessageType messageType;
@@ -38,8 +39,8 @@ public class MessageDTO {
         return MessageDTO.builder()
                 .conversationId(message.getConversationId())
                 .id(message.getId())
-                .senderId(message.getSenderId())
                 .senderUsername(message.getSenderUsername())
+                .receiverUsername(message.getReceiverUsername())
                 .messageType(message.getMessageType())
                 .content(message.getContent())
                 .isRead(message.isRead())

@@ -37,12 +37,14 @@ public class Message {
     private long id;
 
     @Column(nullable = false)
-    private long conversationId;
+    private UUID conversationId;
 
     @Column(nullable = false)
     private UUID senderId;
 
     private String senderUsername;
+
+    private String receiverUsername;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -53,10 +55,10 @@ public class Message {
     @Column(nullable = false, length = 2000)
     private String content;
 
-    @CreatedDate
     @Column(nullable = false, updatable = false)
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime timestamp;
+    @Builder.Default
+    private LocalDateTime timestamp = LocalDateTime.now();
 
     @Column(nullable = false)
     @Builder.Default
@@ -70,4 +72,5 @@ public class Message {
 
         return this.senderId.equals(userId);
     }
+
 }

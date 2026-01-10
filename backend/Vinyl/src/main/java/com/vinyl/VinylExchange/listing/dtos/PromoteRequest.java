@@ -1,4 +1,4 @@
-package com.vinyl.VinylExchange.listing.dto;
+package com.vinyl.VinylExchange.listing.dtos;
 
 import jakarta.validation.constraints.NotNull;
 

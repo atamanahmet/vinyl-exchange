@@ -69,6 +69,8 @@ public class SecurityConfig implements WebMvcConfigurer {
                         .requestMatchers(HttpMethod.POST, "/logout").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/cart/items/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/newlisting").authenticated()
+                        .requestMatchers("/api/messages/**").authenticated()
+                        .requestMatchers("/api/messages/conversation/**").authenticated()
                         .anyRequest()
                         .authenticated())
                 .logout(logout -> logout.disable());

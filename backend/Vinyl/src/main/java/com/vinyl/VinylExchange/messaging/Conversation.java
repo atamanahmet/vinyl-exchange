@@ -13,17 +13,20 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "conversations")
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Conversation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(nullable = false)
     private UUID initiatorId;
@@ -32,12 +35,17 @@ public class Conversation {
     private UUID participantId;
 
     @Column(nullable = false)
+    private UUID initiatorUsername;
+
+    @Column(nullable = false)
+    private UUID participantUsername;
+
+    @Column(nullable = false)
     private UUID relatedListingId;
 
-    @CreatedDate
     @Column(nullable = false, updatable = false)
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(nullable = false)
     private long initiatorUnreadCount = 0;

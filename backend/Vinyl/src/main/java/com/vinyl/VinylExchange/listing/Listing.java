@@ -15,6 +15,7 @@ import com.vinyl.VinylExchange.config.json.DiscountDeserializer;
 import com.vinyl.VinylExchange.config.json.DiscountSerializer;
 import com.vinyl.VinylExchange.config.json.PriceKurusDeserializer;
 import com.vinyl.VinylExchange.config.json.PriceTlSerializer;
+import com.vinyl.VinylExchange.listing.enums.ListingStatus;
 import com.vinyl.VinylExchange.listing.label.Label;
 import com.vinyl.VinylExchange.shared.BaseEntity;
 import com.vinyl.VinylExchange.shared.TradePreference;
@@ -140,6 +141,10 @@ public class Listing extends BaseEntity {
     private boolean promote = false;
 
     // helpers
+    public UUID getOwnerId() {
+        return this.owner.getId();
+    }
+
     public void addTradePreference(TradePreference newTradePreference) {
         newTradePreference.setListing(this);
         tradePreferences.add(newTradePreference);

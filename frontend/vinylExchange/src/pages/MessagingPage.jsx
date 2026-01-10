@@ -1,61 +1,89 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 const MessagingPage = () => {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: "other",
-      text: "Hey! I'm interested in your Pink Floyd - Dark Side of the Moon. What condition is it in?",
-      timestamp: "10:32 AM",
-      senderName: "Alex",
-    },
-    {
-      id: 2,
-      sender: "me",
-      text: "Hi Alex! It's in excellent condition - VG+/VG+ for both vinyl and sleeve. Original 1973 pressing.",
-      timestamp: "10:35 AM",
-      senderName: "You",
-    },
-    {
-      id: 3,
-      sender: "other",
-      text: "Nice! What are you asking for it?",
-      timestamp: "10:36 AM",
-      senderName: "Alex",
-    },
-    {
-      id: 4,
-      sender: "me",
-      text: "Looking for $85, but I'm open to trades. What do you have?",
-      timestamp: "10:38 AM",
-      senderName: "You",
-    },
-    {
-      id: 5,
-      sender: "other",
-      text: "I have a few things... Led Zeppelin II, Fleetwood Mac - Rumours, and some Beatles records. Any interest?",
-      timestamp: "10:42 AM",
-      senderName: "Alex",
-    },
-  ]);
+  const { listingId } = useParams();
+
+  const [response, setResponse] = useState();
+
+  const [sendRequest, SetSendRequest] = useState({
+    relatedListingId: listingId,
+    content: "",
+  });
+
+  async function fetchMessages() {
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/messages/conversation/${listingId}`,
+        {
+          withCredentials: true,
+        }
+      );
+      if (res.status == 200) {
+        setMessages(res.data.content);
+        // console.log(res.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    fetchMessages();
+  }, [response]);
+
+  const [messages, setMessages] = useState([]);
 
   const [newMessage, setNewMessage] = useState("");
 
-  const handleSend = () => {
-    if (newMessage.trim()) {
-      const message = {
-        id: messages.length + 1,
-        sender: "me",
-        text: newMessage,
-        timestamp: new Date().toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        senderName: "You",
-      };
-      setMessages([...messages, message]);
-      setNewMessage("");
+  const handleSend = async () => {
+    // if (newMessage.trim()) {
+    //   const message = {
+    //     id: messages.length + 1,
+    //     sender: "me",
+    //     text: newMessage,
+    //     timestamp: new Date().toLocaleTimeString("en-US", {
+    //       hour: "2-digit",
+    //       minute: "2-digit",
+    //     }),
+    //     senderName: "You",
+    //   };
+    //   setMessages([...messages, message]);
+
+    SetSendRequest((prevData) => ({
+      ...prevData,
+      content: newMessage,
+    }));
+
+    console.log(sendRequest);
+
+    try {
+      const res = await axios.post(
+        "http://localhost:8080/api/messages",
+        {
+          relatedListingId: sendRequest.relatedListingId,
+          content: sendRequest.content,
+        },
+        { withCredentials: true }
+      );
+
+      console.log(res.data);
+      if (res.status == 200) {
+      }
+    } catch (error) {
+      console.log(error);
     }
+
+    setNewMessage("");
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNewMessage((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   const handleKeyPress = (e) => {
@@ -80,30 +108,41 @@ const MessagingPage = () => {
         </div>
         <div></div>
       </div>
-
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
         {messages.map((message) => (
           <div
             key={message.id}
             className={`flex ${
-              message.sender === "me" ? "justify-end" : "justify-start"
+              message.senderId === currentUserId
+                ? "justify-end"
+                : "justify-start"
             }`}
           >
             <div
               className={`max-w-md ${
-                message.sender === "me"
+                message.senderId === currentUserId
                   ? "bg-blue-500 text-white"
                   : "bg-white text-gray-900 border border-gray-200"
               } rounded-2xl px-4 py-2.5 shadow-sm`}
             >
-              <p className="text-sm leading-relaxed">{message.text}</p>
+              {message.senderId !== currentUserId && (
+                <p className="text-xs font-semibold mb-1 text-gray-600">
+                  {message.senderUsername}
+                </p>
+              )}
+              <p className="text-sm leading-relaxed">{message.content}</p>
               <p
                 className={`text-xs mt-1 ${
-                  message.sender === "me" ? "text-blue-100" : "text-gray-500"
+                  message.senderId === currentUserId
+                    ? "text-blue-100"
+                    : "text-gray-500"
                 }`}
               >
-                {message.timestamp}
+                {new Date(message.timestamp).toLocaleTimeString("en-US", {
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
               </p>
             </div>
           </div>
@@ -111,7 +150,7 @@ const MessagingPage = () => {
       </div>
 
       {/* Input Area */}
-      <div className="bg-white border-t px-6 py-4">
+      <div className="bg-white border-t px-6 py-4 text-black">
         <div className="flex gap-3 items-end">
           <div className="flex-1">
             <textarea

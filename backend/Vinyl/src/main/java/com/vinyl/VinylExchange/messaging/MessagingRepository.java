@@ -11,14 +11,14 @@ import org.springframework.data.repository.query.Param;
 
 public interface MessagingRepository extends JpaRepository<Message, UUID> {
 
-        Page<Message> findByConversationIdOrderByTimestampDesc(Long conversationId, Pageable pageable);
+        Page<Message> findByConversationIdOrderByTimestampDesc(UUID conversationId, Pageable pageable);
 
         // for notificstion preview
         @Query("SELECT m from Message m " +
                         "WHERE m.conversationId = :conversationId " +
                         "ORDER BY m.timestamp DESC " +
                         "LIMIT 1")
-        Optional<Message> findLatestMessageByConversationId(@Param("conversationId") long conversationId);
+        Optional<Message> findLatestMessageByConversationId(@Param("conversationId") UUID conversationId);
 
         // unreadCount for user
         @Query("SELECT COUNT(m) FROM Message m " +

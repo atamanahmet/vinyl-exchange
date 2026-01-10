@@ -43,6 +43,8 @@ public class JWTAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        String requestUri = request.getRequestURI();
+        System.out.println("request url " + requestUri);
         try {
 
             // without jwt header?

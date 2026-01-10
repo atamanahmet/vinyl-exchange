@@ -16,7 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vinyl.VinylExchange.cart.CartService;
-import com.vinyl.VinylExchange.listing.dto.ListingDTO;
+import com.vinyl.VinylExchange.listing.dtos.ListingDTO;
+import com.vinyl.VinylExchange.listing.enums.ListingStatus;
 import com.vinyl.VinylExchange.shared.dto.TradePreferenceDTO;
 import com.vinyl.VinylExchange.shared.exception.InsufficientStockException;
 import com.vinyl.VinylExchange.shared.exception.ListingNotFoundException;
@@ -322,6 +323,10 @@ public class ListingService {
 
     public boolean isExistByTitle(String title) {
         return listingRepository.existsByTitle(title);
+    }
+
+    public boolean isAvailableForTrade(UUID listingId) {
+        return listingRepository.isAvailableForTrade(listingId, ListingStatus.AVAILABLE);
     }
 
 }
