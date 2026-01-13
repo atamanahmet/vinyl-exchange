@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface MessagingRepository extends JpaRepository<Message, UUID> {
 
-        Page<Message> findByConversationIdOrderByTimestampDesc(UUID conversationId, Pageable pageable);
+        Page<Message> findByConversationIdOrderByTimestampAsc(UUID conversationId, Pageable pageable);
 
         // for notificstion preview
         @Query("SELECT m from Message m " +

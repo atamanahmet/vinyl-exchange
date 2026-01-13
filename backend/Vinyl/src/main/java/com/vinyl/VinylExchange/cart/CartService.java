@@ -78,7 +78,7 @@ public class CartService {
         Cart cart = getOrCreateCart(userId);
 
         // service throws not found exception
-        Listing listing = listingService.getListingById(listingId);
+        Listing listing = listingService.findListingById(listingId);
 
         Optional<CartItem> existingItem = cart.getCartItems()
                 .stream()
@@ -151,7 +151,7 @@ public class CartService {
                 .findFirst()
                 .orElseThrow(() -> new CartItemNotFoundException("Cart item not found"));
 
-        Listing listing = listingService.getListingById(cartItem.getListingId());
+        Listing listing = listingService.findListingById(cartItem.getListingId());
 
         listing.hasEnoughStock(request.quantity());
 
@@ -170,7 +170,7 @@ public class CartService {
                 .findFirst()
                 .orElseThrow(() -> new CartItemNotFoundException("Cart item not found"));
 
-        Listing listing = listingService.getListingById(listingId);
+        Listing listing = listingService.findListingById(listingId);
 
         int currentOrderQuantity = cartItem.getOrderQuantity();
 
@@ -197,7 +197,7 @@ public class CartService {
 
         for (CartItem cartItem : cart.getCartItems()) {
 
-            Listing listing = listingService.getListingById(cartItem.getListingId());
+            Listing listing = listingService.findListingById(cartItem.getListingId());
 
             if (listing == null) {
 

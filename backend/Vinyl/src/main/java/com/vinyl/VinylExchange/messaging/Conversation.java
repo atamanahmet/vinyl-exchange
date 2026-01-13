@@ -3,8 +3,6 @@ package com.vinyl.VinylExchange.messaging;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import org.springframework.data.annotation.CreatedDate;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Column;
@@ -13,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,10 +34,10 @@ public class Conversation {
     private UUID participantId;
 
     @Column(nullable = false)
-    private UUID initiatorUsername;
+    private String initiatorUsername;
 
     @Column(nullable = false)
-    private UUID participantUsername;
+    private String participantUsername;
 
     @Column(nullable = false)
     private UUID relatedListingId;
@@ -56,10 +55,13 @@ public class Conversation {
     @Column(nullable = false)
     private LocalDateTime lastMessageAt;
 
-    public Conversation(UUID initiatorId, UUID participantId, UUID relatedListingId) {
+    public Conversation(UUID initiatorId, String initiatorUsername, UUID participantId, String participantUsername,
+            UUID relatedListingId) {
 
         this.initiatorId = initiatorId;
+        this.initiatorUsername = initiatorUsername;
         this.participantId = participantId;
+        this.participantUsername = participantUsername;
         this.relatedListingId = relatedListingId;
         this.createdAt = LocalDateTime.now();
         this.lastMessageAt = LocalDateTime.now();

@@ -129,7 +129,7 @@ public class ListingService {
             listingRepository.deleteById(listingId);
     }
 
-    public Listing getListingById(UUID listingId) {
+    public Listing findListingById(UUID listingId) {
 
         return listingRepository
                 .findById(listingId)
@@ -327,6 +327,14 @@ public class ListingService {
 
     public boolean isAvailableForTrade(UUID listingId) {
         return listingRepository.isAvailableForTrade(listingId, ListingStatus.AVAILABLE);
+    }
+
+    public String getOwnerUsernameByListingId(UUID listingId) {
+
+        Listing listing = listingRepository.findById(listingId)
+                .orElseThrow(() -> new ListingNotFoundException());
+
+        return listing.getOwner().getUsername();
     }
 
 }

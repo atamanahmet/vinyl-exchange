@@ -1,5 +1,6 @@
 package com.vinyl.VinylExchange.messaging;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -13,7 +14,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.vinyl.VinylExchange.listing.ListingService;
+import com.vinyl.VinylExchange.messaging.dto.ConversationDTO;
 import com.vinyl.VinylExchange.messaging.dto.MessageDTO;
+import com.vinyl.VinylExchange.messaging.dto.MessagePageResponse;
 import com.vinyl.VinylExchange.messaging.dto.SendMessageRequest;
 
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
@@ -22,43 +26,60 @@ import com.vinyl.VinylExchange.security.principal.UserPrincipal;
 @RequestMapping("/api/messages")
 public class MessagingController {
 
-    private final MessagingService messagingService;
+        private final MessagingService messagingService;
 
-    public MessagingController(MessagingService messagingService) {
-        this.messagingService = messagingService;
-    }
+        public MessagingController(MessagingService messagingService, ListingService listingService) {
+                this.messagingService = messagingService;
+        }
 
-    @PostMapping
-    public ResponseEntity<?> sendMessage(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody SendMessageRequest request) {
+        @PostMapping
+        public ResponseEntity<?> sendMessage(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal,
+                        @RequestBody SendMessageRequest request) {
 
-        System.out.println("message request: " + request.getContent() + "listingId: " +
-                request.getRelatedListingId());
+                // System.out.println("message request: " + request.getContent() + "listingId: "
+                // +
+                // request.getRelatedListingId());
 
-        MessageDTO messageDTO = messagingService.sendMessage(
-                userPrincipal.getId(),
-                request.getRelatedListingId(),
-                request.getContent(), null);
+                MessageDTO messageDTO = messagingService.sendMessage(
+                                userPrincipal.getId(),
+                                request.getRelatedListingId(),
+                                request.getContent(), null);
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(messageDTO);
-    }
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(messageDTO);
+        }
 
-    @GetMapping("/conversation/{listingId}")
-    public ResponseEntity<?> getMessages(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable(name = "listingId") UUID listingId
-    // @RequestParam(defaultValue = "0") int page,
-    // @RequestParam(defaultValue = "50") int size
-    ) {
+        @GetMapping("/conversation/{listingId}")
+        public ResponseEntity<?> getMessages(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal,
+                        @PathVariable(name = "listingId") UUID listingId
+        // @RequestParam(defaultValue = "0") int page,
+        // @RequestParam(defaultValue = "50") int size
+        ) {
+                ConversationDTO conversationDTO = messagingService.getThisConversationDTO(userPrincipal.getId(),
+                                listingId);
 
-        Page<MessageDTO> messagePage = messagingService.getMessages(userPrincipal.getId(), listingId, 0, 50);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(messagePage);
+                Page<MessageDTO> messagePage = messagingService.getMessages(userPrincipal.getId(), listingId, 0, 50);
 
-    }
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(new MessagePageResponse(
+                                                conversationDTO,
+                                                messagePage));
+
+        }
+
+        @GetMapping("/conversations")
+        public ResponseEntity<?> getConversations(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
+                List<ConversationDTO> conversationsDTO = messagingService.getUserConversations(userPrincipal.getId());
+
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(conversationsDTO);
+
+        }
 
 }

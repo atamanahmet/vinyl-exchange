@@ -153,21 +153,21 @@ export default function Navbar() {
             {/* User Menu */}
             {user != null && (
               <div className="relative">
-                <div className="flex gap-4">
-                  <div className="">
-                    <a href="/cart">
-                      <svg
-                        fill="#615fff"
-                        version="1.1"
-                        id="cart"
-                        width="32px"
-                        height="35px"
-                        viewBox="0 0 453.73 453.73"
-                        className="relative"
-                      >
-                        <g>
-                          <path
-                            d="M447.664,129.262c-5.005-6.031-12.435-9.521-20.271-9.521h-20.86l4.734-4.733c1.641-1.642,2.562-3.867,2.562-6.188
+                <div className="flex gap-2">
+                  <div className="flex flex-row gap-3">
+                    <div className="relative">
+                      <a href="/cart">
+                        <svg
+                          fill="#615fff"
+                          version="1.1"
+                          id="cart"
+                          width="32px"
+                          height="35px"
+                          viewBox="0 0 453.73 453.73"
+                        >
+                          <g>
+                            <path
+                              d="M447.664,129.262c-5.005-6.031-12.435-9.521-20.271-9.521h-20.86l4.734-4.733c1.641-1.642,2.562-3.867,2.562-6.188
 		c0-2.321-0.922-4.547-2.562-6.188l-48.674-48.673c-3.415-3.417-8.956-3.416-12.375,0.001l-56.886,56.887v-50.7
 		c0-4.832-3.918-8.75-8.75-8.75H174.265c-4.832,0-8.75,3.918-8.75,8.75v59.511c0,0.028,0.004,0.056,0.004,0.083h-34.664
 		l-2.876-14.948c-1.838-9.543-8.78-17.301-18.063-20.18L34.149,61.111C20.257,56.802,5.5,64.571,1.189,78.465
@@ -182,19 +182,51 @@ export default function Navbar() {
 		c0-8.728,7.075-15.803,15.804-15.803h180.509c8.729,0,15.804,7.075,15.804,15.803C375.067,281.998,367.991,289.074,359.263,289.074
 		z M359.263,204.79H178.754c-8.729,0-15.804-7.076-15.804-15.804s7.075-15.803,15.804-15.803h180.509
 		c8.729,0,15.804,7.075,15.804,15.803S367.991,204.79,359.263,204.79z"
-                          />
-                        </g>
+                            />
+                          </g>
+                        </svg>
+                      </a>
+                      <p
+                        className={
+                          cartItemCount == 0
+                            ? "hidden"
+                            : "text-indigo-900 absolute -top-2 -right-2 bg-white rounded-full w-6"
+                        }
+                      >
+                        {cartItemCount}
+                      </p>
+                    </div>
+                    <a href="/messaging">
+                      <svg
+                        width="30px"
+                        height="35px"
+                        viewBox="0 0 1024 1024"
+                        className="icon"
+                        version="1.1"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M896 192H128c-35.3 0-64 28.7-64 64v512c0 35.3 28.7 64 64 64h576.6l191.6 127.7L896 832c35.3 0 64-28.7 64-64V256c0-35.3-28.7-64-64-64z"
+                          fill="#3D5AFE"
+                        />
+                        <path
+                          d="M640 512c0-125.4-51.5-238.7-134.5-320H128c-35.3 0-64 28.7-64 64v512c0 35.3 28.7 64 64 64h377.5c83-81.3 134.5-194.6 134.5-320z"
+                          fill="#536DFE"
+                        />
+                        <path
+                          d="M256 512m-64 0a64 64 0 1 0 128 0 64 64 0 1 0-128 0Z"
+                          fill="#FFFFFF"
+                        />
+                        <path
+                          d="M512 512m-64 0a64 64 0 1 0 128 0 64 64 0 1 0-128 0Z"
+                          fill="#FFFFFF"
+                        />
+                        <path
+                          d="M768 512m-64 0a64 64 0 1 0 128 0 64 64 0 1 0-128 0Z"
+                          fill="#FFFFFF"
+                        />
                       </svg>
                     </a>
-                    <p
-                      className={
-                        cartItemCount == 0
-                          ? "hidden"
-                          : "text-indigo-900 absolute -top-2 right-10 bg-white rounded-full w-6"
-                      }
-                    >
-                      {cartItemCount}
-                    </p>
                   </div>
                   <button
                     type="button"

@@ -23,6 +23,8 @@ public class ConversationDTO {
 
     private UUID initiatorId;
 
+    private String initiatorUsername;
+
     private UUID participantId;
 
     private UUID relatedListingId;
@@ -41,15 +43,15 @@ public class ConversationDTO {
 
     public ConversationDTO from(
             Conversation conversation,
-            String participantUsername,
             String participantAvatar,
             String lastMessagePreview) {
 
         return ConversationDTO.builder()
                 .id(conversation.getId())
                 .initiatorId(conversation.getInitiatorId())
+                .initiatorUsername(conversation.getInitiatorUsername())
                 .participantId(conversation.getParticipantId())
-                .participantUsername(participantUsername)
+                .participantUsername(conversation.getParticipantUsername())
                 .participantAvatar(participantAvatar)
                 .relatedListingId(conversation.getRelatedListingId())
                 .lastMessagePreview(lastMessagePreview)

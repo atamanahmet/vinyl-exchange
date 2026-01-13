@@ -1,18 +1,48 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 
 const MessagingPage = () => {
+  const navigate = useNavigate();
+
   const { listingId } = useParams();
+
+  const [participantUsername, setParticipantUsername] = useState();
+
+  const [conversations, setConversations] = useState();
+
+  const { user } = useUser();
+
+  if (user == null) {
+    navigate("/");
+  }
 
   const [response, setResponse] = useState();
 
   const [sendRequest, SetSendRequest] = useState({
     relatedListingId: listingId,
-    content: "",
   });
 
-  async function fetchMessages() {
+  async function fetchConversations() {
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/messages/conversations`,
+        {
+          withCredentials: true,
+        }
+      );
+      if (res.status == 200) {
+        setConversations(res.data);
+
+        console.log(res.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function fetchMessages(conversationId) {
     try {
       const res = await axios.get(
         `http://localhost:8080/api/messages/conversation/${listingId}`,
@@ -21,8 +51,13 @@ const MessagingPage = () => {
         }
       );
       if (res.status == 200) {
-        setMessages(res.data.content);
-        // console.log(res.data);
+        setMessages(res.data.messagePage.content);
+        setParticipantUsername(
+          user.username == res.data.conversationDTO.initiatorUsername
+            ? res.data.conversationDTO.participantUsername
+            : res.data.conversationDTO.initiatorUsername
+        );
+        console.log(res.data);
       }
     } catch (error) {
       console.log(error);
@@ -30,14 +65,21 @@ const MessagingPage = () => {
   }
 
   useEffect(() => {
-    fetchMessages();
-  }, [response]);
+    fetchConversations();
+  }, []);
+
+  // useEffect(() => {
+  //   fetchMessages();
+  // }, [response]);
 
   const [messages, setMessages] = useState([]);
 
   const [newMessage, setNewMessage] = useState("");
 
   const handleSend = async () => {
+    if (newMessage == "") {
+      return;
+    }
     // if (newMessage.trim()) {
     //   const message = {
     //     id: messages.length + 1,
@@ -56,20 +98,21 @@ const MessagingPage = () => {
       content: newMessage,
     }));
 
-    console.log(sendRequest);
+    // console.log(sendRequest);
 
     try {
       const res = await axios.post(
         "http://localhost:8080/api/messages",
         {
           relatedListingId: sendRequest.relatedListingId,
-          content: sendRequest.content,
+          content: newMessage,
         },
         { withCredentials: true }
       );
 
       console.log(res.data);
       if (res.status == 200) {
+        setResponse(res.data);
       }
     } catch (error) {
       console.log(error);
@@ -102,7 +145,9 @@ const MessagingPage = () => {
             A
           </div>
           <div>
-            <h2 className="font-semibold text-gray-900">Alex</h2>
+            <h2 className="font-semibold text-gray-900 text-left">
+              {participantUsername}
+            </h2>
             <p className="text-sm text-gray-500">Active now</p>
           </div>
         </div>
@@ -114,19 +159,19 @@ const MessagingPage = () => {
           <div
             key={message.id}
             className={`flex ${
-              message.senderId === currentUserId
+              message.senderUsername === user.username
                 ? "justify-end"
                 : "justify-start"
             }`}
           >
             <div
               className={`max-w-md ${
-                message.senderId === currentUserId
+                message.senderUsername === user.username
                   ? "bg-blue-500 text-white"
                   : "bg-white text-gray-900 border border-gray-200"
               } rounded-2xl px-4 py-2.5 shadow-sm`}
             >
-              {message.senderId !== currentUserId && (
+              {message.senderUsername !== user.username && (
                 <p className="text-xs font-semibold mb-1 text-gray-600">
                   {message.senderUsername}
                 </p>
@@ -134,7 +179,7 @@ const MessagingPage = () => {
               <p className="text-sm leading-relaxed">{message.content}</p>
               <p
                 className={`text-xs mt-1 ${
-                  message.senderId === currentUserId
+                  message.senderUsername === user.username
                     ? "text-blue-100"
                     : "text-gray-500"
                 }`}

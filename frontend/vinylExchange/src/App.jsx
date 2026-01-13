@@ -27,6 +27,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ErrorPage from "./pages/ErrorPage";
 import OrderItemsPage from "./pages/OrderItemsPage";
 import MessagingPage from "./pages/MessagingPage";
+import ConversationsPage from "./pages/ConversationsPage";
 
 function App() {
   const { user, data } = useUser();
@@ -52,7 +53,8 @@ function App() {
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/error" element={<ErrorPage />} />
           <Route path="/orderItems" element={<OrderItemsPage />} />
-          <Route path="/messaging/:listingId" element={<MessagingPage />} />
+          {/* <Route path="/messaging/:listingId" element={<MessagingPage />} /> */}
+          <Route path="/messaging" element={<ConversationsPage />} />
         </Routes>
       </div>
     </>

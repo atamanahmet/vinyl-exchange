@@ -1,12 +1,11 @@
 package com.vinyl.VinylExchange.messaging;
 
+import com.vinyl.VinylExchange.messaging.enums.MessageType;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import org.springframework.data.annotation.CreatedDate;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.vinyl.VinylExchange.messaging.enums.MessageType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

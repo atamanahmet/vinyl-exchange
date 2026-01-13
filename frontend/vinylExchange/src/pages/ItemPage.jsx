@@ -110,6 +110,10 @@ export default function ItemPage({}) {
 
   const [mainImage, setMainImage] = useState();
 
+  const navigateMessagingWithItemId = () => {
+    navigate(`/messaging/${listing.id}`);
+  };
+
   return (
     <>
       <div className="fixedRoot">
@@ -210,7 +214,9 @@ export default function ItemPage({}) {
 
               <div className="inline-flex justify-center w-full gap-3">
                 <button
-                  onClick={addCart}
+                  onClick={() => {
+                    navigateMessagingWithItemId();
+                  }}
                   className=" w-full h-14 bg-orange rounded-lg lg:rounded-xl mb-2 hover:shadow-lg hover:shadow-indigo-600 text-white flex bg-indigo-600 hover:bg-indigo-800 hover:text-slate-200 items-center justify-center lg:w-3/5 "
                   // className="rounded-lg py-2 px-3 text-amber-50  "
                 >

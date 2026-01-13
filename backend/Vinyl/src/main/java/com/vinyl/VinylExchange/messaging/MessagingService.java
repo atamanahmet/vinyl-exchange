@@ -23,7 +23,6 @@ import com.vinyl.VinylExchange.messaging.dto.ConversationDTO;
 import com.vinyl.VinylExchange.messaging.dto.MessageDTO;
 import com.vinyl.VinylExchange.messaging.enums.MessageType;
 
-import com.vinyl.VinylExchange.shared.exception.ConversationNotFoundException;
 import com.vinyl.VinylExchange.shared.exception.ListingNotFoundException;
 import com.vinyl.VinylExchange.shared.exception.UnauthorizedActionException;
 import com.vinyl.VinylExchange.user.UserService;
@@ -54,27 +53,25 @@ public class MessagingService {
     @Transactional
     public Conversation startConversation(
             UUID initiatorId,
+            String initiatorUsername,
             UUID relatedListingId) {
 
-        // if (initiatorId.equals(participantId)) {
-        // logger.warn("User tried to message themselves");
-        // throw new IllegalArgumentException("Same id message initialization issue");
-        // }
-
-        Listing listing = listingService.getListingById(relatedListingId);
+        Listing listing = listingService.findListingById(relatedListingId);
         // to check availability, throws exception if not exist or available
         if (!listing.isAvailable()) {
             throw new ListingNotFoundException("Listing is not available for trade, cannot start conversation");
         }
 
-        UUID participantId = listing.getOwner().getId();
+        UUID participantId = listing.getOwnerId();
+        String participantUsername = listing.getOwnerUsername();
 
         Conversation conversation = conversationRepository
                 .findBetweenUsers(initiatorId, participantId, relatedListingId)
                 .orElseGet(() -> {
 
                     try {
-                        Conversation newConversation = new Conversation(initiatorId, participantId, relatedListingId);
+                        Conversation newConversation = new Conversation(initiatorId, initiatorUsername, participantId,
+                                participantUsername, relatedListingId);
 
                         return conversationRepository.save(newConversation);
 
@@ -88,7 +85,6 @@ public class MessagingService {
                 });
 
         return conversation;
-        // return convertToDTO(conversation, initiatorId);
     }
 
     @Transactional
@@ -98,6 +94,14 @@ public class MessagingService {
             String content,
             MessageType messageType) {
 
+        String senderUsername = userService.findUsernameById(senderId);
+
+        Listing relatedListing = listingService.findListingById(relatedListingId);
+
+        UUID participantId = relatedListing.getOwner().getId();
+
+        String participantUsername = relatedListing.getOwner().getUsername();
+
         Conversation conversation = getOrStartConversation(senderId, relatedListingId);
 
         if (!conversation.isUserParticipant(senderId)) {
@@ -105,14 +109,11 @@ public class MessagingService {
             throw new UnauthorizedActionException(senderId);
         }
 
-        UUID participantId = conversation.getOtherParticipant(senderId);
-
         Message message = Message.builder()
                 .conversationId(conversation.getId())
                 .senderId(senderId)
-                .senderUsername(userService.findUsernameById(senderId))
-                .receiverUsername(userService.findUsernameById(participantId))
-                .senderId(senderId)
+                .senderUsername(senderUsername)
+                .receiverUsername(participantUsername)
                 .content(content)
                 .messageType(messageType == null ? MessageType.TEXT : messageType)
                 .build();
@@ -126,31 +127,6 @@ public class MessagingService {
 
         return new MessageDTO().from(savedMessage);
     }
-
-    // // without messageType method overloading
-    // public MessageDTO sendMessage(
-    // UUID conversationId,
-    // UUID senderId,
-
-    // UUID relatedListingId,
-    // String content) {
-
-    // return sendMessage(conversationId, senderId, relatedListingId, content,
-    // MessageType.TEXT);
-    // }
-
-    // @Transactional
-    // public MessageDTO sendMessage(
-    // UUID senderId,
-
-    // UUID relatedListingId,
-    // String content) {
-
-    // Conversation newConversation = startConversation(senderId, relatedListingId);
-
-    // return sendMessage(newConversation.getId(), senderId, relatedListingId,
-    // content, MessageType.TEXT);
-    // }
 
     public Page<MessageDTO> getMessages(UUID userId, UUID listingId, int page, int size) {
 
@@ -168,19 +144,24 @@ public class MessagingService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<Message> messagePage = messagingRepository.findByConversationIdOrderByTimestampDesc(conversation.getId(),
+        Page<Message> messagePage = messagingRepository.findByConversationIdOrderByTimestampAsc(conversation.getId(),
                 pageable);
+
+        // messagePage.iterator().forEachRemaining(message ->
+        // System.out.println(message.getContent()));
 
         Page<MessageDTO> messageDTOPage = messagePage.map(message -> new MessageDTO().from(message));
 
         return messageDTOPage;
     }
 
+    public ConversationDTO getThisConversationDTO(UUID userId, UUID listingId) {
+        Conversation conversation = getOrStartConversation(userId, listingId);
+
+        return convertToDTO(conversation, listingId);
+    }
+
     public ConversationDTO convertToDTO(Conversation conversation, UUID initiatorId) {
-
-        UUID otherUserId = conversation.getOtherParticipant(initiatorId);
-
-        String otherUsername = userService.findUsernameByUserId(otherUserId);
 
         String lastMessagePreview = messagingRepository.findLatestMessageByConversationId(conversation.getId())
                 .map(message -> message.getContent().length() > 50 ? message.getContent().substring(0, 50)
@@ -189,7 +170,6 @@ public class MessagingService {
 
         return new ConversationDTO().from(
                 conversation,
-                otherUsername,
                 "",
                 lastMessagePreview);
     }
@@ -208,20 +188,24 @@ public class MessagingService {
 
     public Conversation getOrStartConversation(UUID initiatorId, UUID relatedListingId) {
 
-        Listing listing = listingService.getListingById(relatedListingId);
+        Listing listing = listingService.findListingById(relatedListingId);
         // to check availability, throws exception if not exist or available
         if (!listing.isAvailable()) {
             throw new ListingNotFoundException("Listing is not available for trade, cannot start conversation");
         }
 
         UUID participantId = listing.getOwnerId();
+        String participantUsername = listing.getOwnerUsername();
+
+        String initiatorUsername = userService.findUsernameById(initiatorId);
 
         Conversation conversation = conversationRepository
                 .findBetweenUsers(initiatorId, participantId, relatedListingId)
                 .orElseGet(() -> {
 
                     try {
-                        Conversation newConversation = new Conversation(initiatorId, participantId, relatedListingId);
+                        Conversation newConversation = new Conversation(initiatorId, initiatorUsername, participantId,
+                                participantUsername, relatedListingId);
 
                         return conversationRepository.save(newConversation);
 
@@ -235,5 +219,12 @@ public class MessagingService {
                 });
 
         return conversation;
+    }
+
+    public UUID getConversationId(UUID listingId, UUID initiatorId) {
+
+        Conversation conversation = getOrStartConversation(initiatorId, listingId);
+
+        return conversation.getId();
     }
 }

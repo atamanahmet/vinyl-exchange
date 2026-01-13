@@ -145,6 +145,10 @@ public class Listing extends BaseEntity {
         return this.owner.getId();
     }
 
+    public String getOwnerUsername() {
+        return this.owner.getUsername();
+    }
+
     public void addTradePreference(TradePreference newTradePreference) {
         newTradePreference.setListing(this);
         tradePreferences.add(newTradePreference);
