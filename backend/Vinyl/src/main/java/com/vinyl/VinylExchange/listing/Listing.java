@@ -128,7 +128,6 @@ public class Listing extends BaseEntity {
     private User owner;
 
     @Builder.Default
-
     @ElementCollection
     @CollectionTable(name = "listing_images", joinColumns = @JoinColumn(name = "listing_id"))
     @Column(name = "image_path")
@@ -145,6 +144,8 @@ public class Listing extends BaseEntity {
         return this.owner.getId();
     }
 
+    @Transient
+    @JsonProperty("ownerUsername")
     public String getOwnerUsername() {
         return this.owner.getUsername();
     }

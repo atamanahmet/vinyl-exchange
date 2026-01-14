@@ -2,19 +2,35 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useUser } from "../context/UserContext";
 
 export default function ListView({ item }) {
   const { addToCart, cart, removeFromCart } = useCart();
 
+  const { user } = useUser();
+
   const [image, setImage] = useState("");
+
+  const [isOwnerUser, setIsOwnerUser] = useState();
+
+  useEffect(() => {
+    if (item && user && item.ownerUsername === user.username) {
+      setIsOwnerUser(true);
+    } else {
+      setIsOwnerUser(false);
+    }
+  }, [item, user]);
 
   const navigate = useNavigate();
 
   const navigateItemWithId = () => {
     navigate(`/listing/${item.id}`);
   };
+  const navigateEditItemWithId = () => {
+    navigate(`/edit/${item.id}`);
+  };
   const navigateMessagingWithItemId = () => {
-    navigate(`/messaging/${item.id}`);
+    navigate(`/messaging`);
   };
 
   const inCart = cart
@@ -77,25 +93,38 @@ export default function ListView({ item }) {
         {/* <p className="px-6 py-4">{item.price}</p> */}
 
         <div className="px-6 py-4 text-right">
-          <div className="flex flex-col justify-center items-center -mt-5">
-            <a
-              onClick={() =>
-                inCart ? removeFromCart(item.id) : addToCart(item.id)
-              }
-              className={`mt-5 rounded-xl  border   focus:ring-4  shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-4.5 cursor-pointer min-w-30  hover:text-red-700
-              ${inCart ? "bg-green-700 text-white hover:border-red-700" : ""}`}
-            >
-              {inCart ? "In Cart" : "Add to Cart"}
-            </a>
-            <a
-              onClick={() => {
-                navigateMessagingWithItemId();
-              }}
-              className="text-body mt-2 rounded-xl bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-10.5"
-            >
-              Trade
-            </a>
-          </div>
+          {!isOwnerUser && (
+            <div className="flex flex-col justify-center items-center -mt-5">
+              <a
+                onClick={() =>
+                  inCart ? removeFromCart(item.id) : addToCart(item.id)
+                }
+                className={`mt-5 rounded-xl  border   focus:ring-4  shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-4.5 cursor-pointer min-w-30 
+              ${inCart ? "bg-green-700 text-white " : ""}`}
+              >
+                {inCart ? "In Cart" : "Add to Cart"}
+              </a>
+              <a
+                onClick={() => {
+                  navigateMessagingWithItemId();
+                }}
+                className="text-body mt-2 rounded-xl bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-10.5 cursor-pointer"
+              >
+                Trade
+              </a>
+            </div>
+          )}
+          {isOwnerUser && (
+            <div className="flex flex-col justify-center items-center -mt-5">
+              <a
+                onClick={() => navigateEditItemWithId()}
+                className={`mt-5 rounded-xl  border   focus:ring-4  shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-4.5 cursor-pointer min-w-30  hover:text-red-700
+             `}
+              >
+                Edit
+              </a>
+            </div>
+          )}
         </div>
       </div>
     </>

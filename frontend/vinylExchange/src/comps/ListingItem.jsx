@@ -12,7 +12,7 @@ export default function ListingItem({ item, onDelete }) {
   };
 
   const navigateToEditWithId = () => {
-    navigate("/edit", { state: { id: item.id } });
+    navigate(`/edit/${item.id}`);
   };
 
   return (

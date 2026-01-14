@@ -33,7 +33,9 @@ export default function ImageGallery({ imagePaths, openModal }) {
           }
           alt="main"
           className="w-130 h-130 object-cover rounded-md mb-4"
-          onClick={() => handleModal(`http://localhost:8080/${mainImg}`)}
+          onClick={() =>
+            mainImg && handleModal(`http://localhost:8080/${mainImg}`)
+          }
         />
       }
 

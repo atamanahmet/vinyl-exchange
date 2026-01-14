@@ -4,13 +4,11 @@ import { ThemeProvider } from "@material-tailwind/react";
 import Card from "../comps/Card";
 import { useCart } from "../context/CartContext";
 import ListView from "../comps/ListView";
+import { useUser } from "../context/UserContext";
 
 export default function MainPage({ data }) {
   const { cart } = useCart();
-
-  console.log(data);
-
-  const [layoutSelection, setLayoutSelection] = useState("list");
+  const { layoutSelection, setLayoutSelection } = useUser();
 
   return (
     <>
@@ -26,9 +24,9 @@ export default function MainPage({ data }) {
               d="M8 6.00067L21 6.00139M8 12.0007L21 12.0015M8 18.0007L21 18.0015M3.5 6H3.51M3.5 12H3.51M3.5 18H3.51M4 6C4 6.27614 3.77614 6.5 3.5 6.5C3.22386 6.5 3 6.27614 3 6C3 5.72386 3.22386 5.5 3.5 5.5C3.77614 5.5 4 5.72386 4 6ZM4 12C4 12.2761 3.77614 12.5 3.5 12.5C3.22386 12.5 3 12.2761 3 12C3 11.7239 3.22386 11.5 3.5 11.5C3.77614 11.5 4 11.7239 4 12ZM4 18C4 18.2761 3.77614 18.5 3.5 18.5C3.22386 18.5 3 18.2761 3 18C3 17.7239 3.22386 17.5 3.5 17.5C3.77614 17.5 4 17.7239 4 18Z"
               stroke="oklch(0.585 0.233 277.117)"
               fill="#FFFFFF"
-              stroke-width="3"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
         </button>
@@ -38,12 +36,12 @@ export default function MainPage({ data }) {
             viewBox="0 -0.5 21 21"
             version="1.1"
             xmlns="http://www.w3.org/2000/svg"
-            xmlns:xlink="http://www.w3.org/1999/xlink"
+            xmlnsXlink="http://www.w3.org/1999/xlink"
           >
             <title>grid [#1526]</title>
             <desc>Created with Sketch.</desc>
             <defs></defs>
-            <g id="Page-1" stroke="#FFFFFF" stroke-width="0" fill="#FFFFFF">
+            <g id="Page-1" stroke="#FFFFFF" strokeWidth="0" fill="#FFFFFF">
               <g
                 id="Dribbble-Light-Preview"
                 transform="translate(-219.000000, -200.000000)"
@@ -83,7 +81,7 @@ export default function MainPage({ data }) {
       mt-5
       w-full gap-5 "
         >
-          {data && data.map((item) => <Card key={item.id} vinyl={item} />)}
+          {data && data.map((item) => <Card key={item.id} item={item} />)}
         </div>
       )}
     </>

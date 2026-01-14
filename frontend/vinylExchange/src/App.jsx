@@ -46,7 +46,7 @@ function App() {
           <Route path="/newlisting" element={<NewListing />} />
           <Route path="/listings" element={<ListingsPage />} />
           <Route path="/terms" element={<TermsAndConditions />} />
-          <Route path="/edit" element={<EditListing />} />
+          <Route path="/edit/:listingId" element={<EditListing />} />
           <Route path="/listing/:listingId" element={<ItemPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
@@ -55,6 +55,7 @@ function App() {
           <Route path="/orderItems" element={<OrderItemsPage />} />
           {/* <Route path="/messaging/:listingId" element={<MessagingPage />} /> */}
           <Route path="/messaging" element={<ConversationsPage />} />
+          <Route path="/messaging/:listingId" element={<ConversationsPage />} />
         </Routes>
       </div>
     </>

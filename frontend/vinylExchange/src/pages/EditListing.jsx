@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import ImageUploader from "../comps/ImageUploader";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 export default function EditListing() {
   const navigate = useNavigate();
+
+  const { listingId } = useParams();
+
   const location = useLocation();
-  const listingId = location.state.id;
 
   const [previewPrice, setPreviewPrice] = useState(null);
 
@@ -753,10 +755,14 @@ export default function EditListing() {
               <p
                 className="text-right"
                 style={{
-                  color: listing.description?.length <= 255 ? "green" : "red",
+                  color:
+                    listing.description?.length <= 255 ||
+                    listing.description == null
+                      ? "green"
+                      : "red",
                 }}
               >
-                {listing.description?.length}/255
+                {listing.description?.length || 0}/255
               </p>
             </div>
             <div>

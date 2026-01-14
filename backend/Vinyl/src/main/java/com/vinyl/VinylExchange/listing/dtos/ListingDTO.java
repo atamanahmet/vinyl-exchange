@@ -65,6 +65,7 @@ public class ListingDTO {
     private String condition;
     private String artistName;
     private String labelName;
+    private String ownerUsername;
 
     public ListingDTO(Listing listing, List<TradePreferenceDTO> tradePreferenceDTOs) {
         this.id = listing.getId();
@@ -77,6 +78,7 @@ public class ListingDTO {
         this.imagePaths = listing.getImagePaths();
         this.format = listing.getFormat();
         this.packaging = listing.getPackaging();
+        this.ownerUsername = listing.getOwnerUsername();
         this.trackCount = listing.getTrackCount();
         this.tradePreferences = tradePreferenceDTOs;
         this.discountBP = listing.getDiscountBP();

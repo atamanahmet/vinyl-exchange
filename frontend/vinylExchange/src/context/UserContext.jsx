@@ -18,6 +18,7 @@ export const UserProvider = ({ children }) => {
   const [openLogin, setOpenLogin] = useState(false);
   const [data, setData] = useState();
   const [authResponse, setAuthResponse] = useState(null);
+  const [layoutSelection, setLayoutSelection] = useState("grid");
 
   const storedPhoto = sessionStorage.getItem("profilePhoto");
 
@@ -182,6 +183,8 @@ export const UserProvider = ({ children }) => {
         openLogin,
         navbarActive,
         currentUserId,
+        setLayoutSelection,
+        layoutSelection,
       }}
     >
       {children}

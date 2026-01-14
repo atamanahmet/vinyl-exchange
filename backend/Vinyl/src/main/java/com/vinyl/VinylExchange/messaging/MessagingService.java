@@ -156,6 +156,7 @@ public class MessagingService {
     }
 
     public ConversationDTO getThisConversationDTO(UUID userId, UUID listingId) {
+
         Conversation conversation = getOrStartConversation(userId, listingId);
 
         return convertToDTO(conversation, listingId);
@@ -226,5 +227,13 @@ public class MessagingService {
         Conversation conversation = getOrStartConversation(initiatorId, listingId);
 
         return conversation.getId();
+    }
+
+    public void deleteMyConversations(UUID userId) {
+        List<UUID> conversations = conversationRepository.findAllByUserId(userId).stream().map(conv -> conv.getId())
+                .collect(Collectors.toList());
+
+        conversationRepository.deleteAllById(conversations);
+
     }
 }

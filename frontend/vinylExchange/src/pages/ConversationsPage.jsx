@@ -2,12 +2,51 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useUser } from "../context/UserContext";
 import { button } from "@material-tailwind/react";
+import { useParams } from "react-router-dom";
 
 export default function ConversationsPage() {
   const [conversations, setConversations] = useState();
 
+  const [relatedListingId, setRelatedListingId] = useState();
+
+  const [response, setResponse] = useState();
+
+  const { listingId } = useParams();
+
   const [messages, setMessages] = useState();
+  const [newMessage, setNewMessage] = useState("");
+
+  const [participantUsername, setParticipantUsername] = useState();
+
   const { user } = useUser();
+
+  const handleSend = async () => {
+    if (newMessage == "") {
+      return;
+    }
+    try {
+      console.log(relatedListingId);
+      const res = await axios.post(
+        "http://localhost:8080/api/messages",
+        {
+          relatedListingId: relatedListingId,
+          content: newMessage,
+        },
+        { withCredentials: true }
+      );
+
+      console.log(res.data);
+      if (res.status == 200) {
+        setResponse(res.data);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      fetchMessages();
+    }
+
+    setNewMessage("");
+  };
 
   async function fetchConversations() {
     try {
@@ -25,32 +64,61 @@ export default function ConversationsPage() {
       console.log(error);
     }
   }
-  async function fetchMessages(conversationId) {
+  async function deleteAllConversations() {
     try {
-      const res = await axios.get(
-        `http://localhost:8080/api/messages/conversation/${conversationId}`,
-        {
-          withCredentials: true,
-        }
-      );
-      if (res.status == 200) {
-        setMessages(res.data);
-        console.log(res.data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-  async function fetchConversations() {
-    try {
-      const res = await axios.get(
+      const res = await axios.delete(
         `http://localhost:8080/api/messages/conversations`,
         {
           withCredentials: true,
         }
       );
+      if (res.status == 204) {
+        console.log("deleted");
+        setConversations();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async function fetchMessages() {
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/messages/conversation/${relatedListingId}`,
+        {
+          withCredentials: true,
+        }
+      );
       if (res.status == 200) {
-        setConversations(res.data);
+        setMessages(res.data.messagePag.content);
+        setRelatedListingId(res.data.conversationDTO.relatedListingId);
+        setParticipantUsername(
+          user.username == res.data.conversationDTO.initiatorUsername
+            ? res.data.conversationDTO.participantUsername
+            : res.data.conversationDTO.initiatorUsername
+        );
+        console.log("messagePage" + res.data.messagePage);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function fetchSpecificConvo(convoListingId) {
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/messages/conversation/${convoListingId}`,
+        {
+          withCredentials: true,
+        }
+      );
+      if (res.status == 200) {
+        setMessages(res.data.messagePage);
+        setRelatedListingId(res.data.conversationDTO.relatedListingId);
+        setParticipantUsername(
+          user.username == res.data.conversationDTO.initiatorUsername
+            ? res.data.conversationDTO.participantUsername
+            : res.data.conversationDTO.initiatorUsername
+        );
         console.log(res.data);
       }
     } catch (error) {
@@ -59,34 +127,52 @@ export default function ConversationsPage() {
   }
 
   useEffect(() => {
+    fetchMessages();
+  }, []);
+
+  async function fetchConversations() {
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/messages/conversations`,
+        {
+          withCredentials: true,
+        }
+      );
+      if (res.status == 200) {
+        setConversations(res.data);
+        console.log("convos: ", res.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  useEffect(() => {
     fetchConversations();
   }, []);
 
   return (
     <>
-      <div className="flex h-screen min-w-300 overflow-hidden">
+      <div className="flex h-240 min-w-300 overflow-hidden -mt-5">
         {/*  Sidebar  */}
         <div className="min-w-1/4 bg-black border-r border-gray-300">
           {/*  Sidebar Header  */}
-          <header className="p-4 border-b flex justify-between items-center bg-indigo-600 text-white">
-            <h1 className="text-md font-semibold">Convos</h1>
-            <div className="relative">
-              {/* <button id="menuButton" className="focus:outline-none">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-gray-100"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                  <path d="M2 10a2 2 0 012-2h12a2 2 0 012 2 2 2 0 01-2 2H4a2 2 0 01-2-2z" />
-                </svg>
-              </button> */}
-              {/*  Menu Dropdown  */}
-              <div
-                id="menuDropdown"
-                className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-md shadow-lg hidden"
-              ></div>
+          <header className="py-2 px-2 border-b  bg-indigo-600 text-white">
+            <div className="flex justify-between">
+              <h2 className="text-3xl font-semibold">Convos</h2>
+              <button
+                className=" bg-red-500 rounded-xl p-2 "
+                onClick={() => deleteAllConversations()}
+              >
+                Delete All
+              </button>
             </div>
           </header>
 
@@ -94,7 +180,9 @@ export default function ConversationsPage() {
           <div className="flex flex-col flex-wrap">
             {conversations &&
               conversations.map((convo) => (
-                <button onClick={() => fetchMessages(convo.relatedListingId)}>
+                <button
+                  onClick={() => fetchSpecificConvo(convo.relatedListingId)}
+                >
                   <div className="px-2 pt-1.5 pb-1.5">
                     <div className="flex items-center cursor-pointer text-left hover:bg-gray-100 hover:text-black border border-white p-2 rounded-md">
                       <div className="w-12 h-12 bg-gray-300   rounded-full mr-3">
@@ -122,18 +210,65 @@ export default function ConversationsPage() {
         </div>
 
         {/*  Main Chat Area  */}
-        <div className="flex-1">
+        <div className="flex flex-col w-9/9 border-10 rounded-xl border-black">
           {messages && (
             <>
               {/*  Chat Header  */}
-              <header className="bg-black p-4 text-white">
-                <h1 className="text-2xl font-semibold">{}</h1>
+              <header className="bg-black p-4 text-white w-full">
+                <h1 className="text-2xl font-semibold">
+                  {participantUsername}
+                </h1>
               </header>
 
-              {/*  Chat Messages  */}
+              <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${
+                      message.senderUsername === user.username
+                        ? "justify-end"
+                        : "justify-start"
+                    }`}
+                  >
+                    <div
+                      className={`max-w-md ${
+                        message.senderUsername === user.username
+                          ? "bg-blue-500 text-white"
+                          : "bg-white text-gray-900 border border-gray-200"
+                      } rounded-2xl px-4 py-2.5 shadow-sm`}
+                    >
+                      {message.senderUsername !== user.username && (
+                        <p className="text-xs font-semibold mb-1 text-gray-600">
+                          {message.senderUsername}
+                        </p>
+                      )}
+                      <p className="text-sm leading-relaxed">
+                        {message.content}
+                      </p>
+                      <p
+                        className={`text-xs mt-1 ${
+                          message.senderUsername === user.username
+                            ? "text-blue-100"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {new Date(message.timestamp).toLocaleTimeString(
+                          "en-US",
+                          {
+                            hour: "numeric",
+                            minute: "2-digit",
+                          }
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Chat Messages 
               <div className="h-screen overflow-y-auto p-4 pb-36">
                 {/*  Incoming Message  */}
-                <div className="flex mb-4 cursor-pointer">
+              {/* <div className="flex mb-4 cursor-pointer">
                   <div className="w-9 h-9 rounded-full flex items-center justify-center mr-2">
                     <img
                       src="https://placehold.co/200x/ffa8e4/ffffff.svg?text=ʕ•́ᴥ•̀ʔ&font=Lato"
@@ -144,10 +279,10 @@ export default function ConversationsPage() {
                   <div className="flex max-w-96 bg-white rounded-lg p-3 gap-3">
                     <p className="text-gray-700">Hey Bob, how's it going?</p>
                   </div>
-                </div>
+                </div> */}
 
-                {/*  Outgoing Message  */}
-                <div className="flex justify-end mb-4 cursor-pointer">
+              {/*  Outgoing Message  */}
+              {/* <div className="flex justify-end mb-4 cursor-pointer">
                   <div className="flex max-w-96 bg-indigo-500 text-white rounded-lg p-3 gap-3">
                     <p>
                       Hi Alice! I'm good, just finished a great book. How about
@@ -162,19 +297,24 @@ export default function ConversationsPage() {
                     />
                   </div>
                 </div>
-              </div>
+              </div> */}
             </>
           )}
 
           {/*  Chat Input  */}
-          <footer className="bg-white border-t border-gray-300 p-4 absolute bottom-0 w-3/4">
+          <footer className="bg-white border-t border-gray-300 p-4 absolute bottom-0 w-220">
             <div className="flex items-center">
-              <input
+              <textarea
                 type="text"
                 placeholder="Type a message..."
-                className="w-full p-2 rounded-md border border-gray-400 focus:outline-none focus:border-blue-500"
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={handleKeyPress}
+                className="w-full p-2 rounded-md border text-black border-gray-400 focus:outline-none focus:border-blue-500"
               />
-              <button className="bg-indigo-500 text-white px-4 py-2 rounded-md ml-2">
+              <button
+                className="bg-indigo-600 text-white px-4 py-2 rounded-md ml-2"
+                onClick={handleSend}
+              >
                 Send
               </button>
             </div>
