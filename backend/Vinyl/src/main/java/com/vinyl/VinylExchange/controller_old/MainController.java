@@ -1,4 +1,4 @@
-package com.vinyl.VinylExchange.controller;
+package com.vinyl.VinylExchange.controller_old;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

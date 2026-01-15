@@ -1,4 +1,4 @@
-package com.vinyl.VinylExchange.listing.dtos;
+package com.vinyl.VinylExchange.listing.dto;
 
 import java.util.List;
 import java.util.UUID;

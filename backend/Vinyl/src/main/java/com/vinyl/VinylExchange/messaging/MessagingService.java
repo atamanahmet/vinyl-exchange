@@ -21,17 +21,19 @@ import com.vinyl.VinylExchange.listing.ListingService;
 
 import com.vinyl.VinylExchange.messaging.dto.ConversationDTO;
 import com.vinyl.VinylExchange.messaging.dto.MessageDTO;
+import com.vinyl.VinylExchange.messaging.dto.ParticipantInfo;
 import com.vinyl.VinylExchange.messaging.enums.MessageType;
 
+//exceptions
+import com.vinyl.VinylExchange.shared.exception.ConversationNotFoundException;
 import com.vinyl.VinylExchange.shared.exception.ListingNotFoundException;
 import com.vinyl.VinylExchange.shared.exception.UnauthorizedActionException;
-import com.vinyl.VinylExchange.user.UserService;
 
 @Service
 public class MessagingService {
+
     private final MessagingRepository messagingRepository;
     private final ConversationRepository conversationRepository;
-    private final UserService userService;
     private final ListingService listingService;
 
     private static final Logger logger = LoggerFactory.getLogger(MessagingService.class);
@@ -39,30 +41,36 @@ public class MessagingService {
     public MessagingService(
             MessagingRepository messagingRepository,
             ConversationRepository conversationRepository,
-            UserService userService,
             ListingService listingService) {
 
         this.messagingRepository = messagingRepository;
         this.conversationRepository = conversationRepository;
-        this.userService = userService;
         this.listingService = listingService;
 
         logger.info("Messaging service ready.");
     }
 
+    // start with only buyer to owner, no need to owner to buyer wOut convo
     @Transactional
-    public Conversation startConversation(
+    public ConversationDTO startConversation(
             UUID initiatorId,
             String initiatorUsername,
             UUID relatedListingId) {
 
         Listing listing = listingService.findListingById(relatedListingId);
+
         // to check availability, throws exception if not exist or available
         if (!listing.isAvailable()) {
             throw new ListingNotFoundException("Listing is not available for trade, cannot start conversation");
         }
 
+        // do only when starting convo
         UUID participantId = listing.getOwnerId();
+
+        if (initiatorId.equals(participantId)) {
+            throw new UnauthorizedActionException("Conversation can not be start with yourself.");
+        }
+
         String participantUsername = listing.getOwnerUsername();
 
         Conversation conversation = conversationRepository
@@ -75,7 +83,8 @@ public class MessagingService {
 
                         return conversationRepository.save(newConversation);
 
-                        // if conversation exist, but got existing id error due to spamming, try again
+                        // if conversation is exist,
+                        // but got existing id error due to spamming, try again
                     } catch (DataIntegrityViolationException e) {
 
                         return conversationRepository.findBetweenUsers(initiatorId, participantId, relatedListingId)
@@ -84,43 +93,56 @@ public class MessagingService {
                     }
                 });
 
+        return convertToDTO(conversation);
+    }
+
+    private Conversation getConversation(UUID conversationId, UUID userId) {
+
+        Conversation conversation = conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new ConversationNotFoundException());
+
+        if (!conversation.isUserParticipant(userId)) {
+            throw new UnauthorizedActionException("User in not part of this conversation");
+        }
         return conversation;
+    }
+
+    public ConversationDTO getConversationDTO(UUID conversationId, UUID userId) {
+
+        Conversation conversation = getConversation(conversationId, userId);
+
+        return convertToDTO(conversation);
     }
 
     @Transactional
     public MessageDTO sendMessage(
             UUID senderId,
+            String senderUsername,
+            UUID conversationId,
             UUID relatedListingId,
             String content,
             MessageType messageType) {
 
-        String senderUsername = userService.findUsernameById(senderId);
+        // throws listing not found ex
+        listingService.findListingById(relatedListingId);
 
-        Listing relatedListing = listingService.findListingById(relatedListingId);
+        Conversation conversation = getConversation(conversationId, senderId);
 
-        UUID participantId = relatedListing.getOwner().getId();
-
-        String participantUsername = relatedListing.getOwner().getUsername();
-
-        Conversation conversation = getOrStartConversation(senderId, relatedListingId);
-
-        if (!conversation.isUserParticipant(senderId)) {
-            logger.warn("User is not part of this conversation, userId: " + senderId);
-            throw new UnauthorizedActionException(senderId);
-        }
+        ParticipantInfo participantInfo = conversation.getOtherParticipantInfo(senderId);
 
         Message message = Message.builder()
                 .conversationId(conversation.getId())
                 .senderId(senderId)
                 .senderUsername(senderUsername)
-                .receiverUsername(participantUsername)
+                .receiverUsername(participantInfo.username())
+                .receiverId(participantInfo.id())
                 .content(content)
                 .messageType(messageType == null ? MessageType.TEXT : messageType)
                 .build();
 
         Message savedMessage = messagingRepository.save(message);
 
-        conversation.increaseUnreadCount(participantId);
+        conversation.increaseUnreadCount(participantInfo.id());
         conversation.updateLastMessageTime();
 
         conversationRepository.save(conversation);
@@ -128,19 +150,18 @@ public class MessagingService {
         return new MessageDTO().from(savedMessage);
     }
 
-    public Page<MessageDTO> getMessages(UUID userId, UUID listingId, int page, int size) {
+    public Page<MessageDTO> getMessages(UUID userId, UUID conversationId, int page,
+            int size) {
 
         System.out.println("getting messages...");
 
-        Conversation conversation = getOrStartConversation(userId, listingId);
+        Conversation conversation = getConversation(conversationId, userId);
+
+        System.out.println("convo loaded...");
 
         System.out.println("conversation id " + conversation.getId());
-        System.out.println("initiator id " + conversation.getInitiatorId());
-        System.out.println("reciever id " + conversation.getParticipantId());
-
-        if (!conversation.isUserParticipant(userId)) {
-            throw new UnauthorizedActionException("User in not part of the conversation ", userId);
-        }
+        System.out.println("initiator username " + conversation.getInitiatorUsername());
+        System.out.println("reciever username " + conversation.getParticipantUsername());
 
         Pageable pageable = PageRequest.of(page, size);
 
@@ -155,14 +176,7 @@ public class MessagingService {
         return messageDTOPage;
     }
 
-    public ConversationDTO getThisConversationDTO(UUID userId, UUID listingId) {
-
-        Conversation conversation = getOrStartConversation(userId, listingId);
-
-        return convertToDTO(conversation, listingId);
-    }
-
-    public ConversationDTO convertToDTO(Conversation conversation, UUID initiatorId) {
+    private ConversationDTO convertToDTO(Conversation conversation) {
 
         String lastMessagePreview = messagingRepository.findLatestMessageByConversationId(conversation.getId())
                 .map(message -> message.getContent().length() > 50 ? message.getContent().substring(0, 50)
@@ -181,59 +195,27 @@ public class MessagingService {
         List<Conversation> conversationList = conversationRepository.findAllByUserId(userId);
 
         List<ConversationDTO> conversationDTOList = conversationList.stream()
-                .map((conv) -> convertToDTO(conv, userId))
+                .map((conv) -> convertToDTO(conv))
                 .collect(Collectors.toList());
 
         return conversationDTOList;
     }
 
-    public Conversation getOrStartConversation(UUID initiatorId, UUID relatedListingId) {
-
-        Listing listing = listingService.findListingById(relatedListingId);
-        // to check availability, throws exception if not exist or available
-        if (!listing.isAvailable()) {
-            throw new ListingNotFoundException("Listing is not available for trade, cannot start conversation");
-        }
-
-        UUID participantId = listing.getOwnerId();
-        String participantUsername = listing.getOwnerUsername();
-
-        String initiatorUsername = userService.findUsernameById(initiatorId);
-
-        Conversation conversation = conversationRepository
-                .findBetweenUsers(initiatorId, participantId, relatedListingId)
-                .orElseGet(() -> {
-
-                    try {
-                        Conversation newConversation = new Conversation(initiatorId, initiatorUsername, participantId,
-                                participantUsername, relatedListingId);
-
-                        return conversationRepository.save(newConversation);
-
-                        // if conversation exist, but got existing id error due to spamming, try again
-                    } catch (DataIntegrityViolationException e) {
-
-                        return conversationRepository.findBetweenUsers(initiatorId, participantId, relatedListingId)
-                                .orElseThrow(
-                                        () -> new RuntimeException("Conversation creation issues: MessagingService"));
-                    }
-                });
-
-        return conversation;
-    }
-
-    public UUID getConversationId(UUID listingId, UUID initiatorId) {
-
-        Conversation conversation = getOrStartConversation(initiatorId, listingId);
-
-        return conversation.getId();
-    }
-
+    // to do: only delete from deleting party, participant should have a copy
+    // conversation history, separate entity unmutable
     public void deleteMyConversations(UUID userId) {
+
         List<UUID> conversations = conversationRepository.findAllByUserId(userId).stream().map(conv -> conv.getId())
                 .collect(Collectors.toList());
 
         conversationRepository.deleteAllById(conversations);
+    }
 
+    public void deleteThisConversation(UUID conversationId, UUID userId) {
+
+        // checks if user participant, redundant
+        Conversation conversation = getConversation(conversationId, userId);
+
+        conversationRepository.delete(conversation);
     }
 }

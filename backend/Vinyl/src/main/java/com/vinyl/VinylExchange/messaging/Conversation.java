@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.vinyl.VinylExchange.messaging.dto.ParticipantInfo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -72,15 +73,15 @@ public class Conversation {
         return this.initiatorId.equals(userId) || this.participantId.equals(userId);
     }
 
-    public UUID getOtherParticipant(UUID userId) {
+    public ParticipantInfo getOtherParticipantInfo(UUID userId) {
 
         // return this.initiatorId.equals(userId) ? this.participantId
         // : this.participantId.equals(userId) ? this.initiatorId : null;
 
         if (this.initiatorId.equals(userId)) {
-            return this.participantId;
+            return new ParticipantInfo(this.participantId, this.participantUsername);
         } else if (this.participantId.equals(userId)) {
-            return this.initiatorId;
+            return new ParticipantInfo(this.initiatorId, this.initiatorUsername);
         }
 
         throw new IllegalArgumentException("This User is not part of the conversation");
@@ -112,7 +113,6 @@ public class Conversation {
         } else if (this.participantId.equals(userId)) {
             return this.participantUnreadCount;
         }
-
         return null;
     }
 }

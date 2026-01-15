@@ -45,6 +45,8 @@ public class Message {
 
     private String receiverUsername;
 
+    private UUID receiverId;
+
     @Enumerated(EnumType.STRING)
     @Builder.Default
 

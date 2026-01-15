@@ -60,6 +60,11 @@ public class GlobalExceptionHandler {
 
     }
 
+    @ExceptionHandler(UnauthorizedActionException.class)
+    public void handleUnauthorizedActionException(UnauthorizedActionException exception) {
+        System.out.println("Exception: " + exception.getMessage());
+    }
+
     @ExceptionHandler(NoCurrentUserException.class)
     public void handleNoCurrentUserException(NoCurrentUserException exception) {
         System.out.println("No user");

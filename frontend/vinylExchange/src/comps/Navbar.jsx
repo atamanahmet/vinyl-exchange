@@ -14,6 +14,7 @@ export default function Navbar() {
 
   const {
     user,
+    loading,
     logOut,
     setSearchQuery,
     searchHandler,
@@ -51,7 +52,9 @@ export default function Navbar() {
   };
 
   useEffect(() => {
-    setOpenModal(true);
+    if (!loading) {
+      setOpenModal(true);
+    }
   }, [openLogin]);
 
   if (navbarActive) {

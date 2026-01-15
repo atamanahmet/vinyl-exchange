@@ -20,7 +20,7 @@ import com.vinyl.VinylExchange.messaging.dto.ConversationDTO;
 import com.vinyl.VinylExchange.messaging.dto.MessageDTO;
 import com.vinyl.VinylExchange.messaging.dto.MessagePageResponse;
 import com.vinyl.VinylExchange.messaging.dto.SendMessageRequest;
-
+import com.vinyl.VinylExchange.messaging.dto.StartConversationRequest;
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
 
 @Controller
@@ -38,12 +38,10 @@ public class MessagingController {
                         @AuthenticationPrincipal UserPrincipal userPrincipal,
                         @RequestBody SendMessageRequest request) {
 
-                // System.out.println("message request: " + request.getContent() + "listingId: "
-                // +
-                // request.getRelatedListingId());
-
                 MessageDTO messageDTO = messagingService.sendMessage(
                                 userPrincipal.getId(),
+                                userPrincipal.getUsername(),
+                                request.getConversationId(),
                                 request.getRelatedListingId(),
                                 request.getContent(), null);
 
@@ -52,36 +50,51 @@ public class MessagingController {
                                 .body(messageDTO);
         }
 
-        @GetMapping("/conversation/{listingId}")
-        public ResponseEntity<?> getMessages(
+        @PostMapping("/start")
+        public ResponseEntity<?> startConversation(
                         @AuthenticationPrincipal UserPrincipal userPrincipal,
-                        @PathVariable(name = "listingId") UUID listingId
+                        @RequestBody StartConversationRequest request) {
+
+                // only when starting convo
+                ConversationDTO conversationDTO = messagingService.startConversation(
+                                userPrincipal.getId(),
+                                userPrincipal.getUsername(),
+                                request.relatedListingId());
+
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(conversationDTO);
+        }
+
+        @GetMapping("/conversation/{converstaionId}")
+        public ResponseEntity<?> getMessagesByConversationId(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal,
+                        @PathVariable(name = "converstaionId") UUID converstaionId
         // @RequestParam(defaultValue = "0") int page,
         // @RequestParam(defaultValue = "50") int size
         ) {
-                ConversationDTO conversationDTO = messagingService.getThisConversationDTO(userPrincipal.getId(),
-                                listingId);
+                // checking if user participant with userId
+                ConversationDTO conversationDTO = messagingService.getConversationDTO(converstaionId,
+                                userPrincipal.getId());
 
-                Page<MessageDTO> messagePage = messagingService.getMessages(userPrincipal.getId(), listingId, 0, 50);
+                Page<MessageDTO> messagePage = messagingService.getMessages(userPrincipal.getId(), converstaionId, 0,
+                                50);
 
                 return ResponseEntity
                                 .status(HttpStatus.OK)
                                 .body(new MessagePageResponse(
                                                 conversationDTO,
                                                 messagePage));
-
         }
 
         @GetMapping("/conversations")
-        public ResponseEntity<?> getConversations(
-                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        public ResponseEntity<?> getConversations(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
                 List<ConversationDTO> conversationsDTO = messagingService.getUserConversations(userPrincipal.getId());
 
                 return ResponseEntity
                                 .status(HttpStatus.OK)
                                 .body(conversationsDTO);
-
         }
 
         @DeleteMapping("/conversations")
@@ -93,7 +106,18 @@ public class MessagingController {
                 return ResponseEntity
                                 .status(HttpStatus.NO_CONTENT)
                                 .build();
+        }
 
+        @DeleteMapping("/conversation/{conversationId}")
+        public ResponseEntity<?> deleteThisConversation(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal,
+                        @PathVariable(name = "conversationId", required = true) UUID conversationId) {
+
+                messagingService.deleteThisConversation(userPrincipal.getId(), conversationId);
+
+                return ResponseEntity
+                                .status(HttpStatus.NO_CONTENT)
+                                .build();
         }
 
 }

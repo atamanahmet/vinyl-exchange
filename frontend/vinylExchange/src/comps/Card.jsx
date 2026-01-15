@@ -4,7 +4,7 @@ import { useCart } from "../context/CartContext";
 import { useEffect, useState } from "react";
 
 export default function Card({ item }) {
-  const { user } = useUser();
+  const { user, startConversation } = useUser();
   const { addToCart, cart, removeFromCart } = useCart();
   const [date, setDate] = useState();
   const [label, setLabel] = useState();
@@ -53,7 +53,8 @@ export default function Card({ item }) {
     navigate(`/edit/${item.id}`);
   };
   const navigateMessagingWithItemId = () => {
-    navigate(`/messaging/${item.id}`);
+    console.log("item id to start convo: " + item.id);
+    startConversation(item.id);
   };
 
   return (
@@ -98,7 +99,7 @@ export default function Card({ item }) {
               onClick={() => {
                 navigateMessagingWithItemId();
               }}
-              className="text-body mt-5 rounded-xl bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-9"
+              className="text-body mt-5 cursor-pointer rounded-xl bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-9"
             >
               Trade
             </a>

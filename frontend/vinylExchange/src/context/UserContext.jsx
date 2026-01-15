@@ -19,6 +19,7 @@ export const UserProvider = ({ children }) => {
   const [data, setData] = useState();
   const [authResponse, setAuthResponse] = useState(null);
   const [layoutSelection, setLayoutSelection] = useState("grid");
+  const [activeConvoId, setActiveConvoId] = useState();
 
   const storedPhoto = sessionStorage.getItem("profilePhoto");
 
@@ -168,6 +169,24 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+  async function startConversation(relatedListingId) {
+    try {
+      const res = await axios.post(
+        `http://localhost:8080/api/messages/start`,
+        { relatedListingId: relatedListingId },
+        { withCredentials: true }
+      );
+      if (res.status == 201) {
+        console.log("convo started");
+        setActiveConvoId(res.data.id);
+      }
+    } catch (error) {
+      console.log("convo starting error " + error);
+    } finally {
+      navigate(`/messaging`);
+    }
+  }
+
   return (
     <UserContext.Provider
       value={{
@@ -185,6 +204,8 @@ export const UserProvider = ({ children }) => {
         currentUserId,
         setLayoutSelection,
         layoutSelection,
+        startConversation,
+        activeConvoId,
       }}
     >
       {children}

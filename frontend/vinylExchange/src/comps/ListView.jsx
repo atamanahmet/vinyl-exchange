@@ -7,7 +7,7 @@ import { useUser } from "../context/UserContext";
 export default function ListView({ item }) {
   const { addToCart, cart, removeFromCart } = useCart();
 
-  const { user } = useUser();
+  const { user, startConversation } = useUser();
 
   const [image, setImage] = useState("");
 
@@ -30,7 +30,7 @@ export default function ListView({ item }) {
     navigate(`/edit/${item.id}`);
   };
   const navigateMessagingWithItemId = () => {
-    navigate(`/messaging`);
+    startConversation(item.id);
   };
 
   const inCart = cart

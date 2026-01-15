@@ -22,10 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import com.vinyl.VinylExchange.listing.dtos.FreezeRequest;
-import com.vinyl.VinylExchange.listing.dtos.ListingDTO;
-import com.vinyl.VinylExchange.listing.dtos.PricePreviewRequest;
-import com.vinyl.VinylExchange.listing.dtos.PromoteRequest;
+import com.vinyl.VinylExchange.listing.dto.FreezeRequest;
+import com.vinyl.VinylExchange.listing.dto.ListingDTO;
+import com.vinyl.VinylExchange.listing.dto.PricePreviewRequest;
+import com.vinyl.VinylExchange.listing.dto.PromoteRequest;
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
 import com.vinyl.VinylExchange.user.User;
 
