@@ -21,6 +21,7 @@ import com.vinyl.VinylExchange.listing.enums.ListingStatus;
 import com.vinyl.VinylExchange.shared.dto.TradePreferenceDTO;
 import com.vinyl.VinylExchange.shared.exception.InsufficientStockException;
 import com.vinyl.VinylExchange.shared.exception.ListingNotFoundException;
+import com.vinyl.VinylExchange.shared.exception.UnauthorizedActionException;
 import com.vinyl.VinylExchange.user.User;
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
 import com.vinyl.VinylExchange.shared.FileStorageService;
@@ -46,6 +47,11 @@ public class ListingService {
     }
 
     public List<Listing> getAllListings() {
+
+        return listingRepository.findAll();
+    }
+
+    public List<Listing> getAllListingDTO() {
 
         return listingRepository.findAll();
     }
@@ -110,7 +116,9 @@ public class ListingService {
                 tradePreferenceDTOs.add(new TradePreferenceDTO(tradePreference));
             }
 
-            listingDTOs.add(new ListingDTO(listing, tradePreferenceDTOs));
+            List<String> imagePaths = fileStorageService.getListingImagePaths(listing.getId());
+
+            listingDTOs.add(new ListingDTO(listing, tradePreferenceDTOs, imagePaths));
         }
 
         return listingDTOs;
@@ -125,8 +133,12 @@ public class ListingService {
 
         Listing listing = listingRepository.findById(listingId).orElseThrow(() -> new ListingNotFoundException());
 
-        if (listing.getOwner().getId().equals(userPrincipal.getId()))
+        if (listing.getOwner().getId().equals(userPrincipal.getId())) {
+
+            fileStorageService.deleteListingImages(listingId); // Clean up files
+
             listingRepository.deleteById(listingId);
+        }
     }
 
     public Listing findListingById(UUID listingId) {
@@ -142,13 +154,9 @@ public class ListingService {
             List<MultipartFile> images,
             User user) {
 
-        boolean edit = false;
-
         try {
 
             Listing listing = new ObjectMapper().readValue(listingJson, Listing.class);
-
-            edit = listing.getId() != null && listingRepository.existsById(listing.getId());
 
             listing.setOwner(user);
 
@@ -158,56 +166,55 @@ public class ListingService {
                         .forEach(preference -> preference.setListing(listing));
             }
 
-            if (edit) {
+            Listing savedListing = listingRepository.save(listing);
 
-                Listing oldListing = listingRepository
-                        .findById(listing.getId())
-                        .orElseThrow(() -> new ListingNotFoundException());
-
-                List<String> existingUploads = new ArrayList<>(oldListing.getImagePaths());
-
-                List<String> newFilePaths = new ArrayList<>();
-                if (images != null && !images.isEmpty()) {
-                    newFilePaths = fileStorageService.saveImages(images, oldListing.getId());
-                }
-
-                existingUploads.addAll(newFilePaths);
-
-                copyNonNullFields(listing, oldListing);
-
-                oldListing.getTradePreferences().clear();
-
-                if (listing.getTradePreferences() != null) {
-                    for (TradePreference preference : listing.getTradePreferences()) {
-                        preference.setListing(oldListing);
-                        oldListing.getTradePreferences().add(preference);
-                    }
-                }
-
-                oldListing.setImagePaths(existingUploads);
-
-                saveListing(oldListing);
-
-            } else {
-                // for getting id
-                Listing savedListing = saveListing(listing);
-
-                if (images != null) {
-                    List<String> newFilePaths = fileStorageService.saveImages(
-                            images,
-                            savedListing.getId());
-
-                    savedListing.setImagePaths(newFilePaths);
-
-                    saveListing(savedListing);
-                }
-
+            if (images != null) {
+                fileStorageService.saveImages(images, savedListing.getId());
             }
 
         } catch (Exception e) {
-            // // TODO: handle exception
+            // TODO: handle exception
+            System.out.println(e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+
+    public void updateListing(UUID id, String listingJson, List<MultipartFile> images, UUID userId) {
+
+        Listing existingListing = listingRepository.findById(id)
+                .orElseThrow(() -> new ListingNotFoundException());
+
+        // sec check, redundant but whatev
+        if (!existingListing.getOwner().getId().equals(userId)) {
+            throw new UnauthorizedActionException("Listing update unauthorized, action caused by userId: " + userId);
+        }
+
+        Listing updatedListing = new Listing();
+
+        try {
+            updatedListing = new ObjectMapper().readValue(listingJson, Listing.class);
+            copyNonNullFields(updatedListing, existingListing);
+
+            if (images != null && !images.isEmpty()) {
+                fileStorageService.saveImages(images, id); // Add to existing folder
+            }
+        } catch (Exception e) {
+            // TODO: handle exception
+            System.out.println(e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+        existingListing.getTradePreferences().clear();
+
+        if (updatedListing.getTradePreferences() != null) {
+
+            updatedListing.getTradePreferences().forEach(pref -> {
+                pref.setListing(existingListing);
+                existingListing.getTradePreferences().add(pref);
+            });
+        }
+
+        saveListing(existingListing);
     }
 
     public List<Listing> getAllListingsByUserId(UUID ownerId) {
@@ -229,7 +236,9 @@ public class ListingService {
                 tradePreferenceDTOs.add(new TradePreferenceDTO(tradePreference));
             }
 
-            listingDTOs.add(new ListingDTO(listing, tradePreferenceDTOs));
+            List<String> imagePaths = fileStorageService.getListingImagePaths(listing.getId());
+
+            listingDTOs.add(new ListingDTO(listing, tradePreferenceDTOs, imagePaths));
         }
 
         return listingDTOs;
@@ -248,7 +257,10 @@ public class ListingService {
             tradePreferenceDTOs.add(new TradePreferenceDTO(tradePreference));
 
         }
-        ListingDTO listingDTO = new ListingDTO(listing, tradePreferenceDTOs);
+
+        List<String> imagePaths = fileStorageService.getListingImagePaths(listing.getId());
+
+        ListingDTO listingDTO = new ListingDTO(listing, tradePreferenceDTOs, imagePaths);
 
         return listingDTO;
     }
@@ -262,7 +274,6 @@ public class ListingService {
 
             if (name.equals("class")
                     || name.equals("id")
-                    || name.equals("imagePaths")
                     || name.equals("owner")
                     || name.equals("tradePreferences")
                     || name.equals("promote")) {
@@ -335,6 +346,9 @@ public class ListingService {
                 .orElseThrow(() -> new ListingNotFoundException());
 
         return listing.getOwner().getUsername();
+    }
+
+    public List<ListingDTO> getListingDtos() {
     }
 
 }

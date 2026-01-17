@@ -41,7 +41,7 @@ public class AuthController {
             @Valid @RequestBody RegisterRequest registerRequest,
             HttpServletResponse response) {
 
-        AuthResponse authResponseDTO = authService.registerUser(registerRequest);
+        AuthResponse authResponseDTO = authService.registerUser(registerRequest, null);
 
         Cookie cookie = jwtCookieUtil.createJwtCookie(authResponseDTO.token());
 
@@ -80,6 +80,10 @@ public class AuthController {
 
     @GetMapping("/api/me")
     public ResponseEntity<UserDTO> getCurrentUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        if (userPrincipal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
         UserDTO userDTO = new UserDTO(userPrincipal);
 

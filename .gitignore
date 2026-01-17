@@ -5,6 +5,7 @@ target/
 !**/src/test/**/target/
 /backend/Vinyl/src/main/resources/application.properties
 /backend/Vinyl/uploads/**
+/backend/Vinyl/src/main/java/com/vinyl/VinylExchange/config/StartUpInit.java
 
 ### STS ###
 .apt_generated

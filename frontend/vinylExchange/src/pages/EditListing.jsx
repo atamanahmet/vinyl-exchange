@@ -10,7 +10,7 @@ export default function EditListing() {
 
   const location = useLocation();
 
-  const [previewPrice, setPreviewPrice] = useState(null);
+  const [previewPrice, setPreviewPrice] = useState("");
 
   const [images, setImages] = useState([]);
 
@@ -171,9 +171,9 @@ export default function EditListing() {
     images.forEach((img) => {
       formData.append("images", img);
     });
-    for (let pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
-    }
+    // for (let pair of formData.entries()) {
+    //   console.log(pair[0], pair[1]);
+    // }
 
     try {
       const res = await axios.post(
@@ -184,12 +184,16 @@ export default function EditListing() {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
+
       if (res.status === 201) {
-        alert(res.data);
+        console.log(res.data);
         navigate("/listings");
       }
     } catch (err) {
-      alert(err.response.data);
+      console.log("error catrched", err);
+      if (err.status === 403) {
+        navigate("/");
+      }
     }
   };
 

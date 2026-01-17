@@ -13,6 +13,6 @@ import lombok.Setter;
 @Builder
 public class CompressedImage {
     private String fileName;
-    private byte[] lossyImage;
-    private byte[] losslessImage;
+    private byte[] image;
+    // private byte[] losslessImage;
 }

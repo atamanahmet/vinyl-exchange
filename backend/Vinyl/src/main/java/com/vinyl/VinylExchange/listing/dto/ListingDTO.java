@@ -67,7 +67,7 @@ public class ListingDTO {
     private String labelName;
     private String ownerUsername;
 
-    public ListingDTO(Listing listing, List<TradePreferenceDTO> tradePreferenceDTOs) {
+    public ListingDTO(Listing listing, List<TradePreferenceDTO> tradePreferenceDTOs, List<String> imagePaths) {
         this.id = listing.getId();
         this.title = listing.getTitle();
         this.description = listing.getDescription();
@@ -75,7 +75,7 @@ public class ListingDTO {
         this.priceKurus = listing.getPriceKurus();
         this.tradeable = listing.getTradeable();
         this.discountedPrice = listing.getDiscountedPriceKurus();
-        this.imagePaths = listing.getImagePaths();
+        this.imagePaths = imagePaths;
         this.format = listing.getFormat();
         this.packaging = listing.getPackaging();
         this.ownerUsername = listing.getOwnerUsername();

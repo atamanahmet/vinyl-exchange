@@ -17,6 +17,7 @@ import com.vinyl.VinylExchange.cart.dto.UpdateCartItemRequest;
 import com.vinyl.VinylExchange.listing.Listing;
 import com.vinyl.VinylExchange.listing.ListingService;
 import com.vinyl.VinylExchange.listing.enums.ListingStatus;
+import com.vinyl.VinylExchange.shared.FileStorageService;
 import com.vinyl.VinylExchange.shared.exception.CartItemNotFoundException;
 import com.vinyl.VinylExchange.shared.exception.EmptyCartException;
 
@@ -28,15 +29,18 @@ public class CartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ListingService listingService;
+    private final FileStorageService fileStorageService;
 
     public CartService(
             CartRepository cartRepository,
             ListingService listingService,
-            CartItemRepository cartItemRepository) {
+            CartItemRepository cartItemRepository,
+            FileStorageService fileStorageService) {
 
         this.cartRepository = cartRepository;
         this.listingService = listingService;
         this.cartItemRepository = cartItemRepository;
+        this.fileStorageService = fileStorageService;
     }
 
     @Transactional
@@ -296,7 +300,7 @@ public class CartService {
                     .itemTotalPriceKurus(listing.getPriceKurus() * cartItem.getOrderQuantity())
                     .discountPerUnit(listing.getDiscountBP())
                     .discountedTotalPrice(listing.getDiscountedPriceKurus() * cartItem.getOrderQuantity())
-                    .mainImagePath(!listing.getImagePaths().isEmpty() ? listing.getImagePaths().get(0) : null)
+                    .mainImagePath(fileStorageService.getMainImagePath(listing.getId()))
                     .build();
 
             cartItemDTOs.add(cartItemDTO);

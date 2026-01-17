@@ -62,7 +62,7 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers("/register", "/api/listings", "/login", "/", "/search/**",
-                                "/uploads/listings/**",
+                                "/uploads/listings/**", "/api/me",
                                 "/listing/**")
                         .permitAll()
                         // .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

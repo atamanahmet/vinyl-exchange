@@ -7,9 +7,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +38,7 @@ public class FileStorageService {
     // uncompress image from http upload, for saving directly
     // refactor: only compressed
     public List<String> saveImages(List<MultipartFile> images, UUID listingId) throws IOException {
+
         if (images == null) {
             return null;
         }
@@ -41,44 +47,6 @@ public class FileStorageService {
 
         return saveCompressedImages(compressedImages, listingId);
 
-        // List<String> savedPaths = new ArrayList<>();
-
-        // Path listingFolder =
-        // Paths.get(UPLOAD_DIR).resolve(listingId.toString()).toAbsolutePath();
-
-        // Files.createDirectories(listingFolder);
-
-        // try {
-        // for (MultipartFile file : images) {
-        // if (file.isEmpty())
-        // continue;
-
-        // String fileName = file.getOriginalFilename();
-
-        // Path filePath = listingFolder.resolve(fileName);
-
-        // try (InputStream inputStream = file.getInputStream()) {
-
-        // Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-
-        // String relativePath = UPLOAD_DIR + listingId + "/" + fileName;
-
-        // savedPaths.add(relativePath); // relative path
-
-        // } catch (IOException e) {
-        // System.err.println("Failed to save file: " + file.getOriginalFilename());
-        // e.printStackTrace();
-        // }
-        // }
-
-        // return savedPaths;
-        // } catch (Exception e) {
-        // // TODO: handle exception
-        // System.out.println(e.getMessage());
-        // e.printStackTrace();
-        // System.out.println("error while save");
-        // }
-        // return null;
     }
 
     public List<String> saveCompressedImages(
@@ -91,32 +59,63 @@ public class FileStorageService {
 
         for (CompressedImage image : compressedImages) {
 
-            String losslessFileName = "lossless_" + image.getFileName();
-            String lossyFileName = "lossy_" + image.getFileName();
-
-            Path losslessPath = listingFolder.resolve(losslessFileName);
-            Path lossyPath = listingFolder.resolve(lossyFileName);
+            Path path = listingFolder.resolve(image.getFileName());
 
             Files.createDirectories(listingFolder);
 
             try {
 
-                Files.write(lossyPath, image.getLossyImage());
-                Files.write(losslessPath, image.getLosslessImage());
+                Files.write(path, image.getImage());
 
-                String relativeLosslessFileNamePath = UPLOAD_DIR + listingId + "/" + losslessFileName;
-                String relativeLossyPath = UPLOAD_DIR + listingId + "/" + lossyFileName;
+                String relativePath = UPLOAD_DIR + listingId + "/" + image.getFileName();
 
-                savedPaths.add(relativeLosslessFileNamePath);
-                savedPaths.add(relativeLossyPath);
+                savedPaths.add(relativePath);
 
             } catch (IOException e) {
                 System.out.println("Directory creating or file write exception: " + e.getMessage());
                 throw new RuntimeException("COmpressed images save failed: " + e.getMessage());
             }
-
         }
         return savedPaths;
+    }
+
+    public List<String> getListingImagePaths(UUID listingId) {
+
+        Path listingFolder = Paths.get(UPLOAD_DIR).resolve(listingId.toString()).toAbsolutePath();
+
+        if (!Files.exists(listingFolder)) {
+            logger.debug("No image folder found for listing: {}", listingId);
+            return Collections.emptyList();
+        }
+
+        try (Stream<Path> paths = Files.list(listingFolder)) {
+
+            return paths
+                    .filter(Files::isRegularFile)
+                    .filter(path -> isImageFile(path.getFileName().toString()))
+                    .map(Path::getFileName)
+                    .map(Path::toString)
+                    .sorted()
+                    .map(filename -> listingId + "/" + filename) // Relative path for ulrs
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            logger.error("Failed to read images for listing {}: {}", listingId, e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    public void deleteImage(UUID listingId, String filename) throws IOException {
+        Path imagePath = Paths.get(UPLOAD_DIR)
+                .resolve(listingId.toString())
+                .resolve(filename)
+                .toAbsolutePath();
+
+        if (!imagePath.startsWith(Paths.get(UPLOAD_DIR).toAbsolutePath())) {
+            throw new SecurityException("Invalid file path");
+        }
+
+        Files.deleteIfExists(imagePath);
+        logger.info("Deleted image {} for listing {}", filename, listingId);
     }
 
     public List<CompressedImage> compressImages(List<MultipartFile> images) {
@@ -126,6 +125,63 @@ public class FileStorageService {
         } catch (IOException e) {
             logger.error("Error while compressing images: " + e.getMessage());
             throw new RuntimeException("Image compression failed;");
+        }
+    }
+
+    private boolean isImageFile(String filename) {
+        String lower = filename.toLowerCase();
+        return lower.endsWith(".jpg") ||
+                lower.endsWith(".jpeg") ||
+                lower.endsWith(".png") ||
+                lower.endsWith(".webp") ||
+                lower.endsWith(".gif");
+    }
+
+    public void deleteListingImages(UUID listingId) {
+
+        Path listingFolder = Paths.get(UPLOAD_DIR).resolve(listingId.toString()).toAbsolutePath();
+
+        if (!Files.exists(listingFolder)) {
+            logger.debug("No images to delete for listing: {}", listingId);
+            return;
+        }
+
+        try (Stream<Path> paths = Files.walk(listingFolder)) {
+            paths.sorted(Comparator.reverseOrder()) // deepest first
+                    .forEach(path -> {
+                        try {
+                            FileUtils.deleteDirectory(listingFolder.toFile());
+                            logger.info("Force deleted all images for listing: {}", listingId);
+                        } catch (IOException e) {
+                            logger.warn("Failed to force delete images for listing {}: {}", listingId, e.getMessage());
+                        }
+                    });
+            logger.info("Deleted all images for listing: {}", listingId);
+        } catch (IOException e) {
+            logger.error("Failed to walk directory for listing {}: {}", listingId, e.getMessage());
+        }
+    }
+
+    public String getMainImagePath(UUID listingId) {
+
+        Path listingFolder = Paths.get(UPLOAD_DIR).resolve(listingId.toString()).toAbsolutePath();
+
+        if (!Files.exists(listingFolder)) {
+            logger.debug("No image folder found for listing: {}", listingId);
+            return null;
+        }
+
+        try (Stream<Path> paths = Files.list(listingFolder)) {
+            return paths
+                    .filter(Files::isRegularFile)
+                    .filter(path -> isImageFile(path.getFileName().toString()))
+                    .sorted()
+                    .findFirst() // first image only
+                    .map(path -> listingId + "/" + path.getFileName().toString())
+                    .orElse(null); // null if no images found
+        } catch (IOException e) {
+            logger.error("read eror for main image {}: {}", listingId, e.getMessage());
+            return null;
         }
     }
 }

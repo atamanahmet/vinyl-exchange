@@ -3,6 +3,9 @@ package com.vinyl.VinylExchange.shared.exception;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -10,10 +13,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     // dto validation
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -39,11 +48,12 @@ public class GlobalExceptionHandler {
                 .body(exception.getMessage());
     }
 
-    @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<?> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException exception) {
+    @ExceptionHandler({ MaxUploadSizeExceededException.class, FileSizeLimitExceededException.class })
+    public ResponseEntity<?> handleMaxUploadSizeExceededException(Exception exception, HttpServletRequest request,
+            HttpServletResponse response) {
 
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.PAYLOAD_TOO_LARGE)
                 .body("Max file size exceeded");
     }
 
@@ -52,6 +62,14 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
+                .body(exception.getMessage());
+    }
+
+    @ExceptionHandler(PageNotFoundException.class)
+    public ResponseEntity<?> handlePageNotFoundException(PageNotFoundException exception) {
+        logger.warn(exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
                 .body(exception.getMessage());
     }
 

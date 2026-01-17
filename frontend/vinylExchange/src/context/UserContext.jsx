@@ -103,18 +103,13 @@ export const UserProvider = ({ children }) => {
   async function checkAuth() {
     setLoading(true);
 
-    const url = "http://localhost:8080/api/me";
     try {
-      const res = await axios.get(url, {
+      const res = await axios.get("http://localhost:8080/api/me", {
         withCredentials: true,
       });
-
-      if (res.status === 200) {
-        setUser(res.data);
-      }
+      setUser(res.data);
     } catch (error) {
-      setUser(null);
-      navigate("/");
+      setUser(null); // Not logged in, that's fine
     } finally {
       setLoading(false);
     }

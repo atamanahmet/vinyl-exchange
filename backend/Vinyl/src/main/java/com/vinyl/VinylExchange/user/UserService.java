@@ -1,6 +1,7 @@
 package com.vinyl.VinylExchange.user;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -68,6 +69,11 @@ public class UserService {
     public User findByUsername(String username) {
 
         return userRepository.findByUsername(username).orElseThrow(() -> new NoCurrentUserException());
+    }
+
+    public Optional<User> findAdmin() {
+
+        return userRepository.findByUsername("admin");
     }
 
     public User findByUserId(UUID userId) {

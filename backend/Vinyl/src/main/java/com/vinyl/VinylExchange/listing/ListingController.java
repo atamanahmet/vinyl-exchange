@@ -3,6 +3,7 @@ package com.vinyl.VinylExchange.listing;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,6 +28,7 @@ import com.vinyl.VinylExchange.listing.dto.ListingDTO;
 import com.vinyl.VinylExchange.listing.dto.PricePreviewRequest;
 import com.vinyl.VinylExchange.listing.dto.PromoteRequest;
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
+import com.vinyl.VinylExchange.shared.FileStorageService;
 import com.vinyl.VinylExchange.user.User;
 
 @RestController
@@ -35,13 +37,16 @@ public class ListingController {
 
         private final ListingService listingService;
         private final PricePreviewService pricePreviewService;
+        private final FileStorageService fileStorageService;
 
         public ListingController(
                         ListingService listingService,
-                        PricePreviewService pricePreviewService) {
+                        PricePreviewService pricePreviewService,
+                        FileStorageService fileStorageService) {
 
                 this.listingService = listingService;
                 this.pricePreviewService = pricePreviewService;
+                this.fileStorageService = fileStorageService;
         }
 
         @GetMapping
@@ -49,9 +54,11 @@ public class ListingController {
 
                 List<Listing> listings = listingService.getAvailableListings();
 
+                List<ListingDTO> listingDTOs = listingService.getListingDTOs();
+
                 return ResponseEntity
                                 .status(HttpStatus.OK)
-                                .body(listings);
+                                .body(listingDTOs);
         }
 
         // admin

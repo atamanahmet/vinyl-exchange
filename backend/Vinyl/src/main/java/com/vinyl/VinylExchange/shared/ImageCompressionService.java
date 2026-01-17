@@ -1,7 +1,6 @@
 package com.vinyl.VinylExchange.shared;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -22,31 +21,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.annotation.PostConstruct;
-
 @Service
 public class ImageCompressionService {
 
     private Logger logger = LoggerFactory.getLogger(ImageCompressionService.class);
-
-    @PostConstruct // This runs when Spring starts the service
-    public void checkWebPSupport() {
-        logger.info("=== Checking WebP Support ===");
-
-        String[] writerMIMETypes = ImageIO.getWriterMIMETypes();
-        logger.info("Available writer MIME types: " + Arrays.toString(writerMIMETypes));
-
-        Iterator<ImageWriter> writers = ImageIO.getImageWritersByMIMEType("image/webp");
-
-        if (writers.hasNext()) {
-            ImageWriter writer = writers.next();
-            logger.info("Webp writer found: " + writer.getClass().getName());
-        } else {
-            logger.error(" NO webp writer found");
-        }
-
-        logger.info("=== End WebP Check ===");
-    }
 
     public List<CompressedImage> compressImages(List<MultipartFile> images) throws IOException {
 
@@ -54,16 +32,30 @@ public class ImageCompressionService {
 
         for (MultipartFile file : images) {
 
-            byte[] lossyImage = compressLossy(file, 0.80f);
-            byte[] losslessImage = compressLossless(file);
+            System.out.println(file.getSize() + "byte");
 
-            String newFileName = changeExtension(file.getOriginalFilename(), ".webp");
+            // To do: lossless new impl, webp lossless file size bigger than jpg
+            // compare dpi before converst lossless
 
-            compressedImages.add(new CompressedImage(newFileName, lossyImage, losslessImage));
+            // byte[] losslessImage = compressLossless(file);
 
-            logger.info("Image compressed: " + newFileName);
+            // smaller than 1000kb no need to compress, webp conversion reduces too much dpi
+            if (file.getSize() > 100000) {
+                byte[] lossyImage = compressLossy(file, 0.80f);
+
+                String newFileName = changeExtension(file.getOriginalFilename(), ".webp");
+
+                compressedImages.add(new CompressedImage(newFileName, lossyImage));
+
+                logger.info("Image compressed: " + newFileName);
+
+            } else {
+
+                byte[] image = file.getBytes();
+
+                compressedImages.add(new CompressedImage(file.getOriginalFilename(), image));
+            }
         }
-
         return compressedImages;
     }
 
@@ -77,45 +69,47 @@ public class ImageCompressionService {
 
     public byte[] compressImage(MultipartFile file, CompressionType compressionType, Float quality) throws IOException {
 
-        logger.info("Starting compression: {}, type: {}, quality: {}",
-                file.getOriginalFilename(), compressionType, quality);
-
         BufferedImage image = ImageIO.read(file.getInputStream());
 
-        logger.info("Image loaded: {}x{}", image.getWidth(), image.getHeight());
-
-        // if (image == null) {
-        // throw new IllegalArgumentException("Invalid image file: " +
-        // file.getOriginalFilename());
-        // }
-
-        Iterator<ImageWriter> writers = ImageIO.getImageWritersByMIMEType("image/webp");
-
-        if (!writers.hasNext()) {
-            throw new IllegalStateException("No webp writer found, twelvemonkeys dependency?");
+        if (image == null) {
+            throw new IllegalArgumentException("Invalid image file: " +
+                    file.getOriginalFilename());
         }
 
-        // ImageWriter imageWriter = writers.next();
+        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("webp");
+
+        if (!writers.hasNext()) {
+            throw new IllegalStateException("No WebP writer found");
+        }
+
+        ImageWriter writer = writers.next();
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 ImageOutputStream imageOutputStream = ImageIO.createImageOutputStream(outputStream);) {
 
-            boolean written = ImageIO.write(image, "webp", outputStream);
+            ImageWriteParam writeParam = writer.getDefaultWriteParam();
 
-            logger.info("ImageIO.write() returned: {}", written);
+            // System.out.println("can write comppresed " +
+            // writeParam.canWriteCompressed());
 
-            byte[] result = outputStream.toByteArray();
-            logger.info("Output size: {} bytes", result.length);
+            writeParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+            writeParam.setCompressionType(compressionType.toString());
 
-            // byte[] result = outputStream.toByteArray();
+            if (compressionType.equals(CompressionType.LOSSY)) {
+                writeParam.setCompressionQuality(0.85f);
+            }
 
-            logger.info("Compression complete. Output size: {} bytes", result.length);
+            writer.setOutput(imageOutputStream);
 
-            return result;
+            writer.write(null, new IIOImage(image, null, null), writeParam);
 
-        } finally {
-            // imageWriter.dispose();
+            imageOutputStream.flush();
+
+            // System.out.println("output size after write: " + outputStream.size());
+
+            return outputStream.toByteArray();
         }
+
     }
 
     public static String changeExtension(String filename, String ext) {

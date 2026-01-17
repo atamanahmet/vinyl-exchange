@@ -1,15 +1,41 @@
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 
+const MAX_FILE_SIZE = 38 * 1024 * 1024; // 38MB in bytes
+
 export default function ImageUploader({ images, setImages }) {
+  const [error, setError] = useState(null);
+
   const onDrop = useCallback(
-    (acceptedFiles) => {
-      const newFiles = acceptedFiles.map((file) =>
-        Object.assign(file, {
-          preview: URL.createObjectURL(file),
-        })
-      );
-      setImages((prev) => [...prev, ...newFiles]);
+    (acceptedFiles, rejectedFiles) => {
+      console.log("Accepted:", acceptedFiles);
+      console.log("Rejected:", rejectedFiles);
+
+      setError(null);
+
+      // Handle rejected files
+      if (rejectedFiles.length > 0) {
+        const oversizedCount = rejectedFiles.filter((rejection) =>
+          rejection.errors.some((err) => err.code === "file-too-large")
+        ).length;
+
+        if (oversizedCount > 0) {
+          setError(`${oversizedCount} file(s) exceed the 38MB limit`);
+
+          // Auto-clear error after 5 seconds
+          setTimeout(() => setError(null), 5000);
+        }
+      }
+
+      // Handle accepted files
+      if (acceptedFiles.length > 0) {
+        const newFiles = acceptedFiles.map((file) =>
+          Object.assign(file, {
+            preview: URL.createObjectURL(file),
+          })
+        );
+        setImages((prev) => [...prev, ...newFiles]);
+      }
     },
     [setImages]
   );
@@ -18,6 +44,7 @@ export default function ImageUploader({ images, setImages }) {
     onDrop,
     accept: { "image/*": [] },
     multiple: true,
+    maxSize: MAX_FILE_SIZE,
   });
 
   const removeImage = (index) => {
@@ -26,6 +53,13 @@ export default function ImageUploader({ images, setImages }) {
 
   return (
     <div className="space-y-4 max-w-100">
+      {/* ERROR MESSAGE */}
+      {error && (
+        <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded">
+          {error}
+        </div>
+      )}
+
       {/* DROPZONE */}
       <div
         {...getRootProps()}
@@ -41,6 +75,9 @@ export default function ImageUploader({ images, setImages }) {
           {isDragActive
             ? "Drop images here…"
             : "Drag & drop or click to upload images"}
+        </p>
+        <p className="text-gray-500 text-sm mt-2">
+          Max file size: 38MB per image
         </p>
       </div>
 
@@ -64,7 +101,7 @@ export default function ImageUploader({ images, setImages }) {
                   bg-indigo-600 hover:bg-red-700 
                   text-white p-0 rounded-full
                   opacity-50 group-hover:opacity-100 transition
-                flex items-center justify-center
+                  flex items-center justify-center
                 "
               >
                 X

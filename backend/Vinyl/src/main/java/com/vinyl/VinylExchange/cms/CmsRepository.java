@@ -1,5 +1,7 @@
-package com.vinyl.VinylExchange.cms;
+// package com.vinyl.VinylExchange.cms;
 
-public class CmsRepository {
+// import org.springframework.data.jpa.repository.JpaRepository;
 
-}
+// public interface CmsRepository extends JpaRepository<>{
+
+// }

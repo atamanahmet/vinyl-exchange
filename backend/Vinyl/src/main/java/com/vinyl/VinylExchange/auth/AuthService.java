@@ -72,7 +72,7 @@ public class AuthService {
                 new UserDTO(userPrincipal.getUsername(), userPrincipal.getEmail()), token);
     }
 
-    public AuthResponse registerUser(RegisterRequest registerRequest) {
+    public AuthResponse registerUser(RegisterRequest registerRequest, Role role) {
 
         validateRegistration(registerRequest);
 
@@ -83,9 +83,11 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(registerRequest.password()));
         user.setStatus(UserStatus.PENDING);
 
-        Role userRole = roleService.getRoleByName(RoleName.ROLE_USER);
+        if (role == null) {
+            role = roleService.getRoleByName(RoleName.ROLE_USER);
+        }
 
-        user.setRoles(Set.of(userRole));
+        user.setRoles(Set.of(role));
 
         System.out.println(user.getRoles());
 
