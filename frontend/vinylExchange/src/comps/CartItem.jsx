@@ -15,11 +15,8 @@ export default function CartItem({ item }) {
         <a href="#" className="shrink-0 md:order-1">
           <img
             className="h-25 w-25"
-            src={
-              item.mainImagePath
-                ? `http://localhost:8080/${item.mainImagePath}`
-                : "/placeholder.png"
-            }
+            //first imnage as main image
+            src={item.imagePaths[0] ? item.imagePaths[0] : "/placeholder.png"}
             alt="imac image"
           />
         </a>

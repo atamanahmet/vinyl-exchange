@@ -24,12 +24,12 @@ export default function ListingItem({ item, onDelete }) {
           }}
         >
           <img
-            src={`http://localhost:8080/${item.imagePaths[0]}`}
+            src={item.imagePaths[0]}
             onError={(e) => {
               e.target.src = "/placeholder.png";
             }}
             alt="listing main image"
-            className="bg-black"
+            className="bg-black object-cover h-35 w-35"
           />
         </button>
         <button

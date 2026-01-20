@@ -1,13 +1,14 @@
 package com.vinyl.VinylExchange.listing;
 
 import java.math.BigDecimal;
+
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -27,6 +29,7 @@ import com.vinyl.VinylExchange.listing.dto.FreezeRequest;
 import com.vinyl.VinylExchange.listing.dto.ListingDTO;
 import com.vinyl.VinylExchange.listing.dto.PricePreviewRequest;
 import com.vinyl.VinylExchange.listing.dto.PromoteRequest;
+
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
 import com.vinyl.VinylExchange.shared.FileStorageService;
 import com.vinyl.VinylExchange.user.User;
@@ -37,7 +40,6 @@ public class ListingController {
 
         private final ListingService listingService;
         private final PricePreviewService pricePreviewService;
-        private final FileStorageService fileStorageService;
 
         public ListingController(
                         ListingService listingService,
@@ -46,38 +48,35 @@ public class ListingController {
 
                 this.listingService = listingService;
                 this.pricePreviewService = pricePreviewService;
-                this.fileStorageService = fileStorageService;
         }
 
         @GetMapping
         public ResponseEntity<?> getListings() {
 
-                List<Listing> listings = listingService.getAvailableListings();
-
-                List<ListingDTO> listingDTOs = listingService.getListingDTOs();
+                List<ListingDTO> listingDTOs = listingService.getAllAvailableListingDTOs();
 
                 return ResponseEntity
                                 .status(HttpStatus.OK)
                                 .body(listingDTOs);
         }
 
-        // admin
+        // for admin actions only, promote, freeze, remove etc
         @PreAuthorize("hasRole('ADMIN')")
         @GetMapping("/all")
         public ResponseEntity<?> getAllListings() {
 
-                List<Listing> listings = listingService.getAllListings();
+                List<ListingDTO> listingDTOs = listingService.getAllListingDTOs();
 
                 return ResponseEntity
                                 .status(HttpStatus.OK)
-                                .body(listings);
+                                .body(listingDTOs);
         }
 
         @GetMapping("/promote")
-        public ResponseEntity<?> getPromotedListings(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        public ResponseEntity<?> getPromotedListingsForUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-                List<Listing> promoteListings = listingService.getFilteredPromotedListings(userPrincipal.getId());
-                // System.out.println(promoteListings.get(0).getTitle());
+                List<ListingDTO> promoteListings = listingService.getFilteredPromotedListingDTOs(userPrincipal.getId());
+
                 return ResponseEntity
                                 .status(HttpStatus.OK)
                                 .body(promoteListings);
@@ -101,12 +100,22 @@ public class ListingController {
                                 .body("Listing created");
         }
 
+        @PutMapping("/{listingId}")
+        public ResponseEntity<?> updateListing(
+                        @AuthenticationPrincipal UserPrincipal currentUserPrincipal,
+                        @PathVariable UUID listingId,
+                        @RequestPart("listing") String listingJson,
+                        @RequestPart(value = "images", required = false) List<MultipartFile> newImages) {
+
+                listingService.updateListing(listingId, listingJson, newImages, currentUserPrincipal.getId());
+
+                return ResponseEntity.ok("Listing updated");
+        }
+
         @GetMapping("/my")
         public ResponseEntity<?> getMyListings(@AuthenticationPrincipal UserPrincipal currentUserPrincipal) {
 
                 List<ListingDTO> listingResponse = listingService.getListingDTOsByUserId(currentUserPrincipal.getId());
-
-                listingResponse = listingService.getListingDTOsByUserId(currentUserPrincipal.getId());
 
                 return ResponseEntity
                                 .status(HttpStatus.OK)
@@ -156,10 +165,6 @@ public class ListingController {
                         @PathVariable(name = "listingId", required = true) UUID listingId,
                         @RequestBody PromoteRequest promoteRequest) {
 
-                System.out.println("Curret User: " + currentUserPrincipal.getUsername());
-
-                System.out.println("Curret User ROles: " + currentUserPrincipal.getRoles());
-
                 listingService.promoteListing(listingId, promoteRequest.action(), currentUserPrincipal);
 
                 return ResponseEntity
@@ -174,10 +179,6 @@ public class ListingController {
                         @AuthenticationPrincipal UserPrincipal currentUserPrincipal,
                         @PathVariable(name = "listingId", required = true) UUID listingId,
                         @RequestBody FreezeRequest freezeRequest) {
-
-                System.out.println("Curret User: " + currentUserPrincipal.getUsername());
-
-                System.out.println("Curret User ROles: " + currentUserPrincipal.getRoles());
 
                 listingService.freezeListing(listingId, freezeRequest.action(), currentUserPrincipal);
 

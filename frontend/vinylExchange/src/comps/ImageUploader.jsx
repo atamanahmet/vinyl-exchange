@@ -1,10 +1,37 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 
 const MAX_FILE_SIZE = 38 * 1024 * 1024; // 38MB in bytes
 
-export default function ImageUploader({ images, setImages }) {
+export default function ImageUploader({
+  images,
+  setImages,
+  existingImages = [],
+}) {
   const [error, setError] = useState(null);
+
+  //for edit only
+  useEffect(() => {
+    if (existingImages.length > 0 && images.length === 0) {
+      const existingImageObjects = existingImages.map((url, index) => ({
+        preview: url,
+        isExisting: true,
+        url: url,
+        name: `existing-image-${index}`,
+      }));
+      setImages(existingImageObjects);
+    }
+  }, [existingImages, images.length, setImages]);
+
+  useEffect(() => {
+    return () => {
+      images.forEach((img) => {
+        if (img.preview && !img.isExisting) {
+          URL.revokeObjectURL(img.preview);
+        }
+      });
+    };
+  }, [images]);
 
   const onDrop = useCallback(
     (acceptedFiles, rejectedFiles) => {
@@ -13,31 +40,28 @@ export default function ImageUploader({ images, setImages }) {
 
       setError(null);
 
-      // Handle rejected files
       if (rejectedFiles.length > 0) {
         const oversizedCount = rejectedFiles.filter((rejection) =>
-          rejection.errors.some((err) => err.code === "file-too-large")
+          rejection.errors.some((err) => err.code === "file-too-large"),
         ).length;
 
         if (oversizedCount > 0) {
           setError(`${oversizedCount} file(s) exceed the 38MB limit`);
-
-          // Auto-clear error after 5 seconds
           setTimeout(() => setError(null), 5000);
         }
       }
 
-      // Handle accepted files
       if (acceptedFiles.length > 0) {
         const newFiles = acceptedFiles.map((file) =>
           Object.assign(file, {
             preview: URL.createObjectURL(file),
-          })
+            isExisting: false,
+          }),
         );
         setImages((prev) => [...prev, ...newFiles]);
       }
     },
-    [setImages]
+    [setImages],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -48,12 +72,17 @@ export default function ImageUploader({ images, setImages }) {
   });
 
   const removeImage = (index) => {
+    const imageToRemove = images[index];
+
+    if (imageToRemove.preview && !imageToRemove.isExisting) {
+      URL.revokeObjectURL(imageToRemove.preview);
+    }
+
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
     <div className="space-y-4 max-w-100">
-      {/* ERROR MESSAGE */}
       {error && (
         <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded">
           {error}
@@ -81,16 +110,21 @@ export default function ImageUploader({ images, setImages }) {
         </p>
       </div>
 
-      {/* PREVIEW GRID */}
       {images.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {images.map((img, index) => (
             <div key={index} className="relative group">
               <img
                 src={img.preview}
-                alt="preview"
-                className="w-max h-30 object-cover rounded-lg "
+                alt={`preview ${index + 1}`}
+                className="w-full h-30 object-cover rounded-lg"
               />
+
+              {img.isExisting && (
+                <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                  Existing
+                </div>
+              )}
 
               {/* REMOVE BUTTON */}
               <button
@@ -103,8 +137,9 @@ export default function ImageUploader({ images, setImages }) {
                   opacity-50 group-hover:opacity-100 transition
                   flex items-center justify-center
                 "
+                aria-label={`Remove image ${index + 1}`}
               >
-                X
+                ×
               </button>
             </div>
           ))}

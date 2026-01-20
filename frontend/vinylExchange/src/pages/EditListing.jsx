@@ -41,7 +41,7 @@ export default function EditListing() {
         `http://localhost:8080/api/listings/${listingId}`,
         {
           withCredentials: true,
-        }
+        },
       );
       if (res.status == 200) {
         setListing(res.data);
@@ -60,7 +60,7 @@ export default function EditListing() {
       const res = await axios.post(
         "http://localhost:8080/api/listings/price/preview",
         { priceTL: price, discountPercent: discount },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       setPreviewPrice(res.data); // BigDecimal
     } catch (err) {
@@ -152,51 +152,52 @@ export default function EditListing() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const existingImageUrls = images
+      .filter((img) => img.isExisting)
+      .map((img) => img.url);
+
+    const newImageFiles = images.filter((img) => !img.isExisting);
+
     const payload = {
       ...listing,
+      imagePaths: existingImageUrls,
       tradePreferences: listing.tradeable ? listing.tradePreferences : null,
     };
 
     const formData = new FormData();
 
-    // JSON as string
     formData.append(
       "listing",
       new Blob([JSON.stringify(payload)], {
         type: "application/json",
-      })
+      }),
     );
 
-    // upload images
-    images.forEach((img) => {
+    newImageFiles.forEach((img) => {
       formData.append("images", img);
     });
-    // for (let pair of formData.entries()) {
-    //   console.log(pair[0], pair[1]);
-    // }
 
     try {
-      const res = await axios.post(
-        `http://localhost:8080/api/listings`,
+      const res = await axios.put(
+        `http://localhost:8080/api/listings/${listingId}`,
         formData,
         {
           withCredentials: true,
           headers: { "Content-Type": "multipart/form-data" },
-        }
+        },
       );
 
-      if (res.status === 201) {
-        console.log(res.data);
+      if (res.status === 200) {
+        console.log("Listing updated:", res.data);
         navigate("/listings");
       }
     } catch (err) {
-      console.log("error catrched", err);
+      console.log("error caught", err);
       if (err.status === 403) {
         navigate("/");
       }
     }
   };
-
   return (
     <div className="mt-10 -ml-5">
       <h2 className="text-3xl font-bold text-left ml-4">Edit Listing</h2>
@@ -586,16 +587,6 @@ export default function EditListing() {
       ${!listing.tradeable ? "opacity-50 cursor-not-allowed" : ""}`}
                 />
               </label>
-              {/* <div className="formItem mt-5">
-                <label className="block mb-1">Discount</label>
-                <input
-                  type="number"
-                  name="discount"
-                  value={listing.discount}
-                  onChange={handleChange}
-                  className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
-                />
-              </div> */}
               {listing.tradeable && (
                 <div className="mt-5">
                   <div className=" items-center justify-between mb-2 relative">
@@ -635,7 +626,7 @@ export default function EditListing() {
                           setListing((prev) => ({
                             ...prev,
                             tradePreferences: prev.tradePreferences.filter(
-                              (_, i) => i !== index
+                              (_, i) => i !== index,
                             ),
                           }))
                         }
@@ -652,7 +643,7 @@ export default function EditListing() {
                           handleTradePrefChange(
                             index,
                             "desiredItem",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         className="input w-75 input-bordered border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1 mb-3"
@@ -669,7 +660,7 @@ export default function EditListing() {
                             handleTradePrefChange(
                               index,
                               "paymentDirection",
-                              "NO_EXTRA"
+                              "NO_EXTRA",
                             )
                           }
                           className={`px-2 py-1 rounded-md border ${
@@ -687,7 +678,7 @@ export default function EditListing() {
                             handleTradePrefChange(
                               index,
                               "paymentDirection",
-                              "PAY"
+                              "PAY",
                             )
                           }
                           className={`px-2 py-1 rounded-md border ${
@@ -705,7 +696,7 @@ export default function EditListing() {
                             handleTradePrefChange(
                               index,
                               "paymentDirection",
-                              "RECEIVE"
+                              "RECEIVE",
                             )
                           }
                           className={`px-2 py-1 rounded-md border ${
@@ -725,7 +716,7 @@ export default function EditListing() {
                             handleTradePrefChange(
                               index,
                               "extraAmount",
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           disabled={pref.paymentDirection === "NO_EXTRA"}
@@ -772,7 +763,11 @@ export default function EditListing() {
             <div>
               <h3 className="text-3xl font-bold mb-5 mt-5">Upload images</h3>
 
-              <ImageUploader images={images} setImages={setImages} />
+              <ImageUploader
+                images={images}
+                setImages={setImages}
+                existingImages={listing.imagePaths}
+              />
             </div>
           </div>
         </div>

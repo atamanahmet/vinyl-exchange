@@ -3,25 +3,30 @@ package com.vinyl.VinylExchange.security.config;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import org.springframework.http.HttpMethod;
 
 import org.springframework.security.authentication.AuthenticationManager;
+
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -61,11 +66,17 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/register", "/api/listings", "/login", "/", "/search/**",
-                                "/uploads/listings/**", "/api/me",
-                                "/listing/**")
+                        .requestMatchers(
+                                "/",
+                                "/login",
+                                "/api/me",
+                                "/register",
+                                "/search/**",
+                                "/api/cms/**",
+                                "/listing/**",
+                                "/api/listings/**",
+                                "/uploads/listings/**")
                         .permitAll()
-                        // .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/logout").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/cart/items/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/newlisting").authenticated()
@@ -96,7 +107,7 @@ public class SecurityConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry
                 .addResourceHandler("/uploads/listings/**")
-                .addResourceLocations("file:" + UPLOAD_DIR + "/")
+                .addResourceLocations("file:" + UPLOAD_DIR)
                 .setCachePeriod(3600); // 1 hour
     }
 

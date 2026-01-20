@@ -66,11 +66,9 @@ export default function Card({ item }) {
           }}
         >
           <img
-            className="rounded-md h-60 w-60 object-fill"
+            className="rounded-md h-60 w-60 object-cover"
             src={
-              item.imagePaths[0]
-                ? `http://localhost:8080/${item.imagePaths[0]}`
-                : "/placeholder.png"
+              item.imagePaths[0] ? `${item.imagePaths[0]}` : "/placeholder.png"
             }
             alt=""
           />

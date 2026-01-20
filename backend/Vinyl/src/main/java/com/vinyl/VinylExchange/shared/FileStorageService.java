@@ -27,6 +27,12 @@ public class FileStorageService {
     @Value("${file.upload-dir}")
     private String UPLOAD_DIR;
 
+    @Value("${file.image.url-path}")
+    private String IMG_URL_PATH;
+
+    @Value("${app.base-url}")
+    private String BASE_URL;
+
     private final Logger logger = LoggerFactory.getLogger(FileStorageService.class);
 
     private final ImageCompressionService imageCompressionService;
@@ -35,7 +41,7 @@ public class FileStorageService {
         this.imageCompressionService = imageCompressionService;
     }
 
-    // uncompress image from http upload, for saving directly
+    // uncompress images from http upload, for saving directly
     // refactor: only compressed
     public List<String> saveImages(List<MultipartFile> images, UUID listingId) throws IOException {
 
@@ -67,9 +73,9 @@ public class FileStorageService {
 
                 Files.write(path, image.getImage());
 
-                String relativePath = UPLOAD_DIR + listingId + "/" + image.getFileName();
+                String fullPath = BASE_URL + IMG_URL_PATH + listingId + "/" + image.getFileName();
 
-                savedPaths.add(relativePath);
+                savedPaths.add(fullPath);
 
             } catch (IOException e) {
                 System.out.println("Directory creating or file write exception: " + e.getMessage());
@@ -96,7 +102,8 @@ public class FileStorageService {
                     .map(Path::getFileName)
                     .map(Path::toString)
                     .sorted()
-                    .map(filename -> listingId + "/" + filename) // Relative path for ulrs
+                    .map(filename -> BASE_URL + IMG_URL_PATH + listingId + "/" + filename) // full path for ulrs to
+                                                                                           // frontend only
                     .collect(Collectors.toList());
         } catch (IOException e) {
             logger.error("Failed to read images for listing {}: {}", listingId, e.getMessage());
@@ -176,8 +183,8 @@ public class FileStorageService {
                     .filter(Files::isRegularFile)
                     .filter(path -> isImageFile(path.getFileName().toString()))
                     .sorted()
-                    .findFirst() // first image only
-                    .map(path -> listingId + "/" + path.getFileName().toString())
+                    .findFirst() // first image only as a mainImg
+                    .map(path -> BASE_URL + IMG_URL_PATH + listingId + "/" + path.getFileName().toString())
                     .orElse(null); // null if no images found
         } catch (IOException e) {
             logger.error("read eror for main image {}: {}", listingId, e.getMessage());

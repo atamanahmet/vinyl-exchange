@@ -59,7 +59,7 @@ export default function ItemPage() {
         `http://localhost:8080/api/listings/${listingId}`,
         {
           withCredentials: true,
-        }
+        },
       );
       if (res.status == 200) {
         console.log(res.data);
@@ -74,7 +74,6 @@ export default function ItemPage() {
 
   useEffect(() => {
     getListing();
-    console.log(user);
   }, [listingId]);
 
   useEffect(() => {

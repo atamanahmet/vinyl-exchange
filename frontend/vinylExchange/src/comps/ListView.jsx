@@ -46,7 +46,7 @@ export default function ListView({ item }) {
           }}
         >
           <img
-            src={`http://localhost:8080/${item.imagePaths[0]}`}
+            src={item.imagePaths[0]}
             onError={(e) => {
               e.target.src = "/placeholder.png";
             }}

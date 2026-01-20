@@ -9,7 +9,7 @@ import { useUser } from "../context/UserContext";
 export default function MainPage({ data }) {
   const { cart } = useCart();
   const { layoutSelection, setLayoutSelection } = useUser();
-
+  console.log(data);
   return (
     <>
       <div className="flex flex-row gap-2 justify-end">

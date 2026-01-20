@@ -66,15 +66,16 @@ public class ListingService {
         return listingRepository.findByPromoteTrue();
     }
 
-    public List<Listing> getFilteredPromotedListings(UUID userId) {
+    public List<ListingDTO> getFilteredPromotedListingDTOs(UUID userId) {
 
         Set<UUID> cartListingIds = cartService
                 .getCartDTO(userId)
                 .getItems()
                 .stream()
                 .map(item -> item.getListingId()).collect(Collectors.toSet());
+
         if (cartListingIds.isEmpty()) {
-            return null;
+            return List.of();
         }
 
         List<Listing> promotedListings = listingRepository.findByPromoteTrue();
@@ -82,10 +83,12 @@ public class ListingService {
         // only first 3 item to fit in cartPage
         List<Listing> filteredPromotedList = promotedListings.stream()
                 .filter(listing -> !cartListingIds.contains(listing.getId()))
-                .limit(3)
+                .limit(5)
                 .collect(Collectors.toList());
 
-        return filteredPromotedList;
+        return filteredPromotedList.stream()
+                .map(filteredItem -> converToDTO(filteredItem))
+                .toList();
     }
 
     public void saveAllListing(List<Listing> listingList) {
@@ -118,7 +121,7 @@ public class ListingService {
 
             List<String> imagePaths = fileStorageService.getListingImagePaths(listing.getId());
 
-            listingDTOs.add(new ListingDTO(listing, tradePreferenceDTOs, imagePaths));
+            listingDTOs.add(new ListingDTO(listing, imagePaths));
         }
 
         return listingDTOs;
@@ -184,64 +187,103 @@ public class ListingService {
         Listing existingListing = listingRepository.findById(id)
                 .orElseThrow(() -> new ListingNotFoundException());
 
-        // sec check, redundant but whatev
+        // Security check
         if (!existingListing.getOwner().getId().equals(userId)) {
             throw new UnauthorizedActionException("Listing update unauthorized, action caused by userId: " + userId);
         }
 
-        Listing updatedListing = new Listing();
-
         try {
-            updatedListing = new ObjectMapper().readValue(listingJson, Listing.class);
+            ObjectMapper objectMapper = new ObjectMapper();
+            ListingDTO listingDTO = objectMapper.readValue(listingJson, ListingDTO.class);
+
+            // Handle image updates
+            handleImageUpdates(id, listingDTO.getImagePaths(), images);
+
+            // Convert DTO to entity for update
+            Listing updatedListing = new Listing();
+            updatedListing.setTitle(listingDTO.getTitle());
+            updatedListing.setArtistName(listingDTO.getArtistName());
+            updatedListing.setDescription(listingDTO.getDescription());
+            updatedListing.setPriceKurus(listingDTO.getPriceKurus());
+            updatedListing.setDiscountBP(listingDTO.getDiscountBP());
+            updatedListing.setTradeable(listingDTO.getTradeable());
+            updatedListing.setTradeValue(listingDTO.getTradeValue());
+            updatedListing.setCondition(listingDTO.getCondition());
+            updatedListing.setFormat(listingDTO.getFormat());
+            updatedListing.setPackaging(listingDTO.getPackaging());
+            updatedListing.setDate(listingDTO.getDate());
+            // updatedListing.setCountry(listingDTO.getCountry());
+            updatedListing.setLabelName(listingDTO.getLabelName());
+            updatedListing.setBarcode(listingDTO.getBarcode());
+            updatedListing.setTrackCount(listingDTO.getTrackCount());
+
+            // Copy non-null fields
             copyNonNullFields(updatedListing, existingListing);
 
-            if (images != null && !images.isEmpty()) {
-                fileStorageService.saveImages(images, id); // Add to existing folder
-            }
+            // Update trade preferences
+            updateTradePreferences(existingListing, listingDTO.getTradePreferences());
+
+            saveListing(existingListing);
+
         } catch (Exception e) {
-            // TODO: handle exception
-            System.out.println(e.getMessage());
+            System.out.println("Error updating listing: " + e.getMessage());
             throw new RuntimeException(e);
         }
+    }
 
+    /// gets old images, check deleted, add new images
+    private void handleImageUpdates(UUID listingId, List<String> keptImageUrls, List<MultipartFile> newImages) {
+        try {
+            List<String> currentImageUrls = fileStorageService.getListingImagePaths(listingId);
+
+            List<String> imagesToDelete = currentImageUrls.stream()
+                    .filter(url -> keptImageUrls == null || !keptImageUrls.contains(url))
+                    .toList();
+
+            for (String urlToDelete : imagesToDelete) {
+                String filename = urlToDelete.substring(urlToDelete.lastIndexOf("/") + 1);
+                try {
+                    fileStorageService.deleteImage(listingId, filename);
+                } catch (Exception e) {
+                    System.out.println("Failed to delete image: " + filename);
+                }
+            }
+
+            if (newImages != null && !newImages.isEmpty()) {
+                fileStorageService.saveImages(newImages, listingId);
+            }
+        } catch (Exception e) {
+            System.out.println("Error handling image updates: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    // clear old, put new
+    private void updateTradePreferences(Listing existingListing, List<TradePreferenceDTO> tradePreferenceDTOs) {
         existingListing.getTradePreferences().clear();
 
-        if (updatedListing.getTradePreferences() != null) {
-
-            updatedListing.getTradePreferences().forEach(pref -> {
+        if (tradePreferenceDTOs != null && !tradePreferenceDTOs.isEmpty()) {
+            tradePreferenceDTOs.forEach(prefDTO -> {
+                TradePreference pref = new TradePreference();
+                pref.setDesiredItem(prefDTO.getDesiredItem());
+                pref.setExtraAmount(prefDTO.getExtraAmount());
+                pref.setPaymentDirection(prefDTO.getPaymentDirection());
                 pref.setListing(existingListing);
                 existingListing.getTradePreferences().add(pref);
             });
         }
-
-        saveListing(existingListing);
-    }
-
-    public List<Listing> getAllListingsByUserId(UUID ownerId) {
-
-        return listingRepository.findAllByOwner_Id(ownerId);
     }
 
     public List<ListingDTO> getListingDTOsByUserId(UUID ownerId) {
 
         List<Listing> userListings = listingRepository.findAllByOwner_Id(ownerId);
 
-        List<ListingDTO> listingDTOs = new ArrayList<>();
+        if (userListings == null || userListings.isEmpty())
+            return List.of();
 
-        for (Listing listing : userListings) {
-            List<TradePreferenceDTO> tradePreferenceDTOs = new ArrayList<>();
-
-            for (TradePreference tradePreference : listing.getTradePreferences()) {
-
-                tradePreferenceDTOs.add(new TradePreferenceDTO(tradePreference));
-            }
-
-            List<String> imagePaths = fileStorageService.getListingImagePaths(listing.getId());
-
-            listingDTOs.add(new ListingDTO(listing, tradePreferenceDTOs, imagePaths));
-        }
-
-        return listingDTOs;
+        return userListings.stream()
+                .map(listing -> converToDTO(listing))
+                .toList();
     }
 
     public ListingDTO getListingDTOById(UUID listingId) {
@@ -250,19 +292,7 @@ public class ListingService {
                 .findById(listingId)
                 .orElseThrow(() -> new ListingNotFoundException());
 
-        List<TradePreferenceDTO> tradePreferenceDTOs = new ArrayList<>();
-
-        for (TradePreference tradePreference : listing.getTradePreferences()) {
-
-            tradePreferenceDTOs.add(new TradePreferenceDTO(tradePreference));
-
-        }
-
-        List<String> imagePaths = fileStorageService.getListingImagePaths(listing.getId());
-
-        ListingDTO listingDTO = new ListingDTO(listing, tradePreferenceDTOs, imagePaths);
-
-        return listingDTO;
+        return converToDTO(listing);
     }
 
     public static void copyNonNullFields(Listing source, Listing target) {
@@ -319,6 +349,7 @@ public class ListingService {
     }
 
     public void decreaseItemQuantity(UUID listingId, int quantity) {
+
         Listing listing = listingRepository.findById(listingId)
                 .orElseThrow(() -> new ListingNotFoundException());
 
@@ -348,7 +379,28 @@ public class ListingService {
         return listing.getOwner().getUsername();
     }
 
-    public List<ListingDTO> getListingDtos() {
+    public List<ListingDTO> getAllAvailableListingDTOs() {
+
+        List<Listing> listings = getAvailableListings();
+
+        return listings.stream()
+                .map(listing -> converToDTO(listing))
+                .toList();
+    }
+
+    public List<ListingDTO> getAllListingDTOs() {
+
+        List<Listing> listings = getAllListings();
+
+        return listings.stream()
+                .map(listing -> converToDTO(listing))
+                .toList();
+    }
+
+    public ListingDTO converToDTO(Listing listing) {
+        List<String> imagePaths = fileStorageService.getListingImagePaths(listing.getId());
+
+        return new ListingDTO(listing, imagePaths);
     }
 
 }

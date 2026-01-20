@@ -67,7 +67,7 @@ public class ListingDTO {
     private String labelName;
     private String ownerUsername;
 
-    public ListingDTO(Listing listing, List<TradePreferenceDTO> tradePreferenceDTOs, List<String> imagePaths) {
+    public ListingDTO(Listing listing, List<String> imagePaths) {
         this.id = listing.getId();
         this.title = listing.getTitle();
         this.description = listing.getDescription();
@@ -80,7 +80,7 @@ public class ListingDTO {
         this.packaging = listing.getPackaging();
         this.ownerUsername = listing.getOwnerUsername();
         this.trackCount = listing.getTrackCount();
-        this.tradePreferences = tradePreferenceDTOs;
+        this.tradePreferences = TradePreferenceDTO.fromEntities(listing.getTradePreferences());
         this.discountBP = listing.getDiscountBP();
         this.barcode = listing.getBarcode();
         this.artistName = listing.getArtistName();
@@ -88,4 +88,5 @@ public class ListingDTO {
         this.labelName = listing.getLabelName();
 
     }
+
 }
