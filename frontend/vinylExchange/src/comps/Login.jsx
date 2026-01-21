@@ -20,7 +20,6 @@ export function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("login?" + formData.username + formData.password);
     loginUser(formData);
   };
 

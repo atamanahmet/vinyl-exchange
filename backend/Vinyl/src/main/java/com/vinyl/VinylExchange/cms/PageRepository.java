@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PageRepository extends JpaRepository<Page, UUID> {
     Optional<Page> findByPageType(PageType pageType);
+
+    boolean existsByPageType(PageType pageType);
 }

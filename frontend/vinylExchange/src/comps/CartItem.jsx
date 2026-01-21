@@ -16,8 +16,8 @@ export default function CartItem({ item }) {
           <img
             className="h-25 w-25"
             //first imnage as main image
-            src={item.imagePaths[0] ? item.imagePaths[0] : "/placeholder.png"}
-            alt="imac image"
+            src={item.mainImagePath || "/placeholder.png"}
+            alt=""
           />
         </a>
 

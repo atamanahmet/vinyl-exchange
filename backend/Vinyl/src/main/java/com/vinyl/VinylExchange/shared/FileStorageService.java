@@ -1,7 +1,7 @@
 package com.vinyl.VinylExchange.shared;
 
 import java.io.IOException;
-
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,8 +24,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class FileStorageService {
-    @Value("${file.upload-dir}")
-    private String UPLOAD_DIR;
+    @Value("${file.upload-listing-dir}")
+    private String UPLOAD_LISTING_DIR;
 
     @Value("${file.image.url-path}")
     private String IMG_URL_PATH;
@@ -59,7 +59,7 @@ public class FileStorageService {
             List<CompressedImage> compressedImages,
             UUID listingId) throws IOException {
 
-        Path listingFolder = Paths.get(UPLOAD_DIR).resolve(listingId.toString()).toAbsolutePath();
+        Path listingFolder = Paths.get(UPLOAD_LISTING_DIR).resolve(listingId.toString()).toAbsolutePath();
 
         List<String> savedPaths = new ArrayList<>();
 
@@ -87,7 +87,7 @@ public class FileStorageService {
 
     public List<String> getListingImagePaths(UUID listingId) {
 
-        Path listingFolder = Paths.get(UPLOAD_DIR).resolve(listingId.toString()).toAbsolutePath();
+        Path listingFolder = Paths.get(UPLOAD_LISTING_DIR).resolve(listingId.toString()).toAbsolutePath();
 
         if (!Files.exists(listingFolder)) {
             logger.debug("No image folder found for listing: {}", listingId);
@@ -112,12 +112,12 @@ public class FileStorageService {
     }
 
     public void deleteImage(UUID listingId, String filename) throws IOException {
-        Path imagePath = Paths.get(UPLOAD_DIR)
+        Path imagePath = Paths.get(UPLOAD_LISTING_DIR)
                 .resolve(listingId.toString())
                 .resolve(filename)
                 .toAbsolutePath();
 
-        if (!imagePath.startsWith(Paths.get(UPLOAD_DIR).toAbsolutePath())) {
+        if (!imagePath.startsWith(Paths.get(UPLOAD_LISTING_DIR).toAbsolutePath())) {
             throw new SecurityException("Invalid file path");
         }
 
@@ -146,7 +146,7 @@ public class FileStorageService {
 
     public void deleteListingImages(UUID listingId) {
 
-        Path listingFolder = Paths.get(UPLOAD_DIR).resolve(listingId.toString()).toAbsolutePath();
+        Path listingFolder = Paths.get(UPLOAD_LISTING_DIR).resolve(listingId.toString()).toAbsolutePath();
 
         if (!Files.exists(listingFolder)) {
             logger.debug("No images to delete for listing: {}", listingId);
@@ -171,7 +171,7 @@ public class FileStorageService {
 
     public String getMainImagePath(UUID listingId) {
 
-        Path listingFolder = Paths.get(UPLOAD_DIR).resolve(listingId.toString()).toAbsolutePath();
+        Path listingFolder = Paths.get(UPLOAD_LISTING_DIR).resolve(listingId.toString()).toAbsolutePath();
 
         if (!Files.exists(listingFolder)) {
             logger.debug("No image folder found for listing: {}", listingId);
@@ -189,6 +189,18 @@ public class FileStorageService {
         } catch (IOException e) {
             logger.error("read eror for main image {}: {}", listingId, e.getMessage());
             return null;
+        }
+    }
+
+    public String readTextContentFile(String filePath) {
+        try {
+            String relativePath = filePath.substring(filePath.indexOf("/uploads/") + 1);
+
+            Path path = Paths.get(relativePath);
+
+            return Files.readString(path, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException("COntent file read error");
         }
     }
 }

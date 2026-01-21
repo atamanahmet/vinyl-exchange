@@ -30,11 +30,11 @@ import MessagingPage from "./pages/MessagingPage";
 import ConversationsPage from "./pages/ConversationsPage";
 
 function App() {
-  const { user, data } = useUser();
+  const { user, data, isFetching, hasError } = useUser();
 
-  const [count, setCount] = useState(0);
-  const [result, setResult] = useState();
-  const [isFetching, setIsFetching] = useState();
+  if (hasError) {
+    return <ErrorPage />;
+  }
 
   return (
     <>
@@ -51,9 +51,7 @@ function App() {
           <Route path="/cart" element={<CartPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/error" element={<ErrorPage />} />
           <Route path="/orderItems" element={<OrderItemsPage />} />
-          {/* <Route path="/messaging/:listingId" element={<MessagingPage />} /> */}
           <Route path="/messaging" element={<ConversationsPage />} />
           <Route path="/messaging/:listingId" element={<ConversationsPage />} />
         </Routes>

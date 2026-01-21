@@ -37,8 +37,10 @@ import com.vinyl.VinylExchange.security.filter.JWTAuthFilter;
 @EnableWebSecurity
 public class SecurityConfig implements WebMvcConfigurer {
 
-    @Value("${file.upload-dir}")
-    private String UPLOAD_DIR;
+    @Value("${file.upload-listing-dir}")
+    private String UPLOAD_LISTING_DIR;
+    @Value("${file.upload-cms-dir}")
+    private String UPLOAD_CMS_DIR;
 
     private final JWTAuthFilter jwtAuthFilter;
 
@@ -75,6 +77,7 @@ public class SecurityConfig implements WebMvcConfigurer {
                                 "/api/cms/**",
                                 "/listing/**",
                                 "/api/listings/**",
+                                "/uploads/cms/**",
                                 "/uploads/listings/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/logout").authenticated()
@@ -106,8 +109,8 @@ public class SecurityConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry
-                .addResourceHandler("/uploads/listings/**")
-                .addResourceLocations("file:" + UPLOAD_DIR)
+                .addResourceHandler("/uploads/listings/**", "/uploads/cms/**")
+                .addResourceLocations("file:" + UPLOAD_LISTING_DIR, "file:" + UPLOAD_CMS_DIR)
                 .setCachePeriod(3600); // 1 hour
     }
 

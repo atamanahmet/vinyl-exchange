@@ -196,10 +196,8 @@ public class ListingService {
             ObjectMapper objectMapper = new ObjectMapper();
             ListingDTO listingDTO = objectMapper.readValue(listingJson, ListingDTO.class);
 
-            // Handle image updates
             handleImageUpdates(id, listingDTO.getImagePaths(), images);
 
-            // Convert DTO to entity for update
             Listing updatedListing = new Listing();
             updatedListing.setTitle(listingDTO.getTitle());
             updatedListing.setArtistName(listingDTO.getArtistName());
@@ -217,10 +215,8 @@ public class ListingService {
             updatedListing.setBarcode(listingDTO.getBarcode());
             updatedListing.setTrackCount(listingDTO.getTrackCount());
 
-            // Copy non-null fields
             copyNonNullFields(updatedListing, existingListing);
 
-            // Update trade preferences
             updateTradePreferences(existingListing, listingDTO.getTradePreferences());
 
             saveListing(existingListing);

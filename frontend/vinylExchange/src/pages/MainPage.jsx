@@ -5,14 +5,17 @@ import Card from "../comps/Card";
 import { useCart } from "../context/CartContext";
 import ListView from "../comps/ListView";
 import { useUser } from "../context/UserContext";
+import SkeletonCardView from "../comps/SkeletonCardView";
+import SkeletonListView from "../comps/SkeletonListView";
 
 export default function MainPage({ data }) {
   const { cart } = useCart();
-  const { layoutSelection, setLayoutSelection } = useUser();
-  console.log(data);
+
+  const { layoutSelection, setLayoutSelection, isFetching } = useUser();
+
   return (
     <>
-      <div className="flex flex-row gap-2 justify-end">
+      <div className=" flex flex-row gap-2 justify-end">
         <button className="" onClick={() => setLayoutSelection("list")}>
           <svg
             className="border border-indigo-500 w-8 h-8 p-1 rounded-md bg-black"
@@ -60,15 +63,20 @@ export default function MainPage({ data }) {
       </div>
       {layoutSelection == "list" && (
         <div className="">
-          <div className="bg-neutral-primary-soft border-b border-default grid grid-cols-6 items-center text-white mb-5">
+          <div className="bg-neutral-primary-soft border-b border-default grid grid-cols-7 items-center text-white mb-3">
             <p>Cover</p>
             <p>Title</p>
+            <p>Band/Artist</p>
             <p>Release Date</p>
             <p>Format</p>
             <p>Price</p>
           </div>
           <div className="">
-            {data && data.map((item) => <ListView key={item.id} item={item} />)}
+            {isFetching || !data || data.length === 0
+              ? Array(5)
+                  .fill(0)
+                  .map((_, i) => <SkeletonListView key={i} />)
+              : data?.map((item) => <ListView key={item.id} item={item} />)}
           </div>
         </div>
       )}
@@ -81,7 +89,11 @@ export default function MainPage({ data }) {
       mt-5
       w-full gap-5 "
         >
-          {data && data.map((item) => <Card key={item.id} item={item} />)}
+          {isFetching || !data || data.length === 0
+            ? Array(8)
+                .fill(0)
+                .map((_, i) => <SkeletonCardView key={i} />)
+            : data?.map((item) => <Card key={item.id} item={item} />)}
         </div>
       )}
     </>

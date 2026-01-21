@@ -4,9 +4,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController("/api/cms")
+import com.vinyl.VinylExchange.cms.dto.PageDTO;
+
+@RestController
+@RequestMapping("/api/cms")
 public class CmsController {
 
     private final CmsService cmsService;
@@ -18,7 +22,7 @@ public class CmsController {
     @GetMapping("/about")
     public ResponseEntity<?> getAboutPageContent() {
 
-        Page aboutPage = cmsService.getPageByPageType(PageType.ABOUT);
+        PageDTO aboutPage = cmsService.getPageDTOByType(PageType.ABOUT);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -28,7 +32,7 @@ public class CmsController {
     @GetMapping("/contact")
     public ResponseEntity<?> getContactPageContent() {
 
-        Page contactPage = cmsService.getPageByPageType(PageType.CONTACT);
+        PageDTO contactPage = cmsService.getPageDTOByType(PageType.CONTACT);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

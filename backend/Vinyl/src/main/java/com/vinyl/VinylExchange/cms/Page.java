@@ -33,7 +33,11 @@ public class Page {
     @Enumerated(EnumType.STRING)
     private PageType pageType;
 
-    private String textContent;
+    private String header;
+
+    private String textContentPath;
+
+    private String backgroundColor;
 
     private String backgroundImagePath;
 }

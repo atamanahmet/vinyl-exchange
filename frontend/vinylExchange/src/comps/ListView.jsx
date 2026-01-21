@@ -39,7 +39,7 @@ export default function ListView({ item }) {
 
   return (
     <>
-      <div className="bg-neutral-primary-soft ml-1 pb-5 gap-3 grid grid-cols-6 border-b max-w-[1160px] mb-5 items-center">
+      <div className="bg-neutral-primary-soft ml-1 pb-3 grid grid-cols-7 border-b max-w-[1160px] mb-3 items-center">
         <button
           onClick={() => {
             navigateItemWithId();
@@ -51,7 +51,7 @@ export default function ListView({ item }) {
               e.target.src = "/placeholder.png";
             }}
             alt="listing main image"
-            className="bg-black"
+            className="bg-neutral-700 min-h-35 max-w-35 ml-3 object-cover rounded"
           />
         </button>
         <button
@@ -66,9 +66,17 @@ export default function ListView({ item }) {
             {item.title}
           </p>
         </button>
+        <button>
+          <p
+            scope="row"
+            className="px-6 py-4 text-amber-400 font-medium text-heading flex flex-col overflow-auto "
+          >
+            {item.artistName}
+          </p>
+        </button>
 
         <p className="px-6 py-4">{item.date} </p>
-        <p className={"px-6 py-4"}>{item.format} </p>
+        <p className="">{item.format} </p>
         {/* <p className="px-6 py-4">{item.trackCount}</p> */}
         <div className="">
           <p

@@ -17,12 +17,12 @@ export default function PromotedItem({ item }) {
           }}
         >
           <img
-            src={`http://localhost:8080/${item.imagePaths[0]}`}
+            src={item.imagePaths[0]}
             onError={(e) => {
               e.target.src = "/placeholder.png";
             }}
             alt="listing main image"
-            className="bg-black"
+            className="bg-black mb-5"
           />
         </a>
         <div>

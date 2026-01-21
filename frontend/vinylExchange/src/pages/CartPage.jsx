@@ -21,7 +21,7 @@ export default function CartPage() {
       const res = await axios.post(
         "http://localhost:8080/checkout",
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (res.status == 200) {
@@ -33,7 +33,7 @@ export default function CartPage() {
 
   return (
     <>
-      <section className="bg-white w-300 min-h-screen py-8 antialiased dark:bg-gray-900 md:py-16">
+      <section className="bg-white w-300 min-h-screen antialiased dark:bg-gray-900 md:py-5 -mt-5">
         <div className="mx-auto max-w-7xl  px-10 ">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
             Shopping Cart
@@ -89,7 +89,7 @@ export default function CartPage() {
                       <dd className="text-base font-medium text-green-600">
                         {cart &&
                           (cart.discountedPrice - cart.price).toLocaleString(
-                            "tr-TR"
+                            "tr-TR",
                           ) + " ₺"}
                       </dd>
                     </dl>

@@ -18,8 +18,15 @@ export const UserProvider = ({ children }) => {
   const [openLogin, setOpenLogin] = useState(false);
   const [data, setData] = useState();
   const [authResponse, setAuthResponse] = useState(null);
-  const [layoutSelection, setLayoutSelection] = useState("grid");
   const [activeConvoId, setActiveConvoId] = useState();
+  const [hasError, setHasError] = useState(false);
+
+  const [layoutSelection, setLayoutSelection] = useState(() => {
+    return localStorage.getItem("layoutSelection") || "grid";
+  });
+  useEffect(() => {
+    localStorage.setItem("layoutSelection", layoutSelection);
+  }, [layoutSelection]);
 
   const storedPhoto = sessionStorage.getItem("profilePhoto");
 
@@ -35,7 +42,7 @@ export const UserProvider = ({ children }) => {
           password: formData.password,
           email: formData.email,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       if (response.status === 201) {
         setAuthResponse("Account created succesfully. Redirecting...");
@@ -61,7 +68,7 @@ export const UserProvider = ({ children }) => {
           username: formData.username,
           password: formData.password,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (response.status === 200) {
@@ -119,6 +126,11 @@ export const UserProvider = ({ children }) => {
   }, []);
 
   const fetchData = async () => {
+    if (location.pathname === "/error") {
+      setNavbarActive(false);
+      setIsFetching(false);
+      return;
+    }
     if (isFetching) return;
     setIsFetching(true);
     const url = "http://localhost:8080/api/listings";
@@ -130,12 +142,11 @@ export const UserProvider = ({ children }) => {
 
       setData(res.data);
       setNavbarActive(true);
+      setHasError(false);
     } catch (err) {
       console.error("Backend error:", err);
       setNavbarActive(false);
-      console.log("deactivated");
-
-      navigate("/error");
+      setHasError(true);
     } finally {
       setIsFetching(false);
     }
@@ -169,7 +180,7 @@ export const UserProvider = ({ children }) => {
       const res = await axios.post(
         `http://localhost:8080/api/messages/start`,
         { relatedListingId: relatedListingId },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       if (res.status == 201) {
         console.log("convo started");
@@ -201,6 +212,8 @@ export const UserProvider = ({ children }) => {
         layoutSelection,
         startConversation,
         activeConvoId,
+        isFetching,
+        hasError,
       }}
     >
       {children}
