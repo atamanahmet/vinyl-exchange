@@ -22,7 +22,8 @@
     "react-router-dom": "^7.9.6",
     "react-table": "^7.8.0",
     "regenerator-runtime": "^0.14.1",
-    "tailwindcss": "^4.1.17"
+    "tailwindcss": "^4.1.17",
+    "zustand": "^5.0.10"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

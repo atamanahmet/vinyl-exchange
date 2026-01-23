@@ -10,10 +10,12 @@ import {
 import { useState } from "react";
 import { Login } from "./Login";
 import { Register } from "./Register";
-import { useUser } from "../context/UserContext";
+import { useUser } from "../context/old.UserContext";
+import { useAuthStore } from "../stores/authStore";
 
 export function AuthModal({ openModal, setOpenModal }) {
-  const { authResponse } = useUser();
+  const authResponse = useAuthStore((state) => state.authResponse);
+
   const [authType, setAuthType] = useState("Login");
 
   const changeAuthType = () => {

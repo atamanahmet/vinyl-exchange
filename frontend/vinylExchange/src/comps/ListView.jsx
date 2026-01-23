@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useCart } from "../context/CartContext";
-import { useUser } from "../context/UserContext";
+import { useMessagingStore } from "../stores/messagingStore";
+import { useCartStore } from "../stores/cartStore";
+import { useAuthStore } from "../stores/authStore";
 
 export default function ListView({ item }) {
-  const { addToCart, cart, removeFromCart } = useCart();
+  const cart = useCartStore((state) => state.cart);
+  const addToCart = useCartStore((state) => state.addtoCart);
+  const decreaseFromCart = useCartStore((state) => state.decreaseFromCart);
+  const removeFromCart = useCartStore((state) => state.removeFromCart);
 
-  const { user, startConversation } = useUser();
+  const user = useAuthStore((state) => state.user);
+  const startConversation = useMessagingStore(
+    (state) => state.startConversation,
+  );
 
   const [image, setImage] = useState("");
 

@@ -1,11 +1,22 @@
 import { useNavigate } from "react-router-dom";
-import { useUser } from "../context/UserContext";
-import { useCart } from "../context/CartContext";
 import { useEffect, useState } from "react";
+import TradeButton from "./Buttons/TradeButton";
+import { useCartStore } from "../stores/cartStore";
+import { useAuthStore } from "../stores/authStore";
+import { useMessagingStore } from "../stores/messagingStore";
 
 export default function Card({ item }) {
-  const { user, startConversation } = useUser();
-  const { addToCart, cart, removeFromCart } = useCart();
+  const user = useAuthStore((state) => state.user);
+
+  const addToCart = useCartStore((state) => state.addtoCart);
+  const removeFromCart = useCartStore((state) => state.removeFromCart);
+  const decreaseFromCart = useCartStore((state) => state.decreaseFromCart);
+  const cart = useCartStore((state) => state.cart);
+
+  const startConversation = useMessagingStore(
+    (state) => state.startConversation,
+  );
+
   const [date, setDate] = useState();
   const [label, setLabel] = useState();
   const [isOwnerUser, setIsOwnerUser] = useState();
@@ -52,10 +63,6 @@ export default function Card({ item }) {
   const navigateEditItemWithId = () => {
     navigate(`/edit/${item.id}`);
   };
-  const navigateMessagingWithItemId = () => {
-    console.log("item id to start convo: " + item.id);
-    startConversation(item.id);
-  };
 
   return (
     <>
@@ -93,14 +100,7 @@ export default function Card({ item }) {
         </button>
         {!isOwnerUser && (
           <div className="flex flex-row gap-3 justify-center">
-            <a
-              onClick={() => {
-                navigateMessagingWithItemId();
-              }}
-              className="text-body mt-5 cursor-pointer rounded-xl bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-9"
-            >
-              Trade
-            </a>
+            <TradeButton listingId={item.id} />
             <a
               onClick={() =>
                 inCart ? removeFromCart(item.id) : addToCart(item.id)

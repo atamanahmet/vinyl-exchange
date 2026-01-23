@@ -1,9 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { useCart } from "../context/CartContext";
+import { useCartStore } from "../stores/cartStore";
 
 export default function PromotedItem({ item }) {
-  const { addToCart } = useCart();
+  const addtoCart = useCartStore((state) => state.addtoCart);
+
   const navigate = useNavigate();
+
   const navigateItemWithId = () => {
     navigate(`/listing/${item.id}`);
   };

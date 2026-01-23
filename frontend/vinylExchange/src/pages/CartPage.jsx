@@ -1,19 +1,46 @@
-import { useUser } from "../context/UserContext";
-import { useCart } from "../context/CartContext";
+import axios from "axios";
 import { useEffect, useState } from "react";
+import { useAuthStore } from "../stores/authStore";
+import { useCartStore } from "../stores/cartStore";
+
 import CartItem from "../comps/CartItem";
 import PromotedItem from "../comps/PromotedItem";
-import ListingItem from "../comps/ListingItem";
-import axios from "axios";
 
 export default function CartPage() {
-  const {
-    cart,
-    addToCart,
-    decreaseFromCart,
-    removeFromCart,
-    promotedListings,
-  } = useCart();
+  const [promotedListings, setPromotedListings] = useState();
+  const user = useAuthStore((state) => state.user);
+  const cart = useCartStore((state) => state.cart);
+  const fetchCart = useCartStore((state) => state.fetchCart);
+  const addtoCart = useCartStore((state) => state.addtoCart);
+  const decreaseFromCart = useCartStore((state) => state.decreaseFromCart);
+  const removeFromCart = useCartStore((state) => state.removeFromCart);
+
+  useEffect(() => {
+    fetchCart();
+  }, []);
+
+  async function fetchPromotedListings() {
+    if (user && cart) {
+      try {
+        const res = await axios.get(
+          "http://localhost:8080/api/listings/promote",
+          {
+            withCredentials: true,
+          },
+        );
+        if (res.status === 200) {
+          setPromotedListings(res.data);
+          console.log(res.data);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }
+
+  useEffect(() => {
+    fetchPromotedListings();
+  }, [cart]);
 
   const testCheckout = async () => {
     console.log("checkout");

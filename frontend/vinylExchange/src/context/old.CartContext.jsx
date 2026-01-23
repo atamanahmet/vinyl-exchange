@@ -1,6 +1,6 @@
 import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
-import { useUser } from "./UserContext";
+import { useUser } from "./old.UserContext";
 
 const CartContext = createContext();
 
@@ -41,7 +41,7 @@ export function CartProvider({ children }) {
           "http://localhost:8080/api/listings/promote",
           {
             withCredentials: true,
-          }
+          },
         );
         if (res.status === 200) {
           setPromotedListings(res.data);
@@ -76,7 +76,7 @@ export function CartProvider({ children }) {
       const res = await axios.post(
         "http://localhost:8080/api/cart/items",
         { listingId: listingId, quantity: 1 },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       if (res.status === 200) {
         // refresh shared cart after change
@@ -91,7 +91,7 @@ export function CartProvider({ children }) {
       const res = await axios.patch(
         `http://localhost:8080/api/cart/items/${cartItemId}`,
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       );
       if (res.status === 200) {
         // refresh shared cart after change
@@ -106,7 +106,7 @@ export function CartProvider({ children }) {
     try {
       const res = await axios.delete(
         `http://localhost:8080/api/cart/items/${cartItemId}`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
       if (res.status === 204) {
         // refresh shared cart after change

@@ -2,8 +2,7 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import ImageGallery from "../comps/ImageGallery";
-import { useUser } from "../context/UserContext";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../context/old.CartContext";
 
 import {
   Button,
@@ -12,19 +11,26 @@ import {
   ModalFooter,
   ModalHeader,
 } from "flowbite-react";
+import { useAuthStore } from "../stores/authStore";
+import { useMessagingStore } from "../stores/messagingStore";
 
 export default function ItemPage() {
-  const location = useLocation();
-  const { user } = useUser();
+  const user = useAuthStore((state) => state.user);
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+
+  const startConversation = useMessagingStore(
+    (state) => state.startConversation,
+  );
+
+  const [loading, setLoading] = useState(true);
+
   const { listingId } = useParams();
   const [listing, setListing] = useState();
   const [mainImage, setMainImage] = useState();
   const { addToCart } = useCart();
-  const [imageUrlForModal, setImageUrlForModal] = useState();
   const [openModal, setOpenModal] = useState(false);
   const [openModalUrl, setOpenModalUrl] = useState();
   const [isOwnerUser, setIsOwnerUser] = useState();
-  const [loading, setLoading] = useState(true);
 
   function openModalImage(url) {
     console.log(url);
@@ -44,13 +50,12 @@ export default function ItemPage() {
     navigate(`/edit/${listing.id}`);
   };
   const navigateMessagingWithItemId = () => {
-    navigate(`/messaging/${listing.id}`);
+    startConversation(listing.id);
   };
 
   function addCart() {
     console.log("added to cart");
     addToCart(listing.id);
-    // navigate("/cart");
   }
 
   async function getListing() {
@@ -83,35 +88,6 @@ export default function ItemPage() {
       setIsOwnerUser(false);
     }
   }, [listing, user]);
-
-  useEffect(() => {
-    // if (listing.ownerUsername == user.username) {
-    //   setIsOwnerUser(true);
-    //   console.log("is user");
-    // }
-    // switch (listing.format) {
-    //   case "33":
-    //     format = `12" LP - 33 RPM`;
-    //     break;
-    //   case "45":
-    //     format = `7" EP - 45 RPM`;
-    //     break;
-    //   default:
-    //     "";
-    //     break;
-    // }
-    // if (listing.labelName) {
-    //   if (listing.labelName.includes("no label")) {
-    //     label = "";
-    //   } else {
-    //     if (listing.labelName.includes("Records")) {
-    //       label = listing.labelName;
-    //     } else {
-    //       label = listing.labelName + " Records";
-    //     }
-    //   }
-    // }
-  }, [loading]);
 
   return (
     <>
@@ -196,7 +172,6 @@ export default function ItemPage() {
                       -
                     </button>
                     <input
-                      // ref={productQuantityRef}
                       min={0}
                       max={100}
                       // onChange={quantity}

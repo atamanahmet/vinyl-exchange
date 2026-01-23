@@ -95,7 +95,7 @@ export default function NewListing() {
       "listing",
       new Blob([JSON.stringify(payload)], {
         type: "application/json",
-      })
+      }),
     );
 
     // upload images
@@ -113,7 +113,7 @@ export default function NewListing() {
         {
           withCredentials: true,
           headers: { "Content-Type": "multipart/form-data" },
-        }
+        },
       );
 
       alert("Listing added successfully!");
@@ -517,7 +517,7 @@ export default function NewListing() {
                           setListing((prev) => ({
                             ...prev,
                             tradePreferences: prev.tradePreferences.filter(
-                              (_, i) => i !== index
+                              (_, i) => i !== index,
                             ),
                           }))
                         }
@@ -534,7 +534,7 @@ export default function NewListing() {
                           handleTradePrefChange(
                             index,
                             "desiredItem",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         className="input w-75 input-bordered border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1 mb-3"
@@ -551,7 +551,7 @@ export default function NewListing() {
                             handleTradePrefChange(
                               index,
                               "paymentDirection",
-                              "NO_EXTRA"
+                              "NO_EXTRA",
                             )
                           }
                           className={`px-2 py-1 rounded-md border ${
@@ -569,7 +569,7 @@ export default function NewListing() {
                             handleTradePrefChange(
                               index,
                               "paymentDirection",
-                              "PAY"
+                              "PAY",
                             )
                           }
                           className={`px-2 py-1 rounded-md border ${
@@ -587,7 +587,7 @@ export default function NewListing() {
                             handleTradePrefChange(
                               index,
                               "paymentDirection",
-                              "RECEIVE"
+                              "RECEIVE",
                             )
                           }
                           className={`px-2 py-1 rounded-md border ${
@@ -607,7 +607,7 @@ export default function NewListing() {
                             handleTradePrefChange(
                               index,
                               "extraAmount",
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           disabled={pref.paymentDirection === "NO_EXTRA"}

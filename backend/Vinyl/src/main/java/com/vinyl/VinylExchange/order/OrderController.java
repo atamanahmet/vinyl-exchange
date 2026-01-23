@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,4 +36,14 @@ public class OrderController {
                 .status(HttpStatus.OK)
                 .body(orders);
     }
+
+    @PostMapping
+    public ResponseEntity<?> checkout(@AuthenticationPrincipal UserPrincipal userPrincipal)
+            throws JsonProcessingException {
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .build();
+    }
+
 }

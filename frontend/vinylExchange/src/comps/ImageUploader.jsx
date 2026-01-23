@@ -128,6 +128,7 @@ export default function ImageUploader({
 
               {/* REMOVE BUTTON */}
               <button
+                type="button"
                 onClick={() => removeImage(index)}
                 className="
                   absolute top-0.5 right-0.5 

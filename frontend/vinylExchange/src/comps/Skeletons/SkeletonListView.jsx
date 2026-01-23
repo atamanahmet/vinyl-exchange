@@ -1,7 +1,8 @@
-import { useUser } from "../context/UserContext";
+import { useAuthStore } from "../../stores/authStore";
 
 export default function SkeletonListView() {
-  const { user } = useUser();
+  const user = useAuthStore((state) => state.user);
+
   return (
     <div className="bg-neutral-primary-soft ml-1 pb-5 gap-3 grid grid-cols-7 border-b max-w-[1160px] mb-3 items-center">
       <div className="bg-neutral-700 w-full aspect-square rounded animate-pulse min-h-35 max-w-35 ml-3"></div>

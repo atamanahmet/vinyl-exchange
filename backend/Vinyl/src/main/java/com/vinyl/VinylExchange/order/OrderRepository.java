@@ -14,4 +14,5 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     @Query(value = "SELECT nextVal('order_number_seq')", nativeQuery = true)
     Long getNextOrderNumber();
+
 }

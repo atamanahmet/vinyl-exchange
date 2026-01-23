@@ -1,22 +1,33 @@
 import { useState, useEffect } from "react";
 import "../App.css";
 import { ThemeProvider } from "@material-tailwind/react";
+
 import Card from "../comps/Card";
-import { useCart } from "../context/CartContext";
 import ListView from "../comps/ListView";
-import { useUser } from "../context/UserContext";
-import SkeletonCardView from "../comps/SkeletonCardView";
-import SkeletonListView from "../comps/SkeletonListView";
+import SkeletonCardView from "../comps/Skeletons/SkeletonCardView";
+import SkeletonListView from "../comps/Skeletons/SkeletonListView";
 
-export default function MainPage({ data }) {
-  const { cart } = useCart();
+import { useDataStore } from "../stores/dataStore";
+import { useAuthStore } from "../stores/authStore";
+import { useUIStore } from "../stores/uiStore";
+import { useCartStore } from "../stores/cartStore";
 
-  const { layoutSelection, setLayoutSelection, isFetching } = useUser();
+export default function MainPage() {
+  const data = useDataStore((state) => state.data);
+  const isFetching = useDataStore((state) => state.isFetching);
+  const fetchAllListings = useDataStore((state) => state.fetchAllListings);
+  const layout = useUIStore((state) => state.layout);
+  const setLayout = useUIStore((state) => state.setLayout);
+  const cart = useCartStore((state) => state.cart);
+
+  useEffect(() => {
+    fetchAllListings();
+  }, []);
 
   return (
     <>
       <div className=" flex flex-row gap-2 justify-end">
-        <button className="" onClick={() => setLayoutSelection("list")}>
+        <button className="" onClick={() => setLayout("list")}>
           <svg
             className="border border-indigo-500 w-8 h-8 p-1 rounded-md bg-black"
             viewBox="0 0 24 24"
@@ -33,7 +44,7 @@ export default function MainPage({ data }) {
             />
           </svg>
         </button>
-        <button className="" onClick={() => setLayoutSelection("grid")}>
+        <button className="" onClick={() => setLayout("grid")}>
           <svg
             className="border border-indigo-500 w-8 h-8 p-1 rounded-md bg-black"
             viewBox="0 -0.5 21 21"
@@ -61,7 +72,7 @@ export default function MainPage({ data }) {
           </svg>
         </button>
       </div>
-      {layoutSelection == "list" && (
+      {layout == "list" && (
         <div className="">
           <div className="bg-neutral-primary-soft border-b border-default grid grid-cols-7 items-center text-white mb-3">
             <p>Cover</p>
@@ -80,7 +91,7 @@ export default function MainPage({ data }) {
           </div>
         </div>
       )}
-      {layoutSelection == "grid" && (
+      {layout == "grid" && (
         <div
           className=" grid 
       min-[1100px]:grid-cols-3

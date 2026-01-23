@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
-import { useUser } from "../context/UserContext";
-
 import { AuthModal } from "./AuthModal";
-import { use } from "react";
-import { useCart } from "../context/CartContext";
+
+import { useCartStore } from "../stores/cartStore";
+import { useAuthStore } from "../stores/authStore";
+import { useUIStore } from "../stores/uiStore";
+import { useDataStore } from "../stores/dataStore";
 
 const SkeletonNavbar = () => (
   <nav className="bg-black fixed w-full z-20 top-0 start-0 p-2 border-b border-default">
@@ -63,20 +64,15 @@ const SkeletonNavbar = () => (
 export default function Navbar() {
   const navigate = useNavigate();
 
-  const { cartItemCount } = useCart();
-
-  const {
-    user,
-    loading,
-    logOut,
-    setSearchQuery,
-    searchHandler,
-    authType,
-    openLogin,
-    navbarActive,
-  } = useUser();
-
-  const [openModal, setOpenModal] = useState(false);
+  const cartItemCount = useCartStore((state) => state.cartItemCount);
+  const user = useAuthStore((state) => state.user);
+  const logOut = useAuthStore((state) => state.logOut);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const setSearchQuery = useDataStore((state) => state.setSearchQuery);
+  const search = useDataStore((state) => state.search);
+  const openLogin = useUIStore((state) => state.openLogin);
+  const navbarActive = useUIStore((state) => state.navbarActive);
+  const setOpenLogin = useUIStore((state) => state.setOpenLogin);
 
   const [query, setQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -97,19 +93,10 @@ export default function Navbar() {
   const handleLogOut = () => logOut;
 
   const setModalActive = () => {
-    if (openModal == false) {
-      setOpenModal(true);
-    } else {
-      setOpenModal(false);
-    }
+    setOpenLogin(!openLogin);
   };
 
-  useEffect(() => {
-    if (!loading) {
-      setOpenModal(true);
-    }
-  }, [openLogin]);
-  if (loading) {
+  if (isLoading) {
     return <SkeletonNavbar />;
   }
 
@@ -192,7 +179,7 @@ export default function Navbar() {
                 Sign in
               </button>
               <AuthModal
-                openModal={openModal}
+                openModal={openLogin}
                 setOpenModal={setModalActive}
               ></AuthModal>
             </div>

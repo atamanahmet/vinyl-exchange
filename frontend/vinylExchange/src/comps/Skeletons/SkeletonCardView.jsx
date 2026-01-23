@@ -1,5 +1,3 @@
-import { useUser } from "../context/UserContext";
-
 export default function SkeletonCardView() {
   return (
     <div className="bg-neutral-primary-soft p-4 border border-default rounded-2xl shadow-xs flex flex-col justify-center">

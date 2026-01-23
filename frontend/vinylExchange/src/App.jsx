@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
 import "./App.css";
-import { ThemeProvider } from "@material-tailwind/react";
+import { useState, useEffect } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
+import { setNavigate } from "./utils/router";
+import { useAuthStore } from "./stores/authStore";
+import { useDataStore } from "./stores/dataStore";
 
-import Card from "./comps/Card";
-import axios from "axios";
 import Navbar from "./comps/Navbar";
 import MainPage from "./pages/MainPage";
 import About from "./pages/About";
@@ -15,22 +16,31 @@ import ItemPage from "./pages/ItemPage";
 import CartPage from "./pages/CartPage";
 import OrdersPage from "./pages/OrdersPage";
 
-import { useUser } from "./context/UserContext";
-import {
-  Routes,
-  Route,
-  useNavigate,
-  useLocation,
-  useParams,
-} from "react-router-dom";
 import AdminDashboard from "./pages/AdminDashboard";
 import ErrorPage from "./pages/ErrorPage";
 import OrderItemsPage from "./pages/OrderItemsPage";
-import MessagingPage from "./pages/MessagingPage";
 import ConversationsPage from "./pages/ConversationsPage";
+import { useCartStore } from "./stores/cartStore";
 
 function App() {
-  const { user, data, isFetching, hasError } = useUser();
+  const navigate = useNavigate();
+
+  const hasError = useDataStore((state) => state.hasError);
+  const user = useAuthStore((state) => state.user);
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+  const fetchCart = useCartStore((state) => state.fetchCart);
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    fetchCart();
+  }, [user]);
+
+  useEffect(() => {
+    setNavigate(navigate);
+  }, [navigate]);
 
   if (hasError) {
     return <ErrorPage />;
@@ -41,7 +51,7 @@ function App() {
       <Navbar />
       <div className="mt-15">
         <Routes>
-          <Route path="/" element={<MainPage data={data} />} />
+          <Route path="/" element={<MainPage />} />
           <Route path="/about" element={<About />} />
           <Route path="/newlisting" element={<NewListing />} />
           <Route path="/listings" element={<ListingsPage />} />

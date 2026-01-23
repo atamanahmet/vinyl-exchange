@@ -1,11 +1,15 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useUser } from "../context/UserContext";
 import { button } from "@material-tailwind/react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useAuthStore } from "../stores/authStore";
+import { useMessagingStore } from "../stores/messagingStore";
 
 export default function ConversationsPage() {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const activeConvoId = useMessagingStore((state) => state.activeConvoId);
 
   const [conversations, setConversations] = useState();
 
@@ -25,8 +29,6 @@ export default function ConversationsPage() {
 
   const [participantUsername, setParticipantUsername] = useState();
 
-  const { user, loading, activeConvoId } = useUser();
-
   useEffect(() => {
     console.log("active convoıd : " + activeConvoId);
     if (activeConvoId != null) {
@@ -36,13 +38,13 @@ export default function ConversationsPage() {
 
   //user check
   useEffect(() => {
-    if (user == null && !loading) {
+    if (user == null && !isLoading) {
       navigate("/");
     }
   }, []);
 
   useEffect(() => {
-    if (user == null && !loading) {
+    if (user == null && !isLoading) {
       navigate("/");
     }
   }, [user]);
@@ -59,7 +61,7 @@ export default function ConversationsPage() {
           relatedListingId: activeConversation.relatedListingId,
           content: newMessage,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       console.log(res.data);
@@ -81,7 +83,7 @@ export default function ConversationsPage() {
         `http://localhost:8080/api/messages/conversations`,
         {
           withCredentials: true,
-        }
+        },
       );
       if (res.status == 200) {
         setConversations(res.data);
@@ -99,7 +101,7 @@ export default function ConversationsPage() {
         `http://localhost:8080/api/messages/conversations`,
         {
           withCredentials: true,
-        }
+        },
       );
       if (res.status == 204) {
         console.log("deleted");
@@ -117,7 +119,7 @@ export default function ConversationsPage() {
         `http://localhost:8080/api/messages/conversation/${activeConversationId}`,
         {
           withCredentials: true,
-        }
+        },
       );
       if (res.status == 200) {
         setActiveConversation(res.data.conversationDTO);
@@ -125,7 +127,7 @@ export default function ConversationsPage() {
         setParticipantUsername(
           user.username == res.data.conversationDTO.initiatorUsername
             ? res.data.conversationDTO.participantUsername
-            : res.data.conversationDTO.initiatorUsername
+            : res.data.conversationDTO.initiatorUsername,
         );
       }
     } catch (error) {
@@ -145,7 +147,7 @@ export default function ConversationsPage() {
         `http://localhost:8080/api/messages/conversations`,
         {
           withCredentials: true,
-        }
+        },
       );
       if (res.status == 200) {
         setConversations(res.data);
@@ -270,7 +272,7 @@ export default function ConversationsPage() {
                             {
                               hour: "numeric",
                               minute: "2-digit",
-                            }
+                            },
                           )}
                         </p>
                       </div>

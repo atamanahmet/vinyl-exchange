@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { useCart } from "../context/CartContext";
+import { useCartStore } from "../stores/cartStore";
 
 export default function CartItem({ item }) {
-  const { decreaseFromCart, addToCart, removeFromCart, updateItemQuantity } =
-    useCart();
+  const addtoCart = useCartStore((state) => state.addtoCart);
+  const decreaseFromCart = useCartStore((state) => state.decreaseFromCart);
+  const removeFromCart = useCartStore((state) => state.removeFromCart);
+
   const [favButtonColor, setFavButtonColor] = useState();
 
   function handleFav() {
@@ -64,7 +66,7 @@ export default function CartItem({ item }) {
               id="increment-button-2"
               data-input-counter-increment="counter-input-2"
               className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
-              onClick={() => addToCart(item.listingId)}
+              onClick={() => addtoCart(item.listingId)}
             >
               <svg
                 className="h-2.5 w-2.5 text-gray-900 dark:text-white"

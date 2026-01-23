@@ -8,7 +8,6 @@ export default function AdminItem({
   handlePromote,
   handleFreeze,
 }) {
-  console.log(item);
   const [image, setImage] = useState("");
 
   const navigate = useNavigate();
@@ -37,7 +36,7 @@ export default function AdminItem({
           }}
         >
           <img
-            src={`http://localhost:8080/${item.imagePaths[0]}`}
+            src={item.imagePaths[0]}
             onError={(e) => {
               e.target.src = "/placeholder.png";
             }}

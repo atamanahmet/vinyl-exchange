@@ -17,9 +17,14 @@ export const UserProvider = ({ children }) => {
   const [isFetching, setIsFetching] = useState(false);
   const [openLogin, setOpenLogin] = useState(false);
   const [data, setData] = useState();
+
   const [authResponse, setAuthResponse] = useState(null);
+
   const [activeConvoId, setActiveConvoId] = useState();
+
   const [hasError, setHasError] = useState(false);
+
+  const [loginResolver, setLoginResolver] = useState(null);
 
   const [layoutSelection, setLayoutSelection] = useState(() => {
     return localStorage.getItem("layoutSelection") || "grid";
@@ -57,7 +62,17 @@ export const UserProvider = ({ children }) => {
     }
   }
 
-  // login
+  const waitForLogin = () => {
+    return new Promise((resolve) => {
+      setLoginResolver(() => resolve);
+      setOpenLogin(true);
+    });
+  };
+
+  // return new Promise((success)=>{
+
+  //   })
+
   async function loginUser(formData) {
     const url = "http://localhost:8080/login";
 
@@ -72,16 +87,28 @@ export const UserProvider = ({ children }) => {
       );
 
       if (response.status === 200) {
-        setAuthResponse("Logged in succesfully. Redirecting...");
-        setLoggedIn(true);
         const { username, email } = response.data;
+
+        setLoggedIn(true);
+        setUser({ username, email });
+        setAuthResponse("Logged in succesfully. Redirecting...");
+
+        if (loginResolver) {
+          loginResolver(true);
+          setLoginResolver(null);
+        }
         setTimeout(function () {
-          setUser({ username, email });
-        }, 2000);
+          setOpenLogin(false);
+        }, 1500);
       }
     } catch (error) {
       console.log(error);
       setAuthResponse("Wrong credentials. Try again or register");
+
+      if (loginResolver) {
+        loginResolver(false);
+        setLoginResolver(null);
+      }
     }
   }
 
@@ -116,7 +143,8 @@ export const UserProvider = ({ children }) => {
       });
       setUser(res.data);
     } catch (error) {
-      setUser(null); // Not logged in, that's fine
+      setUser(null); // Not logged in, continue
+      return;
     } finally {
       setLoading(false);
     }
@@ -175,21 +203,36 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+  // checks if user not logged in when prompted login
+  useEffect(() => {
+    if (openLogin === false && !user && loginResolver) {
+      loginResolver(false);
+      setLoginResolver(null);
+    }
+  }, [openLogin, user, loginResolver]);
+
   async function startConversation(relatedListingId) {
+    if (!user) {
+      const isLoggedIn = await waitForLogin();
+      if (!isLoggedIn) {
+        return;
+      }
+    }
+
     try {
       const res = await axios.post(
         `http://localhost:8080/api/messages/start`,
         { relatedListingId: relatedListingId },
         { withCredentials: true },
       );
+
       if (res.status == 201) {
         console.log("convo started");
         setActiveConvoId(res.data.id);
+        navigate(`/messaging`);
       }
     } catch (error) {
       console.log("convo starting error " + error);
-    } finally {
-      navigate(`/messaging`);
     }
   }
 
@@ -206,6 +249,7 @@ export const UserProvider = ({ children }) => {
         loginUser,
         authResponse,
         openLogin,
+        setOpenLogin,
         navbarActive,
         currentUserId,
         setLayoutSelection,

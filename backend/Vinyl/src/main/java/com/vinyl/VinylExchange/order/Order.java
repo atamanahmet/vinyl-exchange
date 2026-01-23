@@ -17,7 +17,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,7 +38,6 @@ public class Order extends BaseEntity {
     private UUID id;
 
     @Column(name = "order_number", unique = true, nullable = false)
-    @SequenceGenerator(name = "orderNumberSeqGenerator", sequenceName = "orderNumberSequence", initialValue = 10000, allocationSize = 1)
     private Long orderNumber;
 
     private UUID buyerId;
