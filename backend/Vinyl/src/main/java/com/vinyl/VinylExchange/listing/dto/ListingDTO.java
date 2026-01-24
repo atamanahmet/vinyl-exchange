@@ -53,6 +53,7 @@ public class ListingDTO {
     private String description;
     private String date;
     private Integer trackCount;
+    private int stockQuantity;
     private long tradeValue;
 
     @Min(0)
@@ -80,6 +81,7 @@ public class ListingDTO {
         this.packaging = listing.getPackaging();
         this.ownerUsername = listing.getOwnerUsername();
         this.trackCount = listing.getTrackCount();
+        this.stockQuantity = listing.getStockQuantity();
         this.tradePreferences = TradePreferenceDTO.fromEntities(listing.getTradePreferences());
         this.discountBP = listing.getDiscountBP();
         this.barcode = listing.getBarcode();

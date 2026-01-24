@@ -1,4 +1,4 @@
-package com.vinyl.VinylExchange.order;
+package com.vinyl.VinylExchange.order.enums;
 
 public enum OrderStatus {
 
@@ -6,5 +6,6 @@ public enum OrderStatus {
     PROCESSING,
     SHIPPED,
     DELIVERED,
+    CANCELLATION_PENDING,
     CANCELLED
 }

@@ -109,6 +109,14 @@ public class GlobalExceptionHandler {
                 .body(exception.getMessage());
     }
 
+    @ExceptionHandler(InvalidOrderOperationException.class)
+    public ResponseEntity<?> handleInvalidOrderOperationException(InvalidOrderOperationException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(exception.getMessage());
+    }
+
     @ExceptionHandler(ListingNotFoundException.class)
     public ResponseEntity<?> handleListingNotFoundException(ListingNotFoundException exception) {
 

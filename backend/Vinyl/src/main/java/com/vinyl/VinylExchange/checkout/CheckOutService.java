@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.vinyl.VinylExchange.cart.Cart;
@@ -20,8 +22,8 @@ import com.vinyl.VinylExchange.order.Order;
 import com.vinyl.VinylExchange.order.OrderItem;
 import com.vinyl.VinylExchange.order.OrderItemService;
 import com.vinyl.VinylExchange.order.OrderService;
-import com.vinyl.VinylExchange.order.OrderStatus;
-
+import com.vinyl.VinylExchange.order.enums.OrderStatus;
+import com.vinyl.VinylExchange.shared.FileStorageService;
 import com.vinyl.VinylExchange.shared.exception.CheckOutProcessingException;
 import com.vinyl.VinylExchange.shared.exception.CheckOutValidationException;
 
@@ -30,21 +32,26 @@ import jakarta.transaction.Transactional;
 @Service
 public class CheckOutService {
 
+    private static final Logger logger = LoggerFactory.getLogger(CheckOutService.class);
+
     private final ListingService listingService;
     private final OrderService orderService;
     private final CartService cartService;
     private final OrderItemService orderItemService;
+    private final FileStorageService fileStorageService;
 
     public CheckOutService(
             ListingService listingService,
             OrderService orderService,
             CartService cartService,
-            OrderItemService orderItemService) {
+            OrderItemService orderItemService,
+            FileStorageService fileStorageService) {
 
         this.listingService = listingService;
         this.orderService = orderService;
         this.cartService = cartService;
         this.orderItemService = orderItemService;
+        this.fileStorageService = fileStorageService;
     }
 
     public CheckOutResult proceedCheckOut(UUID userId) {
@@ -83,7 +90,7 @@ public class CheckOutService {
 
         } catch (Exception e) {
 
-            System.out.println(e.getMessage());
+            logger.error("Checkout failed for user id: {}", userId, e);
             throw new CheckOutProcessingException();
         }
     }
@@ -131,10 +138,8 @@ public class CheckOutService {
                         .build());
                 continue;
             }
-
         }
         return issues;
-
     }
 
     private boolean hasCheckoutCancelErrors(List<CartValidationIssue> validationIssues) {
@@ -147,37 +152,58 @@ public class CheckOutService {
     private Order createOrder(UUID userId, List<CartItem> cartItems, Map<UUID, Listing> listingMap) {
 
         Order order = Order.builder()
+                .orderNumber(orderService.getNextOrderNumber())
                 .buyerId(userId)
                 .status(OrderStatus.PENDING)
                 .orderItems(new ArrayList<>())
                 .build();
 
+        // saved first for order number seq generation,
         order = orderService.saveOrder(order);
 
         Long totalPrice = 0L;
+
+        List<Listing> listingsToUpdate = new ArrayList<>();
 
         for (CartItem item : cartItems) {
 
             Listing listing = listingMap.get(item.getListingId());
 
+            String listingMainImagePath = fileStorageService.getMainImagePath(listing.getId());
+
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
-                    .listing(listing)
+                    .listingId(listing.getId())
+                    .listingTitle(listing.getTitle())
+                    .listingMainImageUrl(listingMainImagePath)
+                    .sellerId(listing.getOwnerId())
                     .unitPrice(listing.getPriceKurus())
                     .quantity(item.getOrderQuantity())
                     .subTotal(listing.getPriceKurus() * item.getOrderQuantity())
                     .build();
 
-            order.getOrderItems().add(orderItem);
+            // saved first for single sourc of truth :createdAt
+            OrderItem savedItem = orderItemService.saveOrderItemAndFlush(orderItem);
 
-            totalPrice = totalPrice + orderItem.getSubTotal();
+            savedItem.setShippingDeadline(savedItem.getCreatedAt().plusDays(5));
+            savedItem.setExpectedDeliveryDate(savedItem.getCreatedAt().plusDays(7));
 
-            listing.setStockQuantity(listing.getStockQuantity() - orderItem.getQuantity());
+            order.getOrderItems().add(savedItem);
 
-            orderItemService.saveOrderItem(orderItem);
+            totalPrice += savedItem.getSubTotal();
+
+            listing.setStockQuantity(listing.getStockQuantity() - savedItem.getQuantity());
+
+            listingsToUpdate.add(listing);
+
         }
 
         order.setTotalPrice(totalPrice);
+
+        listingService.saveAllListing(listingsToUpdate);
+        orderItemService.saveAllOrderItems(order.getOrderItems());
+
+        logger.info("Order createdand populated with orderNumber: {}", order.getOrderNumber());
 
         return orderService.saveOrder(order);
     }

@@ -16,24 +16,37 @@ import jakarta.persistence.LockModeType;
 @Repository
 public interface ListingRepository extends JpaRepository<Listing, UUID> {
 
-    List<Listing> findAllByOwner_Id(UUID ownerId);
+        List<Listing> findAllByOwner_Id(UUID ownerId);
 
-    List<Listing> findAllByIdIn(List<UUID> listingIds);
+        List<Listing> findAllByIdIn(List<UUID> listingIds);
 
-    @Lock(LockModeType.PESSIMISTIC_READ)
-    List<Listing> findByIdIn(List<UUID> listingIds);
+        @Lock(LockModeType.PESSIMISTIC_READ)
+        @Query("SELECT l FROM Listing l WHERE l.id IN :listingIds")
+        List<Listing> findByIdInWithLock(List<UUID> listingIds);
 
-    List<Listing> findByPromoteTrue();
+        List<Listing> findByPromoteTrue();
 
-    List<Listing> findByOnHoldFalse();
+        List<Listing> findByOnHoldFalse();
 
-    boolean existsByTitle(String title);
+        boolean existsByTitle(String title);
 
-    @Query("SELECT CASE WHEN COUNT(l) > 0 THEN true ELSE false END FROM Listing l " +
-            "WHERE l.id = :listingId " +
-            "AND l.stockQuantity > 0 " +
-            "AND l.status = :status")
-    boolean isAvailableForTrade(
-            @Param("listingId") UUID listingId,
-            @Param("status") ListingStatus status);
+        @Query("SELECT CASE WHEN COUNT(l) > 0 THEN true ELSE false END FROM Listing l " +
+                        "WHERE l.id = :listingId " +
+                        "AND l.stockQuantity > 0 " +
+                        "AND l.status = :status")
+        boolean isAvailableForTrade(
+                        @Param("listingId") UUID listingId,
+                        @Param("status") ListingStatus status);
+
+        @Query("SELECT l FROM Listing l " +
+                        "WHERE l.stockQuantity > 0 " +
+                        "AND l.status = :status " +
+                        "AND l.onHold = false")
+        List<Listing> findAllAvailable(@Param("status") ListingStatus status);
+
+        @Query("SELECT COUNT(l) FROM Listing l " +
+                        "WHERE l.stockQuantity > 0 " +
+                        "AND l.status = :status " +
+                        "AND l.onHold = false")
+        long countAvailableListings(@Param("status") ListingStatus status);
 }

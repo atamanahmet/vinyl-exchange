@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.vinyl.VinylExchange.config.json.PriceTlSerializer;
+import com.vinyl.VinylExchange.order.enums.OrderStatus;
 import com.vinyl.VinylExchange.shared.BaseEntity;
 
 import jakarta.persistence.CascadeType;
@@ -37,6 +38,7 @@ public class Order extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    // for frontend only
     @Column(name = "order_number", unique = true, nullable = false)
     private Long orderNumber;
 

@@ -51,14 +51,16 @@ public class ListingService {
         return listingRepository.findAll();
     }
 
-    public List<Listing> getAllListingDTO() {
+    public List<ListingDTO> getAllListingDTO() {
 
-        return listingRepository.findAll();
+        List<Listing> listings = listingRepository.findAll();
+
+        return converAllToDTO(listings);
     }
 
     public List<Listing> getAvailableListings() {
 
-        return listingRepository.findByOnHoldFalse();
+        return listingRepository.findAllAvailable(ListingStatus.AVAILABLE);
     }
 
     public List<Listing> getPromotedListings() {
@@ -394,9 +396,35 @@ public class ListingService {
     }
 
     public ListingDTO converToDTO(Listing listing) {
+
         List<String> imagePaths = fileStorageService.getListingImagePaths(listing.getId());
 
         return new ListingDTO(listing, imagePaths);
+    }
+
+    public List<ListingDTO> converAllToDTO(List<Listing> listings) {
+
+        List<ListingDTO> listingDTOs = new ArrayList<>();
+
+        for (Listing listing : listings) {
+
+            List<String> imagePaths = fileStorageService.getListingImagePaths(listing.getId());
+
+            listingDTOs.add(new ListingDTO(listing, imagePaths));
+        }
+
+        return listingDTOs;
+    }
+
+    public void restoreStock(UUID listingId, int quantity) {
+
+        Listing listing = listingRepository.findById(listingId)
+                .orElseThrow(() -> new ListingNotFoundException("Listing not foujnd for restock"));
+
+        listing.setStockQuantity(listing.getStockQuantity() + quantity);
+
+        listingRepository.save(listing);
+
     }
 
 }

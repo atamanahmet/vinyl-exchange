@@ -24,7 +24,8 @@ export default function EditListing() {
     barcode: "",
     packaging: "",
     format: "",
-    trackCount: 0,
+    trackCount: 1,
+    stockQuantity: 1,
     artistName: "",
     tradeValue: 0,
     description: "",
@@ -308,11 +309,24 @@ export default function EditListing() {
             </div>
 
             <div className="formItem">
+              <label className="block mb-1">Stock</label>
+              <input
+                type="number"
+                name="stockQuantity"
+                value={listing.stockQuantity}
+                min={1}
+                onChange={handleChange}
+                className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+              />
+            </div>
+
+            <div className="formItem">
               <label className="block mb-1">Track Count</label>
               <input
                 type="number"
                 name="trackCount"
                 value={listing.trackCount}
+                min={1}
                 onChange={handleChange}
                 className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
               />

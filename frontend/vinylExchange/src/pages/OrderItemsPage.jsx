@@ -1,8 +1,6 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
-export default function OrderItemsPage({ orderItems }) {
+export default function OrderItemsPage() {
   const location = useLocation();
   const items = location.state;
 
@@ -13,116 +11,160 @@ export default function OrderItemsPage({ orderItems }) {
     const year = date.getFullYear();
     return `${day}.${month}.${year}`;
   };
-  return (
-    <>
-      <div class="mt-7 border border-gray-300 rounded-2xl py-4  transition-all duration-200 ease-in-out hover:-translate-y-1 ">
-        <svg
-          class="my-3 w-full"
-          xmlns="http://www.w3.org/2000/svg"
-          width="1216"
-          height="2"
-          viewBox="0 0 1216 2"
-          fill="none"
-        >
-          <path d="M0 1H1216" stroke="#D1D5DB" />
-        </svg>
 
+  // Calculate totals
+  const itemsSubtotal =
+    items?.reduce((sum, item) => sum + item.subTotal, 0) || 0;
+  const shipping = 50; // You can make this dynamic
+  const orderTotal = itemsSubtotal + shipping;
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Order Items Table */}
+      <div className="bg-gray-900 border border-gray-700 rounded-lg overflow-hidden">
+        {/* Table Header */}
+        <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-gray-800 border-b border-gray-700">
+          <div className="col-span-5 text-sm font-medium text-gray-400">
+            Item
+          </div>
+          <div className="col-span-2 text-sm font-medium text-gray-400 text-right">
+            Cost
+          </div>
+          <div className="col-span-2 text-sm font-medium text-gray-400 text-center">
+            Qty
+          </div>
+          <div className="col-span-2 text-sm font-medium text-gray-400 text-right">
+            Total
+          </div>
+          <div className="col-span-1 text-sm font-medium text-gray-400 text-right">
+            Status
+          </div>
+        </div>
+
+        {/* Order Items */}
         {items &&
-          items.map((item) => (
-            <div class="flex max-lg:flex-col items-center gap-8 lg:gap-24 px-3 md:px-11">
-              <div class="grid grid-cols-6 w-full">
-                <div class="col-span-6 sm:col-span-1">
-                  <img
-                    src={
-                      item.listing.imagePaths[0]
-                        ? `http://localhost:8080/${item.listing.imagePaths[0]}`
-                        : "/placeholder.png"
-                    }
-                    alt=""
-                    class="h-30 min-w-30 object-cover"
-                  />
-                </div>
-                <div class="col-span-4 sm:col-span-3 max-sm:mt-4 sm:pl-8 flex flex-col justify-center max-sm:items-center ml-7">
-                  <h6 class="font-manrope font-semibold text-2xl leading-9 text-indigo-50 mb-3 whitespace-nowrap">
-                    <div className="flex gap-2">
-                      <p class="font-medium text-left text-lg leading-8 text-indigo-50 whitespace-nowrap">
-                        Title:{" "}
+          items.map((item, index) => (
+            <div key={index}>
+              <div className="grid grid-cols-12 gap-4 px-6 py-6 items-center hover:bg-gray-800/50 transition-colors">
+                {/* Item Info */}
+                <div className="col-span-5 flex items-center gap-4">
+                  <div className="shrink-0 w-16 h-16 bg-gray-800 rounded-md overflow-hidden">
+                    <img
+                      src={item.listingMainImageUrl || "/placeholder.png"}
+                      alt={item.listingTitle}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-indigo-400 font-medium text-base truncate hover:text-indigo-300 cursor-pointer">
+                      {item.listingTitle}
+                    </h3>
+                    {item.artistName && (
+                      <p className="text-gray-400 text-sm mt-1">
+                        {item.artistName}
                       </p>
-                      <p className="font-medium text-left text-lg leading-8 text-indigo-50 whitespace-nowrap w-50 overflow-hidden hover:overflow-auto">
-                        {item.listing.title}
-                      </p>
-                    </div>
-                  </h6>
-                  <p class="font-medium text-left text-lg leading-8 text-indigo-50 whitespace-nowrap ">
-                    Band / Artist : {item.listing.artistName}
-                  </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div class="flex items-center justify-between gap-10 w-full  sm:pl-28 lg:pl-0">
-                <div class="flex flex-col justify-center items-start max-sm:items-center">
-                  <p class="font-normal text-lg text-gray-500 leading-8 mb-2 text-left whitespace-nowrap">
-                    Quantity
-                  </p>
-                  <p class=" font-semibold text-lg leading-8 text-green-500 text-center whitespace-nowrap">
-                    {item.quantity}
-                  </p>
-                </div>
-                <div class="flex flex-col justify-center items-start max-sm:items-center">
-                  <p class="font-normal text-lg text-gray-500 leading-8 mb-2 text-left whitespace-nowrap">
-                    Unit price
-                  </p>
-                  <p class="font-semibold text-lg leading-8 text-green-500 text-left whitespace-nowrap">
+
+                {/* Cost */}
+                <div className="col-span-2 text-right">
+                  <p className="text-gray-300 font-medium">
                     {item.unitPrice.toLocaleString("tr-TR")} ₺
                   </p>
                 </div>
-                <div class="flex flex-col justify-center items-start max-sm:items-center">
-                  <p class="font-normal text-lg text-gray-500 leading-8 mb-2 text-left whitespace-nowrap">
-                    Total price
-                  </p>
-                  <p class="font-semibold text-lg leading-8 text-green-500 text-left whitespace-nowrap">
+
+                {/* Quantity */}
+                <div className="col-span-2 text-center">
+                  <p className="text-gray-300 font-medium">× {item.quantity}</p>
+                </div>
+
+                {/* Total */}
+                <div className="col-span-2 text-right">
+                  <p className="text-green-500 font-semibold">
                     {item.subTotal.toLocaleString("tr-TR")} ₺
                   </p>
                 </div>
 
-                <div class="flex flex-col justify-center items-start max-sm:items-center">
-                  <p class="font-normal text-lg text-gray-500 leading-8 mb-2 text-left whitespace-nowrap">
-                    Delivery Expected by
-                  </p>
-                  <p class="font-semibold text-lg leading-8 text-indigo-50 text-left whitespace-nowrap">
-                    23rd March 2021
-                  </p>
+                {/* Status/Delivery */}
+                <div className="col-span-1 text-right">
+                  <span className="inline-block px-2 py-1 text-xs font-medium text-green-400 bg-green-900/30 rounded">
+                    Active
+                  </span>
                 </div>
               </div>
-            </div>
 
-            //   <div class="col-span-4 sm:col-span-3 max-sm:mt-4 sm:pl-8 flex flex-col justify-center max-sm:items-center text-left">
-            //     <h6 class="font-manrope font-semibold text-2xl leading-9 text-indigo-50 mb-3 whitespace-nowrap">
-            //       {item.listing.title}
-            //     </h6>
-            //     <p class="font-normal text-lg leading-8 text-gray-500 mb-8 whitespace-nowrap">
-            //       {item.listing.artistName}
-            //     </p>
-            //     <div class="flex items-center max-sm:flex-col gap-x-10 gap-y-3">
-            //       <span class="font-normal text-lg leading-8 text-gray-500 whitespace-nowrap">
-            //         Qty: {item.quantity}
-            //       </span>
-            //       <p class="font-semibold text-xl leading-8 text-indigo-50 whitespace-nowrap">
-            //         Price: {item.subTotal.toLocaleString("tr-TR")} ₺
-            //       </p>
-            //     </div>
-            //   </div>
+              {/* Delivery Info (expandable row) */}
+              <div className="px-6 pb-4 ml-20">
+                <p className="text-sm text-gray-400">
+                  <span className="text-gray-500">Delivery Expected by:</span>{" "}
+                  <span className="text-indigo-300 font-medium">
+                    23rd March 2025
+                  </span>
+                </p>
+              </div>
+
+              {/* Divider */}
+              {index < items.length - 1 && (
+                <div className="border-b border-gray-700"></div>
+              )}
+            </div>
           ))}
-        <svg
-          class="my-3 w-full"
-          xmlns="http://www.w3.org/2000/svg"
-          width="1216"
-          height="2"
-          viewBox="0 0 1216 2"
-          fill="none"
-        >
-          <path d="M0 1H1216" stroke="#D1D5DB" />
-        </svg>
       </div>
-    </>
+
+      {/* Order Summary */}
+      <div className="mt-6 bg-gray-900 border border-gray-700 rounded-lg p-6">
+        <div className="max-w-md ml-auto space-y-3">
+          {/* Items Subtotal */}
+          <div className="flex justify-between items-center">
+            <span className="text-gray-400">Items Subtotal:</span>
+            <span className="text-gray-300 font-medium">
+              {itemsSubtotal.toLocaleString("tr-TR")} ₺
+            </span>
+          </div>
+
+          {/* Shipping */}
+          <div className="flex justify-between items-center">
+            <span className="text-gray-400">Shipping:</span>
+            <span className="text-gray-300 font-medium">
+              {shipping.toLocaleString("tr-TR")} ₺
+            </span>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-gray-700 pt-3"></div>
+
+          {/* Order Total */}
+          <div className="flex justify-between items-center">
+            <span className="text-lg font-semibold text-indigo-50">
+              Order Total:
+            </span>
+            <span className="text-lg font-bold text-green-500">
+              {orderTotal.toLocaleString("tr-TR")} ₺
+            </span>
+          </div>
+
+          {/* Paid Amount */}
+          <div className="border-t border-gray-700 pt-3 mt-3">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-400">Paid By Customer:</span>
+              <span className="text-green-400 font-semibold">
+                {orderTotal.toLocaleString("tr-TR")} ₺
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="mt-6 flex justify-between items-center">
+        <button className="px-6 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors">
+          Refund
+        </button>
+        <p className="text-sm text-gray-500 italic">
+          This order is no longer editable.
+        </p>
+      </div>
+    </div>
   );
 }

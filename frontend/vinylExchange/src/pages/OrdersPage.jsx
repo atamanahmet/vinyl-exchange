@@ -96,10 +96,10 @@ export default function OrdersPage() {
                         <h6 class="font-manrope font-semibold text-2xl leading-9 text-indigo-50 mb-3 whitespace-nowrap">
                           <div>
                             <p class="font-medium text-left text-lg leading-8 text-indigo-50 whitespace-nowrap">
-                              Order Id:{" "}
+                              Order Number:{" "}
                             </p>
                             <p className="font-medium text-left text-lg leading-8 text-indigo-50 whitespace-nowrap w-50 overflow-hidden hover:overflow-auto">
-                              {order.id}
+                              {order.orderNumber}
                             </p>
                           </div>
                         </h6>

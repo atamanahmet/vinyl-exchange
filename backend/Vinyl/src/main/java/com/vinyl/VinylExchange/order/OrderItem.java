@@ -1,19 +1,26 @@
 package com.vinyl.VinylExchange.order;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import com.vinyl.VinylExchange.config.json.PriceTlSerializer;
-import com.vinyl.VinylExchange.listing.Listing;
+import com.vinyl.VinylExchange.order.enums.OrderItemStatus;
+import com.vinyl.VinylExchange.shared.BaseEntity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,15 +34,18 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "order_items")
-public class OrderItem {
+public class OrderItem extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "listing_id")
-    private Listing listing;
+    // when listing removed snapshot can hold basic info
+    private UUID listingId;
+
+    private String listingTitle;
+
+    private String listingMainImageUrl;
 
     @JsonSerialize(using = PriceTlSerializer.class)
     private Long unitPrice;
@@ -47,9 +57,16 @@ public class OrderItem {
 
     private UUID sellerId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
     @JsonBackReference
     private Order order;
+
+    @Enumerated(EnumType.STRING)
+    private OrderItemStatus status;
+
+    private LocalDateTime expectedDeliveryDate;
+
+    private LocalDateTime shippingDeadline;
 
 }
