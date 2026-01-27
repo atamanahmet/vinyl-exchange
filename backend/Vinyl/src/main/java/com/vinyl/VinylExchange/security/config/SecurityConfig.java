@@ -71,9 +71,10 @@ public class SecurityConfig implements WebMvcConfigurer {
                         .requestMatchers(
                                 "/",
                                 "/login",
+                                "/error",
                                 "/api/me",
                                 "/register",
-                                "/search/**",
+                                "/api/mb/search/**",
                                 "/api/cms/**",
                                 "/listing/**",
                                 "/api/listings/**",

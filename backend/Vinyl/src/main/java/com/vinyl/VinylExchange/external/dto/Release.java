@@ -1,0 +1,60 @@
+package com.vinyl.VinylExchange.external.dto;
+
+import java.util.List;
+import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+// @Entity
+// @Table(name = "releases")
+public class Release {
+
+    @Id
+    private UUID id;
+
+    private int score;
+
+    @JsonProperty("artist-credit-id")
+    private String artistCreditId;
+
+    private String title;
+
+    // @ElementCollection
+    private List<ArtistCredit> artistCredit;
+
+    private String date;
+
+    private String status;
+
+    private String country;
+
+    private String barcode;
+
+    // @ElementCollection
+    private LabelInfo labelInfo;
+
+    @JsonProperty("track-count")
+    private Integer trackCount;
+
+    private List<Media> media;
+
+    private List<Tags> tags;
+
+    private String imagePaths;
+
+}

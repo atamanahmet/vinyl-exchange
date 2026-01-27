@@ -4,6 +4,7 @@ import { ThemeProvider } from "@material-tailwind/react";
 
 import Card from "../comps/Card";
 import ListView from "../comps/ListView";
+
 import SkeletonCardView from "../comps/Skeletons/SkeletonCardView";
 import SkeletonListView from "../comps/Skeletons/SkeletonListView";
 
@@ -12,17 +13,47 @@ import { useAuthStore } from "../stores/authStore";
 import { useUIStore } from "../stores/uiStore";
 import { useCartStore } from "../stores/cartStore";
 
+import { listingToCardItem } from "../adapters/listingToCardItem";
+import { mbReleaseToCardItem } from "../adapters/mbReleaseToCardItem";
+import { useNavigate } from "react-router-dom";
+
 export default function MainPage() {
+  const navigate = useNavigate();
+
   const data = useDataStore((state) => state.data);
+  const dataType = useDataStore((state) => state.dataType);
+
+  const user = useAuthStore((state) => state.user);
   const isFetching = useDataStore((state) => state.isFetching);
   const fetchAllListings = useDataStore((state) => state.fetchAllListings);
   const layout = useUIStore((state) => state.layout);
   const setLayout = useUIStore((state) => state.setLayout);
   const cart = useCartStore((state) => state.cart);
+  const addToCart = useCartStore((state) => state.addToCart);
+  const removeFromCart = useCartStore((state) => state.removeFromCart);
 
   useEffect(() => {
     fetchAllListings();
   }, []);
+
+  let items = [];
+
+  if (dataType === "listing" && Array.isArray(data)) {
+    items = data.map((listing) =>
+      listingToCardItem(
+        listing,
+        user,
+        cart,
+        navigate,
+        addToCart,
+        removeFromCart,
+      ),
+    );
+  }
+
+  if (dataType === "mb" && data?.releases) {
+    items = data.releases.map((release) => mbReleaseToCardItem(release));
+  }
 
   return (
     <>
@@ -83,11 +114,11 @@ export default function MainPage() {
             <p>Price</p>
           </div>
           <div className="">
-            {isFetching || !data || data.length === 0
+            {isFetching || !items || items.length === 0
               ? Array(5)
                   .fill(0)
                   .map((_, i) => <SkeletonListView key={i} />)
-              : data?.map((item) => <ListView key={item.id} item={item} />)}
+              : items?.map((item) => <ListView key={item.id} item={item} />)}
           </div>
         </div>
       )}
@@ -100,11 +131,11 @@ export default function MainPage() {
       mt-5
       w-full gap-5 "
         >
-          {isFetching || !data || data.length === 0
+          {isFetching || !items || items.length === 0
             ? Array(8)
                 .fill(0)
                 .map((_, i) => <SkeletonCardView key={i} />)
-            : data?.map((item) => <Card key={item.id} item={item} />)}
+            : items?.map((item) => <Card key={item.id} item={item} />)}
         </div>
       )}
     </>

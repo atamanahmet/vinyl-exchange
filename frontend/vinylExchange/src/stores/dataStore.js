@@ -4,6 +4,7 @@ import { create } from "zustand";
 export const useDataStore = create((set, get) => ({
   isFetching: false,
   data: null,
+  dataType: "",
   hasError: false,
   avatar: sessionStorage.getItem("avatar") || null,
   searchQuery: "",
@@ -25,6 +26,7 @@ export const useDataStore = create((set, get) => ({
       if (res.status === 200) {
         set({
           data: res.data,
+          dataType: "listing",
           hasError: false,
         });
         return true;
@@ -48,17 +50,20 @@ export const useDataStore = create((set, get) => ({
       return;
     }
 
-    query = query.replaceAll(" ", "+");
-
-    const url = "http://localhost:8080/search/";
+    const url = "http://localhost:8080/api/mb/search";
 
     try {
-      const res = await axios.get(url + query, {
+      const res = await axios.get(url, {
+        params: {
+          title: query,
+          limit: 20,
+        },
         withCredentials: true,
       });
 
       if (res.status === 200) {
-        set({ data: res.data });
+        set({ data: res.data, dataType: "mb" });
+        console.log(res.data);
       } else {
         console.error("Search failed with status:", res.status);
       }

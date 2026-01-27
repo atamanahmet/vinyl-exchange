@@ -82,7 +82,7 @@ export default function Navbar() {
   const handleSearch = (e) => {
     if (e) e.preventDefault();
     navigate("/");
-    searchHandler(query);
+    search(query);
   };
 
   const handleKeyPress = (e) => {
@@ -143,7 +143,7 @@ export default function Navbar() {
           </button>
 
           {/* Desktop Search */}
-          <div className="relative hidden md:hidden">
+          <div className="relative  ">
             <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none ">
               <svg
                 className="w-4 h-4 text-body "

@@ -141,6 +141,12 @@ public class GlobalExceptionHandler {
                 .body(exception.getMessage());
     }
 
+    @ExceptionHandler(GenreNotFoundException.class)
+    public void handleGenreNotFoundException(GenreNotFoundException exception) {
+
+        logger.warn(exception.getMessage());
+    }
+
     @ExceptionHandler(RoleNotFoundException.class)
     public ResponseEntity<?> handleRoleNotFoundException(RoleNotFoundException exception) {
 
