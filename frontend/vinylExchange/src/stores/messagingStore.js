@@ -6,9 +6,26 @@ import { navigate } from "../utils/router";
 
 export const useMessagingStore = create((set, get) => ({
   activeConvoId: null,
+  unreadCount: null,
 
   setActiveConvoId: (id) => set({ activeConvoId: id }),
 
+  fetchUnreadCount: async () => {
+    const user = useAuthStore.getState().user;
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/api/messages/unread",
+        { withCredentials: true },
+      );
+
+      set({ unreadCount: response.data.unreadCount });
+    } catch (error) {
+      console.error("Failed to fetch unread count:", error);
+    }
+    // if (user) {
+
+    // }
+  },
   startConversation: async (relatedListingId) => {
     const user = useAuthStore.getState().user;
 

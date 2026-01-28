@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
+import { useAuthStore } from "./authStore";
+import { useUIStore } from "./uiStore";
 
 export const useCartStore = create((set, get) => ({
   cart: null,
@@ -21,7 +23,15 @@ export const useCartStore = create((set, get) => ({
     }
   },
 
-  addtoCart: async (listingId) => {
+  addToCart: async (listingId) => {
+    const user = useAuthStore.getState().user;
+
+    if (!user) {
+      const isLoggedIn = await useUIStore.getState().waitForLogin();
+      if (!isLoggedIn) {
+        return;
+      }
+    }
     try {
       const res = await axios.post(
         "http://localhost:8080/api/cart/items",
@@ -38,6 +48,14 @@ export const useCartStore = create((set, get) => ({
   },
 
   decreaseFromCart: async (cartItemId) => {
+    const user = useAuthStore.getState().user;
+
+    if (!user) {
+      const isLoggedIn = await useUIStore.getState().waitForLogin();
+      if (!isLoggedIn) {
+        return;
+      }
+    }
     try {
       const res = await axios.patch(
         `http://localhost:8080/api/cart/items/${cartItemId}`,
@@ -54,6 +72,14 @@ export const useCartStore = create((set, get) => ({
   },
 
   removeFromCart: async (cartItemId) => {
+    const user = useAuthStore.getState().user;
+
+    if (!user) {
+      const isLoggedIn = await useUIStore.getState().waitForLogin();
+      if (!isLoggedIn) {
+        return;
+      }
+    }
     try {
       const res = await axios.delete(
         `http://localhost:8080/api/cart/items/${cartItemId}`,

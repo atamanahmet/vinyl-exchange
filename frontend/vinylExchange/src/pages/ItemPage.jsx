@@ -13,10 +13,13 @@ import {
 } from "flowbite-react";
 import { useAuthStore } from "../stores/authStore";
 import { useMessagingStore } from "../stores/messagingStore";
+import { useCartStore } from "../stores/cartStore";
 
 export default function ItemPage() {
   const user = useAuthStore((state) => state.user);
-  const checkAuth = useAuthStore((state) => state.checkAuth);
+
+  const addToCart = useCartStore((state) => state.addToCart);
+  const removeFromCart = useCartStore((state) => state.removeFromCart);
 
   const startConversation = useMessagingStore(
     (state) => state.startConversation,
@@ -27,7 +30,6 @@ export default function ItemPage() {
   const { listingId } = useParams();
   const [listing, setListing] = useState();
   const [mainImage, setMainImage] = useState();
-  const { addToCart } = useCart();
   const [openModal, setOpenModal] = useState(false);
   const [openModalUrl, setOpenModalUrl] = useState();
   const [isOwnerUser, setIsOwnerUser] = useState();
@@ -92,7 +94,7 @@ export default function ItemPage() {
   return (
     <>
       {listing && (
-        <div className="fixedRoot">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-4 ">
           <div>
             <Modal
               dismissible
@@ -109,7 +111,7 @@ export default function ItemPage() {
               </div>
             </Modal>
           </div>
-          <div className="grid grid-cols-2 gap-10 text-left">
+          <div className="flex justify-center gap-20 text-left mt-20">
             <ImageGallery
               imagePaths={listing.imagePaths}
               openModal={openModalImage}
@@ -123,7 +125,7 @@ export default function ItemPage() {
                 className="product capitalize text-very-dark-blue font-bold text-3xl sm:text-4xl sm:leading-none pb-3"
               >
                 {listing.title}{" "}
-                <span className="block  mt-5 text-2xl text-indigo-400">
+                <span className="block  mt-5 text-2xl text-amber-600">
                   {/* {size} */}
                   {listing.artistName}
                 </span>
@@ -131,20 +133,24 @@ export default function ItemPage() {
                   {/* {size} */}
                   {label}
                 </span>
-                <span className="block  mt-5 text-2xl">{format}</span>
+                <span className="block  mt-5 text-2xl">{listing.format}</span>
                 <span className="block  mt-5 text-2xl">
                   <span className="italic font-normal text-amber-200">
                     Condition:{" "}
                   </span>
                   {listing.condition}
                 </span>
+                <span className="block  mt-5 text-2xl">{listing.date}</span>
               </h3>
+              <p className="mt-5">Seller: {listing.ownerUsername}</p>
+              <p className="mt-5">Stock: {listing.stockQuantity}</p>
+
               <p className="text-dark-grayish-blue pb-6 lg:py-7 lg:leading-6">
                 {listing.description}
               </p>
               <div className="amount font-bold flex items-center justify-between lg:flex-col lg:items-start mb-6">
                 <div className="discount-price items-center flex">
-                  <div className="price text-3xl ">
+                  <div className="price -mt-5 text-3xl ">
                     <span className="text-green-400">
                       {listing.discount == 0
                         ? listing.price.toLocaleString("tr-TR") + " ₺"
@@ -216,7 +222,7 @@ export default function ItemPage() {
                   </div>
                 )}
                 {isOwnerUser && (
-                  <div className="inline-flex  w-full gap-3 items-center mt-5">
+                  <div className="inline-flex  w-full gap-3 ">
                     <button
                       onClick={() => {
                         navigateEditItemWithId();

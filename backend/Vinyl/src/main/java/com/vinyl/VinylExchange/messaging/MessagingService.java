@@ -111,6 +111,10 @@ public class MessagingService {
 
         Conversation conversation = getConversation(conversationId, userId);
 
+        conversation.resetUnreadCount(userId);
+
+        conversationRepository.save(conversation);
+
         return convertToDTO(conversation);
     }
 
@@ -201,8 +205,12 @@ public class MessagingService {
         return conversationDTOList;
     }
 
-    // to do: only delete from deleting party, participant should have a copy
-    // conversation history, separate entity unmutable
+    public Long getUserTotalUnreadCount(UUID userId) {
+        return conversationRepository.getTotalUnreadCountForUser(userId);
+    }
+
+    // TODO: only delete from deleting party, participant should have a copy
+    // conversation history, separate entity immutable
     public void deleteMyConversations(UUID userId) {
 
         List<UUID> conversations = conversationRepository.findAllByUserId(userId).stream().map(conv -> conv.getId())

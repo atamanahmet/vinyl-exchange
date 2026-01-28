@@ -9,8 +9,8 @@ export function mbReleaseToCardItem(release, navigate) {
     imageUrl: `https://coverartarchive.org/release/${release.id}/front-250`,
 
     primaryAction: {
-      label: "Select",
-      onClick: () => console.log(release),
+      label: "Add to Wishlist",
+      onClick: () => console.log("add to favorites: " + release),
     },
   };
 }

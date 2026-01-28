@@ -3,6 +3,7 @@ package com.vinyl.VinylExchange.external.dto;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -35,6 +36,7 @@ public class Release {
     private String title;
 
     // @ElementCollection
+    @JsonAlias("artist-credit")
     private List<ArtistCredit> artistCredit;
 
     private String date;
@@ -46,9 +48,10 @@ public class Release {
     private String barcode;
 
     // @ElementCollection
-    private LabelInfo labelInfo;
+    @JsonAlias("label-info")
+    private List<LabelInfo> labelInfo;
 
-    @JsonProperty("track-count")
+    @JsonAlias("track-count")
     private Integer trackCount;
 
     private List<Media> media;

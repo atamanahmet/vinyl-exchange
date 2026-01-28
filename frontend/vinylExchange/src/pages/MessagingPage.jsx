@@ -30,7 +30,7 @@ const MessagingPage = () => {
         `http://localhost:8080/api/messages/conversations`,
         {
           withCredentials: true,
-        }
+        },
       );
       if (res.status == 200) {
         setConversations(res.data);
@@ -48,14 +48,14 @@ const MessagingPage = () => {
         `http://localhost:8080/api/messages/conversation/${listingId}`,
         {
           withCredentials: true,
-        }
+        },
       );
       if (res.status == 200) {
         setMessages(res.data.messagePage.content);
         setParticipantUsername(
           user.username == res.data.conversationDTO.initiatorUsername
             ? res.data.conversationDTO.participantUsername
-            : res.data.conversationDTO.initiatorUsername
+            : res.data.conversationDTO.initiatorUsername,
         );
         console.log(res.data);
       }
@@ -68,10 +68,6 @@ const MessagingPage = () => {
     fetchConversations();
   }, []);
 
-  // useEffect(() => {
-  //   fetchMessages();
-  // }, [response]);
-
   const [messages, setMessages] = useState([]);
 
   const [newMessage, setNewMessage] = useState("");
@@ -80,25 +76,11 @@ const MessagingPage = () => {
     if (newMessage == "") {
       return;
     }
-    // if (newMessage.trim()) {
-    //   const message = {
-    //     id: messages.length + 1,
-    //     sender: "me",
-    //     text: newMessage,
-    //     timestamp: new Date().toLocaleTimeString("en-US", {
-    //       hour: "2-digit",
-    //       minute: "2-digit",
-    //     }),
-    //     senderName: "You",
-    //   };
-    //   setMessages([...messages, message]);
 
     SetSendRequest((prevData) => ({
       ...prevData,
       content: newMessage,
     }));
-
-    // console.log(sendRequest);
 
     try {
       const res = await axios.post(
@@ -107,7 +89,7 @@ const MessagingPage = () => {
           relatedListingId: sendRequest.relatedListingId,
           content: newMessage,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       console.log(res.data);

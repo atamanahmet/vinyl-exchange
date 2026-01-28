@@ -16,6 +16,7 @@ import { useCartStore } from "../stores/cartStore";
 import { listingToCardItem } from "../adapters/listingToCardItem";
 import { mbReleaseToCardItem } from "../adapters/mbReleaseToCardItem";
 import { useNavigate } from "react-router-dom";
+import { useMessagingStore } from "../stores/messagingStore";
 
 export default function MainPage() {
   const navigate = useNavigate();
@@ -29,6 +30,9 @@ export default function MainPage() {
   const layout = useUIStore((state) => state.layout);
   const setLayout = useUIStore((state) => state.setLayout);
   const cart = useCartStore((state) => state.cart);
+  const startConversation = useMessagingStore(
+    (state) => state.startConversation,
+  );
   const addToCart = useCartStore((state) => state.addToCart);
   const removeFromCart = useCartStore((state) => state.removeFromCart);
 
@@ -39,14 +43,15 @@ export default function MainPage() {
   let items = [];
 
   if (dataType === "listing" && Array.isArray(data)) {
+    const cartIds = new Set(cart?.items?.map((i) => i.listingId) || []);
     items = data.map((listing) =>
       listingToCardItem(
         listing,
         user,
-        cart,
-        navigate,
+        cartIds,
         addToCart,
         removeFromCart,
+        startConversation,
       ),
     );
   }
@@ -57,7 +62,7 @@ export default function MainPage() {
 
   return (
     <>
-      <div className=" flex flex-row gap-2 justify-end">
+      <div className=" flex flex-row gap-2 w-full justify-end mt-3">
         <button className="" onClick={() => setLayout("list")}>
           <svg
             className="border border-indigo-500 w-8 h-8 p-1 rounded-md bg-black"
@@ -83,9 +88,6 @@ export default function MainPage() {
             xmlns="http://www.w3.org/2000/svg"
             xmlnsXlink="http://www.w3.org/1999/xlink"
           >
-            <title>grid [#1526]</title>
-            <desc>Created with Sketch.</desc>
-            <defs></defs>
             <g id="Page-1" stroke="#FFFFFF" strokeWidth="0" fill="#FFFFFF">
               <g
                 id="Dribbble-Light-Preview"
@@ -104,8 +106,8 @@ export default function MainPage() {
         </button>
       </div>
       {layout == "list" && (
-        <div className="">
-          <div className="bg-neutral-primary-soft border-b border-default grid grid-cols-7 items-center text-white mb-3">
+        <div>
+          <div className="bg-neutral-primary-soft border-b border-default grid grid-cols-7 items-center text-white justify-center">
             <p>Cover</p>
             <p>Title</p>
             <p>Band/Artist</p>
@@ -113,7 +115,7 @@ export default function MainPage() {
             <p>Format</p>
             <p>Price</p>
           </div>
-          <div className="">
+          <div>
             {isFetching || !items || items.length === 0
               ? Array(5)
                   .fill(0)
@@ -123,14 +125,7 @@ export default function MainPage() {
         </div>
       )}
       {layout == "grid" && (
-        <div
-          className=" grid 
-      min-[1100px]:grid-cols-3
-      min-[1300px]:grid-cols-4
-      min-[750px]:grid-cols-2
-      mt-5
-      w-full gap-5 "
-        >
+        <div className="grid min-[850px]:grid-cols-3 min-[1100px]:grid-cols-4 min-[670px]:grid-cols-2 mt-5 gap-2  px-4 sm:px-6 lg:px-8">
           {isFetching || !items || items.length === 0
             ? Array(8)
                 .fill(0)

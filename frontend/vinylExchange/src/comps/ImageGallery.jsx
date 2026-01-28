@@ -25,7 +25,7 @@ export default function ImageGallery({ imagePaths, openModal }) {
   }
 
   return (
-    <div className="w-full">
+    <div>
       {
         <img
           src={mainImg ? mainImg : "/placeholder.png"}

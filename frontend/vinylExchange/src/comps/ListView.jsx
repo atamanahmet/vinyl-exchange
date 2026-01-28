@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useMessagingStore } from "../stores/messagingStore";
 import { useCartStore } from "../stores/cartStore";
 import { useAuthStore } from "../stores/authStore";
+import CardImage from "./CardImage";
 
 export default function ListView({ item }) {
   const cart = useCartStore((state) => state.cart);
@@ -46,21 +47,12 @@ export default function ListView({ item }) {
 
   return (
     <>
-      <div className="bg-neutral-primary-soft ml-1 pb-3 grid grid-cols-7 border-b max-w-[1160px] mb-3 items-center">
-        <button
-          onClick={() => {
-            navigateItemWithId();
-          }}
-        >
-          <img
-            src={item.imagePaths[0]}
-            onError={(e) => {
-              e.target.src = "/placeholder.png";
-            }}
-            alt="listing main image"
-            className="bg-neutral-700 min-h-35 max-w-35 ml-3 object-cover rounded"
-          />
-        </button>
+      <div className="bg-neutral-primary-soft grid grid-cols-7 border-b   items-center">
+        <div className="scale-65 -ml-6 -my-5">
+          <Link to={`/listing/${item.id}`} className="cursor-pointer">
+            <CardImage src={item.imageUrl} alt={item.title} />
+          </Link>
+        </div>
         <button
           onClick={() => {
             navigateItemWithId();
@@ -78,13 +70,12 @@ export default function ListView({ item }) {
             scope="row"
             className="px-6 py-4 text-amber-400 font-medium text-heading flex flex-col overflow-auto "
           >
-            {item.artistName}
+            {item.artist}
           </p>
         </button>
 
-        <p className="px-6 py-4">{item.date} </p>
+        <p className="px-6 py-4">{item.year} </p>
         <p className="">{item.format} </p>
-        {/* <p className="px-6 py-4">{item.trackCount}</p> */}
         <div className="">
           <p
             className={`px-6 ${

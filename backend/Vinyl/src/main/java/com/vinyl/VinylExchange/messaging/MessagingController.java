@@ -21,6 +21,7 @@ import com.vinyl.VinylExchange.messaging.dto.MessageDTO;
 import com.vinyl.VinylExchange.messaging.dto.MessagePageResponse;
 import com.vinyl.VinylExchange.messaging.dto.SendMessageRequest;
 import com.vinyl.VinylExchange.messaging.dto.StartConversationRequest;
+import com.vinyl.VinylExchange.messaging.dto.UnreadCountResponse;
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
 
 @Controller
@@ -120,4 +121,10 @@ public class MessagingController {
                                 .build();
         }
 
+        @GetMapping("/unread")
+        public ResponseEntity<UnreadCountResponse> getUnreadCount(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
+                Long count = messagingService.getUserTotalUnreadCount(userPrincipal.getId());
+                return ResponseEntity.ok(new UnreadCountResponse(count));
+        }
 }
