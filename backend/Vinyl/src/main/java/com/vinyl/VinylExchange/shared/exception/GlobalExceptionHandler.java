@@ -73,6 +73,11 @@ public class GlobalExceptionHandler {
                 .body(exception.getMessage());
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public void handleResourceNotFoundException(ResourceNotFoundException exception) {
+        logger.warn(exception.getMessage());
+    }
+
     @ExceptionHandler(TokenExpireException.class)
     public void handleTokenExpiredException(TokenExpireException exception) {
 

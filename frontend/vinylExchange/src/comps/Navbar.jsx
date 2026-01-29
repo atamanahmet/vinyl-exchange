@@ -111,8 +111,8 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-neutral-primary border-neutral-secondary border-b sticky top-0 z-50 bg-black ">
-      <div className="w-full px-4 sm:px-6 lg:px-8">
+    <nav className="full-width-break  border-neutral-secondary border-b sticky top-0 z-50 bg-black ">
+      <div className=" max-w-7xl mx-auto  px-4 sm:px-6 lg:px-8 ">
         <div className="flex items-center justify-between h-16">
           {/* logo */}
           <button
@@ -205,64 +205,95 @@ export default function Navbar() {
               </button>
             )}
 
-            {/* message */}
-            {user != null && (
-              <button
-                onClick={() => navigate("/messaging")}
-                className="relative flex items-center justify-center text-body hover:text-heading bg-transparent border border-transparent hover:bg-neutral-secondary-medium focus:ring-2 focus:ring-neutral-tertiary font-medium rounded-base text-sm w-10 h-10 focus:outline-none"
-                aria-label="Messages"
-              >
-                <div className="border-2 border-gray-800 p-2 rounded-full">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-                    />
-                  </svg>
-                </div>
+            <div className="flex gap-2">
+              {/* message */}
+              {user != null && (
+                <button
+                  onClick={() => navigate("/messaging")}
+                  className="relative flex items-center justify-center text-body hover:text-heading bg-transparent border border-transparent hover:bg-neutral-secondary-medium focus:ring-2 focus:ring-neutral-tertiary font-medium rounded-base text-sm w-10 h-10 ml-2 hover:-translate-y-0.5 ease-in-out"
+                  aria-label="Messages"
+                >
+                  <div className="border-2 border-gray-800 p-2 rounded-full">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                      />
+                    </svg>
+                  </div>
 
-                <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-accent-primary rounded-full">
-                  {unreadCount}
-                </span>
-              </button>
-            )}
-
-            {/* cart */}
-            {user != null && (
-              <button
-                onClick={() => navigate("/cart")}
-                className="relative flex items-center justify-center text-body hover:text-heading bg-transparent  hover:bg-neutral-secondary-medium focus:ring-2 focus:ring-neutral-tertiary font-medium rounded-base text-sm w-10 h-10 focus:outline-none mr-2"
-                aria-label="Cart"
-              >
-                <div className="border-2 border-gray-800 p-2 rounded-full">
-                  <svg
-                    className="w-5 h-5 "
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                    />
-                  </svg>
-                </div>
-                {cartItemCount > 0 && (
                   <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-accent-primary rounded-full">
-                    {cartItemCount}
+                    {unreadCount}
                   </span>
-                )}
-              </button>
-            )}
+                </button>
+              )}
+
+              {/* cart */}
+              {user != null && (
+                <button
+                  onClick={() => navigate("/cart")}
+                  className="relative flex items-center justify-center text-body hover:text-heading bg-transparent  hover:bg-neutral-secondary-medium focus:ring-2 focus:ring-neutral-tertiary font-medium rounded-base text-sm w-10 h-10 focus:outline-none "
+                  aria-label="Cart"
+                >
+                  <div className="border-2 border-gray-800 p-2 rounded-full">
+                    <svg
+                      className="w-5 h-5 "
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
+                    </svg>
+                  </div>
+                  {cartItemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-accent-primary rounded-full">
+                      {cartItemCount}
+                    </span>
+                  )}
+                </button>
+              )}
+              {/* notification */}
+              {user != null && (
+                <button
+                  onClick={() => navigate("/cart")}
+                  className="relative flex items-center justify-center text-body hover:text-heading bg-transparent  hover:bg-neutral-secondary-medium focus:ring-2 focus:ring-neutral-tertiary font-medium rounded-base text-sm w-10 h-10 focus:outline-none mr-2"
+                  aria-label="Cart"
+                >
+                  <div className="border-2 border-gray-800 p-2 rounded-full">
+                    <svg
+                      className="w-5 h-5"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <g>
+                        <path d="M0 0h24v24H0z" />
+                        <path
+                          d="M20 17h2v2H2v-2h2v-7a8 8 0 1 1 16 0v7zm-2 0v-7a6 6 0 1 0-12 0v7h12zm-9 4h6v2H9v-2z"
+                          fill="#FFFFFF"
+                        />
+                      </g>
+                    </svg>
+                  </div>
+                  {cartItemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-accent-primary rounded-full">
+                      {cartItemCount}
+                    </span>
+                  )}
+                </button>
+              )}
+            </div>
 
             {/* user menu */}
             {user != null && (
@@ -316,6 +347,17 @@ export default function Navbar() {
                           className="w-full text-left block px-4 py-2 text-sm text-body hover:bg-neutral-secondary-medium hover:text-heading"
                         >
                           Profile
+                        </button>
+                      </li>
+                      <li>
+                        <button
+                          onClick={() => {
+                            navigate("/wishlist");
+                            setIsUserMenuOpen(false);
+                          }}
+                          className="w-full text-left block px-4 py-2 text-sm text-body hover:bg-neutral-secondary-medium hover:text-heading"
+                        >
+                          Wishlist
                         </button>
                       </li>
                       <li>

@@ -135,7 +135,7 @@ export default function ConversationsPage() {
   }, [user]);
 
   return (
-    <div className="flex h-[calc(100vh-64px)] w-full  mx-auto bg-black">
+    <div className="flex h-[calc(100vh-64px)] max-w-7xl mx-auto bg-black ">
       {/* Sidebar */}
       <div className=" w-2/8  bg-neutral-primary border-r border-neutral-secondary flex flex-col">
         {/* Sidebar Header */}

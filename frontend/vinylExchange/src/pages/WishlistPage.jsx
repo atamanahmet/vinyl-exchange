@@ -1,78 +1,29 @@
-import { useState, useEffect } from "react";
-import "../App.css";
-import { ThemeProvider } from "@material-tailwind/react";
-
+import { useEffect } from "react";
+import useWishlistStore from "../stores/wishlistStore";
+import { useUIStore } from "../stores/uiStore";
+import SkeletonCardView from "../comps/Skeletons/SkeletonCardView";
+import SkeletonListView from "../comps/Skeletons/SkeletonListView";
 import Card from "../comps/Card";
 import ListView from "../comps/ListView";
 
-import SkeletonCardView from "../comps/Skeletons/SkeletonCardView";
-import SkeletonListView from "../comps/Skeletons/SkeletonListView";
+export default function WishlistPage() {
+  const wishlistItems = useWishlistStore((state) => state.wishlistItems);
+  const fetchWishlist = useWishlistStore((state) => state.fetchWishlist);
+  const isLoading = useWishlistStore((state) => state.isLoading);
 
-import { useDataStore } from "../stores/dataStore";
-import { useAuthStore } from "../stores/authStore";
-import { useUIStore } from "../stores/uiStore";
-import { useCartStore } from "../stores/cartStore";
-
-import { listingToCardItem } from "../adapters/listingToCardItem";
-import { mbReleaseToCardItem } from "../adapters/mbReleaseToCardItem";
-import { useNavigate } from "react-router-dom";
-import { useMessagingStore } from "../stores/messagingStore";
-import useWishlistStore from "../stores/wishlistStore";
-
-export default function MainPage() {
-  const navigate = useNavigate();
-
-  const data = useDataStore((state) => state.data);
-  const dataType = useDataStore((state) => state.dataType);
-
-  const user = useAuthStore((state) => state.user);
-  const addToWishlist = useWishlistStore((state) => state.addToWishlist);
-  const isInWishlist = useWishlistStore((state) => state.isInWishlist);
-  const toggleWishlist = useWishlistStore((state) => state.toggleWishlist);
-  const removeFromWishlist = useWishlistStore(
-    (state) => state.removeFromWishlist,
-  );
-  const isFetching = useDataStore((state) => state.isFetching);
-  const fetchAllListings = useDataStore((state) => state.fetchAllListings);
   const layout = useUIStore((state) => state.layout);
   const setLayout = useUIStore((state) => state.setLayout);
-  const cart = useCartStore((state) => state.cart);
-  const startConversation = useMessagingStore(
-    (state) => state.startConversation,
-  );
-  const addToCart = useCartStore((state) => state.addToCart);
-  const removeFromCart = useCartStore((state) => state.removeFromCart);
 
   useEffect(() => {
-    fetchAllListings();
+    fetchWishlist();
   }, []);
-
-  let items = [];
-
-  if (dataType === "listing" && Array.isArray(data)) {
-    const cartIds = new Set(cart?.items?.map((i) => i.listingId) || []);
-    items = data.map((listing) =>
-      listingToCardItem(
-        listing,
-        user,
-        cartIds,
-        addToCart,
-        removeFromCart,
-        navigate,
-        startConversation,
-      ),
-    );
-  }
-
-  if (dataType === "mb" && data?.releases) {
-    items = data.releases.map((release) =>
-      mbReleaseToCardItem(release, isInWishlist, toggleWishlist),
-    );
-  }
 
   return (
     <>
-      <div className=" flex flex-row gap-2 justify-end mt-5 max-w-7xl mx-auto px-10 ">
+      <div className="max-w-7xl mx-auto px-5">
+        <h2 className="text-3xl font-bold text-left ml-4 mt-10  ">Wishlist</h2>
+      </div>
+      <div className=" flex flex-row gap-2 justify-end max-w-7xl mx-auto px-10 ">
         <button className="" onClick={() => setLayout("list")}>
           <svg
             className="border border-indigo-500 w-8 h-8 p-1 rounded-md bg-black"
@@ -126,21 +77,23 @@ export default function MainPage() {
             <p>Price</p>
           </div>
           <div className="max-w-7xl mx-auto">
-            {isFetching || !items || items.length === 0
+            {isLoading || !wishlistItems || wishlistItems.length === 0
               ? Array(5)
                   .fill(0)
                   .map((_, i) => <SkeletonListView key={i} />)
-              : items?.map((item) => <ListView key={item.id} item={item} />)}
+              : wishlistItems?.map((item) => (
+                  <ListView key={item.id} item={item} />
+                ))}
           </div>
         </div>
       )}
       {layout == "grid" && (
         <div className="grid min-[850px]:grid-cols-3 min-[1100px]:grid-cols-4 min-[670px]:grid-cols-2 mt-5 gap-5 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          {isFetching || !items || items.length === 0
+          {isLoading || !wishlistItems || wishlistItems.length === 0
             ? Array(8)
                 .fill(0)
                 .map((_, i) => <SkeletonCardView key={i} />)
-            : items?.map((item) => <Card key={item.id} item={item} />)}
+            : wishlistItems?.map((item) => <Card key={item.id} item={item} />)}
         </div>
       )}
     </>

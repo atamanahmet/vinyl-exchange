@@ -6,6 +6,7 @@ export function listingToCardItem(
   cartIds,
   addToCart,
   removeFromCart,
+  navigate,
   startConversation,
 ) {
   const isOwner = user?.username === listing.ownerUsername;

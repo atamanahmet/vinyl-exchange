@@ -60,7 +60,7 @@ export default function CartPage() {
 
   return (
     <>
-      <section className="bg-white w-full min-h-screen antialiased dark:bg-gray-900 py-5 ">
+      <section className="bg-white max-w-7xl mx-auto min-h-screen antialiased dark:bg-gray-900 py-5 ">
         <div className="  px-10 ">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
             Shopping Cart

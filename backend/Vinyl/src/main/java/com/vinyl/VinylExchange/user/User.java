@@ -1,8 +1,9 @@
 package com.vinyl.VinylExchange.user;
 
 import java.time.LocalDateTime;
-
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vinyl.VinylExchange.auth.Role;
 import com.vinyl.VinylExchange.listing.Listing;
 import com.vinyl.VinylExchange.shared.BaseEntity;
+import com.vinyl.VinylExchange.whislist.WishlistItem;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -57,9 +59,14 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private UserStatus status = UserStatus.PENDING;
 
+    // TODO: list? equals and hashcode with id?
     @JsonIgnore
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Listing> listings;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WishlistItem> wishlist = new ArrayList<>();
 
     @JsonIgnore
     @ElementCollection(fetch = FetchType.EAGER)

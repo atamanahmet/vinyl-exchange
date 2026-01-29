@@ -117,7 +117,7 @@ export default function ItemPage() {
               openModal={openModalImage}
             />
             <div>
-              <h2 className="company uppercase text-orange font-bold text-sm sm:text-md tracking-wider pb-3 sm:pb-5">
+              <h2 className="company uppercase text-amber-600 font-bold text-sm sm:text-md tracking-wider pb-3 sm:pb-5">
                 {listing.labelName}
               </h2>
               <h3

@@ -200,7 +200,7 @@ export default function EditListing() {
     }
   };
   return (
-    <div className="mt-10 -ml-5">
+    <div className="mt-5 max-w-7xl mx-auto">
       <h2 className="text-3xl font-bold text-left ml-4">Edit Listing</h2>
       <form onSubmit={handleSubmit} className=" p-4 space-y-4 text-left">
         <div className="grid grid-cols-[0.9fr_0.5fr_1fr_1fr]">

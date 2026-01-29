@@ -21,6 +21,7 @@ import ErrorPage from "./pages/ErrorPage";
 import OrderItemsPage from "./pages/OrderItemsPage";
 import ConversationsPage from "./pages/ConversationsPage";
 import { useCartStore } from "./stores/cartStore";
+import WishlistPage from "./pages/WishlistPage";
 
 function App() {
   const navigate = useNavigate();
@@ -63,6 +64,7 @@ function App() {
         <Route path="/orderItems" element={<OrderItemsPage />} />
         <Route path="/messaging" element={<ConversationsPage />} />
         <Route path="/messaging/:listingId" element={<ConversationsPage />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
       </Routes>
     </>
   );
