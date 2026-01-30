@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.vinyl.VinylExchange.external.dto.Release;
+import com.vinyl.VinylExchange.external.dto.ReleaseDTO;
 import com.vinyl.VinylExchange.external.dto.RootResponse;
 
 @Service
@@ -18,7 +19,7 @@ public class MusicBrainzService {
         this.musicBrainzClient = musicBrainzClient;
     }
 
-    public RootResponse searchTitle(String title) {
+    public List<ReleaseDTO> searchTitle(String title) {
 
         String cleanTitle = title.trim();
 
@@ -29,13 +30,19 @@ public class MusicBrainzService {
         List<Release> releases = RootResponse.getReleases();
 
         for (Release release : releases) {
-            release.setImagePaths("http://coverartarchive.org/release/" + release.getId() + "/front-250");
-            System.out.println(release.getImagePaths());
+            release.setImageUrl("http://coverartarchive.org/release/" + release.getId() + "/front-250");
         }
 
-        RootResponse newRoot = new RootResponse(releases);
+        return convertToDTO(releases);
+    }
 
-        return newRoot;
+    private List<ReleaseDTO> convertToDTO(List<Release> releases) {
+
+        List<ReleaseDTO> releaseDTOs = releases.stream()
+                .map(release -> new ReleaseDTO(release))
+                .toList();
+
+        return releaseDTOs;
     }
 
 }

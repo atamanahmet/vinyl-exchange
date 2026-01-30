@@ -5,6 +5,7 @@ import { useMessagingStore } from "../stores/messagingStore";
 import { useCartStore } from "../stores/cartStore";
 import { useAuthStore } from "../stores/authStore";
 import CardImage from "./CardImage";
+import ModularButton from "./Buttons/ModularButton";
 
 export default function ListView({ item }) {
   const cart = useCartStore((state) => state.cart);
@@ -74,7 +75,7 @@ export default function ListView({ item }) {
           </p>
         </button>
 
-        <p className="px-6 py-4">{item.year} </p>
+        <p className="px-6 py-4">{item.year || item.date} </p>
         <p className="">{item.format} </p>
         <div className="">
           <p
@@ -101,23 +102,21 @@ export default function ListView({ item }) {
         <div className="px-6 py-4 text-right">
           {!isOwnerUser && (
             <div className="flex flex-col justify-center items-center -mt-5">
-              <a
-                onClick={() =>
-                  inCart ? removeFromCart(item.id) : addToCart(item.id)
-                }
-                className={`mt-5 rounded-xl  border   focus:ring-4  shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-4.5 cursor-pointer min-w-30 
-              ${inCart ? "bg-green-700 text-white " : ""}`}
-              >
-                {inCart ? "In Cart" : "Add to Cart"}
-              </a>
-              <a
-                onClick={() => {
-                  navigateMessagingWithItemId();
-                }}
-                className="text-body mt-2 rounded-xl bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5  text-sm  py-2.5 focus:outline-none text-center px-10.5 cursor-pointer"
-              >
-                Trade
-              </a>
+              {item.primaryAction && (
+                <ModularButton
+                  listingId={item.id}
+                  onClickFunction={item.primaryAction.onClick}
+                  text={item.primaryAction.label}
+                />
+              )}
+
+              {item.secondaryAction && (
+                <ModularButton
+                  listingId={item.id}
+                  onClickFunction={item.secondaryAction.onClick}
+                  text={item.secondaryAction.label}
+                />
+              )}
             </div>
           )}
           {isOwnerUser && (

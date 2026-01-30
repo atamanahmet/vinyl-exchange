@@ -1,8 +1,10 @@
 import { create } from "zustand";
 import axios from "axios";
+import { useAuthStore } from "./authStore";
+import { useUIStore } from "./uiStore";
 
 const useWishlistStore = create((set, get) => ({
-  wishlistItems: [],
+  wishlist: [],
   isLoading: false,
   error: null,
 
@@ -15,7 +17,7 @@ const useWishlistStore = create((set, get) => ({
       });
 
       if (res.status === 200) {
-        set({ wishlistItems: res.data, isLoading: false });
+        set({ wishlist: res.data, isLoading: false });
         console.log(res.data);
         return true;
       }
@@ -42,15 +44,18 @@ const useWishlistStore = create((set, get) => ({
         url,
         {
           title: release.title,
-          artist: release.artist,
-          year: release.year,
-          format: release.format,
+          artist:
+            release.artistCredit?.[0]?.name.toLowerCase() || "Unknown Artist",
+          year: release.date ? release.date.substring(0, 4) : "Unknown Date",
+          format: release.media?.[0]?.format || "Unknown Format",
           imageUrl: release.imageUrl,
         },
 
         { withCredentials: true },
       );
       if (res.status === 201) {
+        set({ wishlist: res.data, isLoading: false });
+
         return true;
       }
 
@@ -63,22 +68,18 @@ const useWishlistStore = create((set, get) => ({
     }
   },
 
-  removeFromWishlist: async (wishlistId) => {
+  removeFromWishlist: async (wishlistItemId) => {
     set({ isLoading: true, error: null });
-    const url = `http://localhost:8080/api/wishlists/${wishlistId}`;
+
+    const url = `http://localhost:8080/api/wishlists/${wishlistItemId}`;
 
     try {
       const res = await axios.delete(url, {
         withCredentials: true,
       });
 
-      if (res.status === 204) {
-        set((state) => ({
-          wishlistItems: state.wishlistItems.filter(
-            (item) => item.id !== wishlistId,
-          ),
-          isLoading: false,
-        }));
+      if (res.status === 200) {
+        set({ wishlist: res.data, isLoading: false });
         return true;
       }
 
@@ -96,30 +97,62 @@ const useWishlistStore = create((set, get) => ({
     }
   },
 
-  isInWishlist: (title, artist) => {
-    const { wishlistItems } = get();
-    return wishlistItems.some(
+  isInWishlist: (release) => {
+    const { wishlist } = get();
+
+    //set? calcualte overhead for smaller than 500item
+    return wishlist.some(
       (item) =>
-        item.title.toLowerCase() === title.toLowerCase() &&
-        item.artist.toLowerCase() === artist.toLowerCase(),
+        (item.title === release.title &&
+          item.artist.toLowerCase() ===
+            release.artistCredit?.[0]?.name.toLowerCase()) ||
+        (release.artist &&
+          item.year ===
+            (release.date ? release.date.substring(0, 4) : release.year) &&
+          item.format === release.media?.[0]?.format) ||
+        release.format,
     );
   },
 
-  toggleWishlist: async (release) => {
-    const { isInWishlist, addToWishlist, removeByTitleAndArtist } = get();
+  findInWishlist: (release) => {
+    const { wishlist } = get();
+    return (
+      wishlist.find(
+        (item) =>
+          item.title.toLowerCase() === release.title.toLowerCase() &&
+          item.artist.toLowerCase() ===
+            release.artistCredit?.[0]?.name.toLowerCase() &&
+          item.year === (release.date ? release.date.substring(0, 4) : null) &&
+          item.format ===
+            (release.media?.[0]?.format ? release.media?.[0]?.format : null),
+      ) || null
+    );
+  },
 
-    if (isInWishlist(release.title, release.artist)) {
-      await removeByTitleAndArtist(release.title, release.artist);
-      return false;
+  toggleToWishlist: async (release) => {
+    const user = useAuthStore.getState().user;
+
+    if (!user) {
+      const isLoggedIn = await useUIStore.getState().waitForLogin();
+      if (!isLoggedIn) {
+        return;
+      }
+    }
+    const { findInWishlist, addToWishlist, removeFromWishlist } = get();
+    const existing = findInWishlist(release);
+
+    if (existing) {
+      const remowed = await removeFromWishlist(existing.id);
+      return remowed ? "removed" : null;
     } else {
-      await addToWishlist(release);
-      return true;
+      const added = await addToWishlist(release);
+      return added ? "added" : null;
     }
   },
 
   clearError: () => set({ error: null }),
 
-  reset: () => set({ wishlistItems: [], isLoading: false, error: null }),
+  reset: () => set({ wishlist: [], isLoading: false, error: null }),
 }));
 
 export default useWishlistStore;

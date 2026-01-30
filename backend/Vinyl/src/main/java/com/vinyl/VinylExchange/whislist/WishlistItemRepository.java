@@ -6,9 +6,9 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface WishlistItemRepository extends JpaRepository<WishlistItem, Long> {
+public interface WishlistItemRepository extends JpaRepository<WishlistItem, UUID> {
 
-    Optional<WishlistItem> findByIdAndUserId(Long WishlistItemId, UUID userId);
+    Optional<WishlistItem> findByIdAndUserId(UUID WishlistItemId, UUID userId);
 
     Optional<WishlistItem> findByUserIdAndTitleAndArtist(UUID userId, String title,
             String artist);

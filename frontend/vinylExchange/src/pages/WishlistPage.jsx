@@ -5,11 +5,17 @@ import SkeletonCardView from "../comps/Skeletons/SkeletonCardView";
 import SkeletonListView from "../comps/Skeletons/SkeletonListView";
 import Card from "../comps/Card";
 import ListView from "../comps/ListView";
+import { watchlistItemToCardItem } from "../adapters/watchlistItemToCardItem";
 
 export default function WishlistPage() {
-  const wishlistItems = useWishlistStore((state) => state.wishlistItems);
-  const fetchWishlist = useWishlistStore((state) => state.fetchWishlist);
+  const wishlist = useWishlistStore((state) => state.wishlist);
   const isLoading = useWishlistStore((state) => state.isLoading);
+  const isInWishlist = useWishlistStore((state) => state.isInWishlist);
+  const fetchWishlist = useWishlistStore((state) => state.fetchWishlist);
+  // const toggleToWishlist = useWishlistStore((state) => state.toggleToWishlist);
+  const removeFromWishlist = useWishlistStore(
+    (state) => state.removeFromWishlist,
+  );
 
   const layout = useUIStore((state) => state.layout);
   const setLayout = useUIStore((state) => state.setLayout);
@@ -17,6 +23,10 @@ export default function WishlistPage() {
   useEffect(() => {
     fetchWishlist();
   }, []);
+
+  const items = wishlist?.map((item) =>
+    watchlistItemToCardItem(item, isInWishlist, removeFromWishlist),
+  );
 
   return (
     <>
@@ -68,7 +78,7 @@ export default function WishlistPage() {
       </div>
       {layout == "list" && (
         <div>
-          <div className="bg-neutral-primary-soft border-b border-default grid grid-cols-7 items-center text-white justify-center max-w-7xl mx-auto">
+          <div className="bg-neutral-primary-soft border-b border-default grid grid-cols-7 items-center text-white justify-start max-w-7xl mx-auto">
             <p>Cover</p>
             <p>Title</p>
             <p>Band/Artist</p>
@@ -77,23 +87,41 @@ export default function WishlistPage() {
             <p>Price</p>
           </div>
           <div className="max-w-7xl mx-auto">
-            {isLoading || !wishlistItems || wishlistItems.length === 0
-              ? Array(5)
-                  .fill(0)
-                  .map((_, i) => <SkeletonListView key={i} />)
-              : wishlistItems?.map((item) => (
-                  <ListView key={item.id} item={item} />
-                ))}
+            {isLoading &&
+              Array(8)
+                .fill(0)
+                .map((_, i) => <SkeletonListView key={i} />)}
+
+            {!isLoading &&
+              items &&
+              items.length > 0 &&
+              items.map((item) => <ListView key={item.id} item={item} />)}
+
+            {!isLoading && (!items || items.length === 0) && (
+              <p className="col-span-full text-center text-gray-500 mt-20">
+                Wishlist is empty
+              </p>
+            )}
           </div>
         </div>
       )}
       {layout == "grid" && (
-        <div className="grid min-[850px]:grid-cols-3 min-[1100px]:grid-cols-4 min-[670px]:grid-cols-2 mt-5 gap-5 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          {isLoading || !wishlistItems || wishlistItems.length === 0
-            ? Array(8)
-                .fill(0)
-                .map((_, i) => <SkeletonCardView key={i} />)
-            : wishlistItems?.map((item) => <Card key={item.id} item={item} />)}
+        <div className=" grid min-[850px]:grid-cols-3 min-[1100px]:grid-cols-4 min-[670px]:grid-cols-2 mt-5 gap-5 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+          {isLoading &&
+            Array(8)
+              .fill(0)
+              .map((_, i) => <SkeletonCardView key={i} />)}
+
+          {!isLoading &&
+            items &&
+            items.length > 0 &&
+            items.map((item) => <Card key={item.id} item={item} />)}
+
+          {!isLoading && (!items || items.length === 0) && (
+            <p className="col-span-full text-center text-gray-500 mt-20">
+              Wishlist is empty
+            </p>
+          )}
         </div>
       )}
     </>

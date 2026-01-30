@@ -9,6 +9,7 @@ import ModularButton from "./Buttons/ModularButton";
 import CardImage from "./CardImage";
 
 export default function Card({ item }) {
+  console;
   return (
     <div className="bg-neutral-primary-soft hover:-translate-y-1 duration-200 ease-in-out border border-default rounded-2xl shadow-xs flex flex-col justify-center items-center py-5 px-5 max-w-70">
       <Link to={`/listing/${item.id}`} className="cursor-pointer">
@@ -22,7 +23,7 @@ export default function Card({ item }) {
       </a>
       <p className="mb-3 text-body text-amber-400">{item.artist}</p>
       <p className="mb-3 text-body">{item.format || "‎"}</p>
-      <p className="text-body mb-2">{item.year || "‎"}</p>
+      <p className="text-body mb-2">{item.date || "‎"}</p>
       <p className="text-body">{item.label || "‎"}</p>
 
       {item.price && (

@@ -28,7 +28,7 @@ export default function MainPage() {
   const user = useAuthStore((state) => state.user);
   const addToWishlist = useWishlistStore((state) => state.addToWishlist);
   const isInWishlist = useWishlistStore((state) => state.isInWishlist);
-  const toggleWishlist = useWishlistStore((state) => state.toggleWishlist);
+  const toggleToWishlist = useWishlistStore((state) => state.toggleToWishlist);
   const removeFromWishlist = useWishlistStore(
     (state) => state.removeFromWishlist,
   );
@@ -64,9 +64,9 @@ export default function MainPage() {
     );
   }
 
-  if (dataType === "mb" && data?.releases) {
-    items = data.releases.map((release) =>
-      mbReleaseToCardItem(release, isInWishlist, toggleWishlist),
+  if (dataType === "mb") {
+    items = data?.map((release) =>
+      mbReleaseToCardItem(release, isInWishlist, toggleToWishlist),
     );
   }
 

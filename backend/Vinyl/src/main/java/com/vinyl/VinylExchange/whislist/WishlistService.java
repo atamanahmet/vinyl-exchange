@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,13 +27,15 @@ public class WishlistService {
         List<WishlistItem> wishlists = wishlistItemRepository.findByUserId(userId);
         return wishlists.stream()
                 .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // checks item year only while creation,
     // notification will send even when release year is diffirent
     @Transactional
     public WishlistItemDTO addToWishlist(UUID userId, AddToWishlistRequest request) {
+
+        System.err.println(request.getImageUrl());
 
         String title = request.getTitle();
         String artist = request.getArtist();
@@ -54,7 +55,7 @@ public class WishlistService {
         wishlistItem.setUser(user);
         wishlistItem.setTitle(title);
         wishlistItem.setArtist(artist);
-        wishlistItem.setYear(request.getYear());
+        wishlistItem.setYear(year);
         wishlistItem.setImageUrl(request.getImageUrl());
         wishlistItem.setFormat(request.getFormat());
 
@@ -64,7 +65,7 @@ public class WishlistService {
     }
 
     @Transactional
-    public void removeFromWishlist(UUID userId, Long wishlistItemId) {
+    public void removeFromWishlist(UUID userId, UUID wishlistItemId) {
         WishlistItem wishlistItem = wishlistItemRepository.findById(wishlistItemId)
                 .orElseThrow(() -> new ResourceNotFoundException("Wishlist item not found"));
 
@@ -75,6 +76,7 @@ public class WishlistService {
         }
 
         wishlistItemRepository.delete(wishlistItem);
+
     }
 
     public boolean isInWishlist(UUID userId, String title, String artist, Integer year) {
@@ -95,6 +97,7 @@ public class WishlistService {
                 .title(wishlistItem.getTitle())
                 .artist(wishlistItem.getArtist())
                 .year(wishlistItem.getYear())
+                .imageUrl(wishlistItem.getImageUrl())
                 .format(wishlistItem.getFormat())
                 .addedAt(wishlistItem.getAddedAt())
                 .build();

@@ -21,17 +21,32 @@ public class ReleaseDTO {
 
     private List<ArtistCredit> artistCredit;
 
+    private String imageUrl;
+
     private String date;
 
     private String country;
 
     private String barcode;
 
-    private LabelInfo labelInfo;
+    private List<LabelInfo> labelInfo;
 
     private Integer trackCount;
 
-    private Media media;
+    private List<Media> media;
 
     private List<Tags> tags;
+
+    public ReleaseDTO(Release release) {
+        this.title = release.getTitle();
+        this.artistCredit = release.getArtistCredit();
+        this.imageUrl = release.getImageUrl();
+        this.date = release.getDate();
+        this.country = release.getCountry();
+        this.barcode = release.getBarcode();
+        this.labelInfo = release.getLabelInfo();
+        this.trackCount = release.getTrackCount();
+        this.media = release.getMedia();
+        this.title = release.getTitle();
+    }
 }

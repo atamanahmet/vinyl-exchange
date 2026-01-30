@@ -1,4 +1,4 @@
-package com.vinyl.VinylExchange.whislist;
+package com.vinyl.VinylExchange.notification;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -7,54 +7,59 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.vinyl.VinylExchange.user.User;
+import com.vinyl.VinylExchange.notification.enums.NotificationType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+
 import jakarta.persistence.Table;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "wishlist_items")
+@Table(name = "notifications")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @EntityListeners(AuditingEntityListener.class)
-public class WishlistItem {
-
+public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    private UUID userId;
+
+    @Column(nullable = false)
     private String title;
 
-    private String artist;
+    @Column(nullable = false)
+    private String message;
 
-    private Integer year;
-
-    private String format;
-
-    private String imageUrl;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Column(name = "is_read", nullable = false)
+    @Builder.Default
+    private boolean read = false;
 
     @CreatedDate
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime addedAt;
+    private LocalDateTime createdAt;
 
+    @Column(name = "type")
+    @Enumerated(EnumType.STRING)
+    private NotificationType type;
+
+    @Column(name = "relatedListing")
+    private UUID relatedListingId;
 }

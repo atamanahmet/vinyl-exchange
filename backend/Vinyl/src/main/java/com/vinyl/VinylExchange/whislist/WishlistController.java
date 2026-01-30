@@ -1,6 +1,7 @@
 package com.vinyl.VinylExchange.whislist;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,43 +26,45 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/wishlists")
 public class WishlistController {
 
-    private final WishlistService wishlistService;
+        private final WishlistService wishlistService;
 
-    @GetMapping
-    public ResponseEntity<List<WishlistItemDTO>> getMyWishlist(
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        @GetMapping
+        public ResponseEntity<List<WishlistItemDTO>> getMyWishlist(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-        List<WishlistItemDTO> wishlistDTO = wishlistService.getWishlistByUserId(userPrincipal.getId());
+                List<WishlistItemDTO> wishlistDTO = wishlistService.getWishlistByUserId(userPrincipal.getId());
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(wishlistDTO);
-    }
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(wishlistDTO);
+        }
 
-    @PostMapping
-    public ResponseEntity<HttpStatus> addToWishlist(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody AddToWishlistRequest request) {
+        @PostMapping
+        public ResponseEntity<List<WishlistItemDTO>> addToWishlist(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal,
+                        @RequestBody AddToWishlistRequest request) {
 
-        System.out.println(request.getTitle() + request.getArtist() + request.getYear() + request.getImageUrl());
+                wishlistService.addToWishlist(userPrincipal.getId(), request);
 
-        wishlistService.addToWishlist(userPrincipal.getId(), request);
+                List<WishlistItemDTO> wishlistDTO = wishlistService.getWishlistByUserId(userPrincipal.getId());
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .build();
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(wishlistDTO);
 
-    }
+        }
 
-    @DeleteMapping("/{wishlistItemId}")
-    public ResponseEntity<HttpStatus> removeFromWishlist(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable(name = "wishlistItemId") Long wishlistItemId) {
+        @DeleteMapping("/{wishlistItemId}")
+        public ResponseEntity<List<WishlistItemDTO>> removeFromWishlist(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal,
+                        @PathVariable(name = "wishlistItemId") UUID wishlistItemId) {
 
-        wishlistService.removeFromWishlist(userPrincipal.getId(), wishlistItemId);
+                wishlistService.removeFromWishlist(userPrincipal.getId(), wishlistItemId);
 
-        return ResponseEntity
-                .status(HttpStatus.NO_CONTENT)
-                .build();
-    }
+                List<WishlistItemDTO> wishlistDTO = wishlistService.getWishlistByUserId(userPrincipal.getId());
+
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(wishlistDTO);
+        }
 }

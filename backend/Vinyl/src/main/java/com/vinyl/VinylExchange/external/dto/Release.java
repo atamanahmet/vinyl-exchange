@@ -58,6 +58,6 @@ public class Release {
 
     private List<Tags> tags;
 
-    private String imagePaths;
+    private String imageUrl;
 
 }

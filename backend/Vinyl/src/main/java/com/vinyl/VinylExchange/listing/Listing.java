@@ -19,7 +19,6 @@ import com.vinyl.VinylExchange.config.json.PriceKurusDeserializer;
 import com.vinyl.VinylExchange.config.json.PriceTlSerializer;
 
 import com.vinyl.VinylExchange.listing.enums.ListingStatus;
-import com.vinyl.VinylExchange.listing.label.Label;
 
 import com.vinyl.VinylExchange.shared.BaseEntity;
 import com.vinyl.VinylExchange.shared.TradePreference;
@@ -120,10 +119,6 @@ public class Listing extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TradePreference> tradePreferences = new ArrayList<>();
-
-    @ManyToOne
-    @JoinColumn(name = "label_id")
-    private Label label;
 
     @ManyToOne
     @JoinColumn(name = "owner_id")

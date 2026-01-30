@@ -16,7 +16,7 @@ export function listingToCardItem(
     id: listing.id,
     title: listing.title,
     artist: listing.artistName,
-    year: listing.date ? listing.date.substring(0, 4) : null,
+    date: listing.date ? listing.date.substring(0, 4) : null,
     format: listing.format,
     label: listing.labelName,
     imageUrl: listing.imagePaths?.[0] || "/placeholder.png",
