@@ -1,6 +1,7 @@
 package com.vinyl.VinylExchange.external.dto;
 
 import java.util.List;
+import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +15,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class ReleaseDTO {
+
+    private UUID id;
 
     private int score;
 
@@ -38,6 +41,7 @@ public class ReleaseDTO {
     private List<Tags> tags;
 
     public ReleaseDTO(Release release) {
+        this.id = release.getId();
         this.title = release.getTitle();
         this.artistCredit = release.getArtistCredit();
         this.imageUrl = release.getImageUrl();

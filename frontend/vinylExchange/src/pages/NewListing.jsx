@@ -1,10 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import ImageUploader from "../comps/ImageUploader";
 import { useNavigate } from "react-router-dom";
+import { useSearchStore } from "../stores/searchStore";
+import Card from "../comps/Card";
+import { mbReleaseToListingMap } from "../adapters/mbReleaseToListingMap";
 
 export default function NewListing() {
   const [images, setImages] = useState([]);
+
+  const search = useSearchStore((state) => state.search);
+  const isLoadingSearch = useSearchStore((state) => state.isLoadingSearch);
+  const searchResult = useSearchStore((state) => state.searchResult);
+
+  const [mbResults, setMbResults] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loadingMb, setLoadingMb] = useState(false);
+
+  const [items, setItems] = useState([]);
 
   const navigate = useNavigate();
 
@@ -25,10 +38,37 @@ export default function NewListing() {
     description: "",
 
     tradeable: false,
-    price: 0,
+    price: null,
     discount: 0,
     tradePreferences: [],
   });
+
+  useEffect(() => {
+    setItems(searchResult.map((release) => mbReleaseToListingMap(release)));
+    console.log("items ", items);
+  }, [searchResult]);
+
+  const checkRelease = async () => {
+    if (!listing.title) return alert("Enter album title first");
+    await search(listing.title);
+
+    setIsModalOpen(true);
+  };
+
+  const selectMbRelease = (item) => {
+    setListing((prev) => ({
+      ...prev,
+      title: item.title,
+      artistName: item.artist,
+      date: item.date || "",
+      labelName: item.label || "",
+      barcode: item.barcode || "",
+      format: item.format || "",
+      country: item.country || "",
+      trackCount: item.trackCount || 1,
+    }));
+    setIsModalOpen(false);
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -91,6 +131,22 @@ export default function NewListing() {
 
     const formData = new FormData();
 
+    if (images.length === 0 && listing.imageUrl) {
+      try {
+        const response = await fetch(listing.imageUrl);
+        const blob = await response.blob();
+        const filename = listing.imageUrl.split("/").pop();
+        const file = new File([blob], filename, { type: blob.type });
+        formData.append("images", file);
+      } catch (err) {
+        console.error("Failed to fetch image from URL:", err);
+      }
+    }
+    // upload images
+    images.forEach((img) => {
+      formData.append("images", img);
+    });
+
     // JSON as string
     formData.append(
       "listing",
@@ -99,10 +155,6 @@ export default function NewListing() {
       }),
     );
 
-    // upload images
-    images.forEach((img) => {
-      formData.append("images", img);
-    });
     for (let pair of formData.entries()) {
       console.log(pair[0], pair[1]);
     }
@@ -127,6 +179,31 @@ export default function NewListing() {
 
   return (
     <div className="mt-5 max-w-7xl mx-auto">
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-black rounded-md p-6 max-w-4xl w-full overflow-y-auto max-h-[80vh] ">
+            <h2 className="text-xl font-bold mb-4">Select Release</h2>
+            {isLoadingSearch && <p>Loading...</p>}
+            {!searchResult.length && <p>No results found.</p>}
+            <div className="grid grid-cols-3 gap-3">
+              {items &&
+                items.map((item) => (
+                  <Card
+                    key={item.id}
+                    item={item}
+                    onSelect={() => selectMbRelease(item)}
+                  />
+                ))}
+            </div>
+            <button
+              className="btn btn-sm btn-outline mt-4"
+              onClick={() => setIsModalOpen(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
       <h2 className="text-3xl font-bold text-left ml-4">Create New Listing</h2>
       <form onSubmit={handleSubmit} className=" p-4 space-y-4 text-left">
         <div className="grid grid-cols-[0.9fr_0.5fr_1fr_1fr]">
@@ -143,6 +220,13 @@ export default function NewListing() {
                 className="input w-75 input-bordered border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
                 required
               />
+              <button
+                type="button"
+                onClick={checkRelease}
+                className="bg-indigo-600 rounded mt-2 px-2"
+              >
+                Check Release Info
+              </button>
             </div>
             <div className="formItem">
               <label className="block mb-1">Artist / Band</label>
@@ -166,6 +250,7 @@ export default function NewListing() {
                   checked={listing.packaging === "SEALED"}
                   onChange={handleChange}
                   className="radio radio-primary border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                  required
                 />
                 <span>Sealed</span>
                 <input
@@ -193,11 +278,17 @@ export default function NewListing() {
             <div className="formItem mt-3">
               <label className="block mb-1">Release Date</label>
               <input
-                type="date"
+                type="number"
                 name="date"
-                value={listing.date}
-                onChange={handleChange}
-                className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                value={listing.date ? new Date(listing.date).getFullYear() : ""}
+                onChange={(e) =>
+                  handleChange({
+                    target: { name: "date", value: e.target.value + "-01-01" },
+                  })
+                }
+                min="1900"
+                max={new Date().getFullYear()}
+                className="input w-75 input-bordered border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
               />
             </div>
             <div className="formItem">
@@ -283,6 +374,7 @@ export default function NewListing() {
                   checked={listing.format === "33"}
                   onChange={handleChange}
                   className="radio radio-primary border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                  required
                 />
                 <span>LP 12"/ 33 </span>
               </label>
@@ -362,6 +454,7 @@ export default function NewListing() {
                   checked={listing.condition === "P"}
                   onChange={handleChange}
                   className="radio radio-primary border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                  required
                 />
                 <span>(P) (F) Poor / Fair</span>
               </label>
@@ -448,10 +541,10 @@ export default function NewListing() {
                   type="number"
                   name="price"
                   step="0.01"
-                  min="0"
                   value={listing.price}
                   onChange={handleChange}
                   className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
+                  required
                 />
                 <span className="absolute text-xl right-12 top-7.5"> ₺</span>
               </div>

@@ -104,8 +104,7 @@ const useWishlistStore = create((set, get) => ({
     return wishlist.some(
       (item) =>
         (item.title === release.title &&
-          item.artist.toLowerCase() ===
-            release.artistCredit?.[0]?.name.toLowerCase()) ||
+          item.artist === release.artistCredit?.[0]?.name) ||
         (release.artist &&
           item.year ===
             (release.date ? release.date.substring(0, 4) : release.year) &&

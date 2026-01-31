@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import "../App.css";
 import { ThemeProvider } from "@material-tailwind/react";
 
@@ -20,6 +20,11 @@ import { useMessagingStore } from "../stores/messagingStore";
 import useWishlistStore from "../stores/wishlistStore";
 
 export default function MainPage() {
+  const PAGE_SIZE = 20;
+
+  const [page, setPage] = useState(1);
+  const [visibleItems, setVisibleItems] = useState([]);
+
   const navigate = useNavigate();
 
   const data = useDataStore((state) => state.data);
@@ -47,28 +52,61 @@ export default function MainPage() {
     fetchAllListings();
   }, []);
 
-  let items = [];
+  const items = useMemo(() => {
+    if (dataType === "listing" && Array.isArray(data)) {
+      const cartIds = new Set(cart?.items?.map((i) => i.listingId) || []);
+      return data.map((listing) =>
+        listingToCardItem(
+          listing,
+          user,
+          cartIds,
+          addToCart,
+          removeFromCart,
+          navigate,
+          startConversation,
+        ),
+      );
+    }
 
-  if (dataType === "listing" && Array.isArray(data)) {
-    const cartIds = new Set(cart?.items?.map((i) => i.listingId) || []);
-    items = data.map((listing) =>
-      listingToCardItem(
-        listing,
-        user,
-        cartIds,
-        addToCart,
-        removeFromCart,
-        navigate,
-        startConversation,
-      ),
-    );
-  }
+    if (dataType === "mb") {
+      return data?.map((release) =>
+        mbReleaseToCardItem(release, isInWishlist, toggleToWishlist),
+      );
+    }
 
-  if (dataType === "mb") {
-    items = data?.map((release) =>
-      mbReleaseToCardItem(release, isInWishlist, toggleToWishlist),
-    );
-  }
+    return [];
+  }, [data, dataType, cart, user]);
+
+  //pagination for infinite scroll
+  useEffect(() => {
+    setPage(1);
+    setVisibleItems(items.slice(0, PAGE_SIZE));
+  }, [items]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const fullHeight = document.documentElement.scrollHeight;
+
+      if (scrollTop + windowHeight >= fullHeight * 0.75) {
+        loadNextPage();
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [visibleItems, items, page]);
+
+  const loadNextPage = () => {
+    const nextPage = page + 1;
+    const nextItems = items.slice(0, nextPage * PAGE_SIZE);
+
+    if (nextItems.length > visibleItems.length) {
+      setVisibleItems(nextItems);
+      setPage(nextPage);
+    }
+  };
 
   return (
     <>
@@ -126,21 +164,23 @@ export default function MainPage() {
             <p>Price</p>
           </div>
           <div className="max-w-7xl mx-auto">
-            {isFetching || !items || items.length === 0
+            {isFetching || !visibleItems || visibleItems.length === 0
               ? Array(5)
                   .fill(0)
                   .map((_, i) => <SkeletonListView key={i} />)
-              : items?.map((item) => <ListView key={item.id} item={item} />)}
+              : visibleItems?.map((item) => (
+                  <ListView key={item.id} item={item} />
+                ))}
           </div>
         </div>
       )}
       {layout == "grid" && (
         <div className="grid min-[850px]:grid-cols-3 min-[1100px]:grid-cols-4 min-[670px]:grid-cols-2 mt-5 gap-5 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          {isFetching || !items || items.length === 0
+          {isFetching || !visibleItems || visibleItems.length === 0
             ? Array(8)
                 .fill(0)
                 .map((_, i) => <SkeletonCardView key={i} />)
-            : items?.map((item) => <Card key={item.id} item={item} />)}
+            : visibleItems?.map((item) => <Card key={item.id} item={item} />)}
         </div>
       )}
     </>

@@ -6,6 +6,8 @@ import { useAuthStore } from "../stores/authStore";
 import { useUIStore } from "../stores/uiStore";
 import { useDataStore } from "../stores/dataStore";
 import { useMessagingStore } from "../stores/messagingStore";
+import { useNotificationStore } from "../stores/notificationStore";
+import Notification from "./Notification";
 
 //TODO: remove, test
 const SkeletonNavbar = () => (
@@ -52,22 +54,43 @@ const SkeletonNavbar = () => (
 
 export default function Navbar() {
   const location = useLocation();
+
   const navigate = useNavigate();
+
   const cartItemCount = useCartStore((state) => state.cartItemCount);
+
   const user = useAuthStore((state) => state.user);
   const logOut = useAuthStore((state) => state.logOut);
   const isLoading = useAuthStore((state) => state.isLoading);
+
   const setSearchQuery = useDataStore((state) => state.setSearchQuery);
+
   const search = useDataStore((state) => state.search);
+
   const openLogin = useUIStore((state) => state.openLogin);
   const navbarActive = useUIStore((state) => state.navbarActive);
   const setOpenLogin = useUIStore((state) => state.setOpenLogin);
-  const fetchUnreadCount = useMessagingStore((state) => state.fetchUnreadCount);
-  const unreadCount = useMessagingStore((state) => state.unreadCount);
+
+  const fetchMessaggeUnreadCount = useMessagingStore(
+    (state) => state.fetchUnreadCount,
+  );
+  const messageUnreadCount = useMessagingStore((state) => state.unreadCount);
+
+  const fetchDropdownNotifications = useNotificationStore(
+    (state) => state.fetchDropdownNotifications,
+  );
+  const notifications = useNotificationStore((state) => state.notifications);
+  const notificationUnreadCount = useNotificationStore(
+    (state) => state.unreadCount,
+  );
+  const markAsRead = useNotificationStore((state) => state.markAsRead);
 
   const [query, setQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+  const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
   const handleSearch = (e) => {
@@ -84,7 +107,8 @@ export default function Navbar() {
 
   useEffect(() => {
     if (user && !isLoading) {
-      fetchUnreadCount();
+      fetchMessaggeUnreadCount();
+      fetchDropdownNotifications();
     }
   }, [user]);
 
@@ -230,7 +254,7 @@ export default function Navbar() {
                   </div>
 
                   <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-accent-primary rounded-full">
-                    {unreadCount}
+                    {messageUnreadCount}
                   </span>
                 </button>
               )}
@@ -264,12 +288,17 @@ export default function Navbar() {
                   )}
                 </button>
               )}
-              {/* notification */}
-              {user != null && (
+            </div>
+            {/* notification */}
+
+            {user != null && (
+              <div className="relative">
                 <button
-                  onClick={() => navigate("/cart")}
-                  className="relative flex items-center justify-center text-body hover:text-heading bg-transparent  hover:bg-neutral-secondary-medium focus:ring-2 focus:ring-neutral-tertiary font-medium rounded-base text-sm w-10 h-10 focus:outline-none mr-2"
-                  aria-label="Cart"
+                  onClick={() =>
+                    setIsNotificationMenuOpen(!isNotificationMenuOpen)
+                  }
+                  className="flex  items-center justify-center text-sm bg-neutral-secondary-medium rounded-full w-10 h-10 focus:ring-4 focus:ring-neutral-tertiary"
+                  aria-label="Open user menu"
                 >
                   <div className="border-2 border-gray-800 p-2 rounded-full">
                     <svg
@@ -286,14 +315,54 @@ export default function Navbar() {
                       </g>
                     </svg>
                   </div>
-                  {cartItemCount > 0 && (
-                    <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-accent-primary rounded-full">
-                      {cartItemCount}
-                    </span>
-                  )}
                 </button>
-              )}
-            </div>
+
+                {isNotificationMenuOpen && (
+                  <div
+                    className="fixed inset-0 z-30"
+                    onClick={() => setIsNotificationMenuOpen(false)}
+                  />
+                )}
+
+                {/* notification dropdown */}
+                {isNotificationMenuOpen && (
+                  <div className="absolute bg-black right-0 z-40 mt-2 w-65 bg-neutral-primary divide-y divide-neutral-secondary rounded-base shadow-lg border border-amber-100">
+                    <div className=" py-3">
+                      <span className="block text-sm text-heading font-semibold">
+                        Notifications
+                      </span>
+                    </div>
+                    <ul className=" px-2">
+                      {notifications && notifications.length > 0 ? (
+                        notifications.map((notification) => (
+                          <Notification
+                            key={notification.id}
+                            notification={notification}
+                            navigate={navigate}
+                            closeMenu={setIsNotificationMenuOpen}
+                            markAsRead={markAsRead}
+                          />
+                        ))
+                      ) : (
+                        <li className=" py-2 text-sm text-gray-400 text-center">
+                          No notifications
+                        </li>
+                      )}
+                    </ul>
+                    <div className="py-2">
+                      <button
+                        onClick={() => {
+                          navigate("/notifications");
+                        }}
+                        className="w-full text-left block px-4 py-2 text-sm text-body hover:bg-neutral-secondary-medium hover:text-heading"
+                      >
+                        All notifications
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* user menu */}
             {user != null && (

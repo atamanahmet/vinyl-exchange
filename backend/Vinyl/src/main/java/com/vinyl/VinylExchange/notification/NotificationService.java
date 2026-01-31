@@ -3,6 +3,8 @@ package com.vinyl.VinylExchange.notification;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.vinyl.VinylExchange.notification.dto.NotificationDTO;
@@ -26,6 +28,7 @@ public class NotificationService {
 
     @Transactional
     public void notifyUsers(List<UUID> userIds, NotificationCommand command) {
+
         List<Notification> notifications = userIds.stream()
                 .map(userId -> createNotification(userId, command))
                 .toList();
@@ -49,20 +52,20 @@ public class NotificationService {
         return notificationRepository.save(notification);
     }
 
-    public NotificationResponse getUnreadNotifications(UUID userId) {
+    public NotificationResponse getUnreadNotifications(UUID userId, Pageable pageable) {
 
-        List<Notification> notifications = notificationRepository.findByUserIdAndReadFalse(userId);
+        Page<Notification> page = notificationRepository.findByUserIdAndReadFalse(userId, pageable);
 
-        List<NotificationDTO> notificationDTOs = convertToDTO(notifications);
+        List<NotificationDTO> notificationDTOs = convertToDTO(page.getContent());
 
         return new NotificationResponse(notificationDTOs, notificationDTOs.size());
     }
 
-    public NotificationResponse getAllNotificationsByUserId(UUID userId) {
+    public NotificationResponse getAllNotificationsByUserId(UUID userId, Pageable pageable) {
 
-        List<Notification> notifications = notificationRepository.findAllByUserId(userId);
+        Page<Notification> page = notificationRepository.findByUserId(userId, pageable);
 
-        List<NotificationDTO> notificationDTOs = convertToDTO(notifications);
+        List<NotificationDTO> notificationDTOs = convertToDTO(page.getContent());
 
         int unreadCount = notificationRepository.countByUserIdAndReadFalse(userId);
 
@@ -92,5 +95,9 @@ public class NotificationService {
                 .relatedListingId(notification.getRelatedListingId())
                 .build())
                 .toList();
+    }
+
+    public void clearAll() {
+        notificationRepository.deleteAll();
     }
 }

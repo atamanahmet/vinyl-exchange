@@ -21,10 +21,11 @@ public class MusicBrainzClient {
 
                 RootResponse result = client.get()
                                 .uri(uriBuilder -> uriBuilder
-                                                .queryParam("query", "release:\"" + title + "\"")
+                                                .queryParam("query", "release:\"" + title
+                                                                + "\" AND primarytype:album AND NOT title:Tribute")
                                                 .queryParam("fmt", "json")
                                                 // .queryParam("inc", "ratings")
-                                                .queryParam("limit", limit)
+                                                .queryParam("limit", 75)
                                                 .build())
                                 .retrieve()
                                 .bodyToMono(RootResponse.class)

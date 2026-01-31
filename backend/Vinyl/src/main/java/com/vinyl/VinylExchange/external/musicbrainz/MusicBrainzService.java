@@ -2,7 +2,10 @@ package com.vinyl.VinylExchange.external.musicbrainz;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -29,11 +32,14 @@ public class MusicBrainzService {
 
         List<Release> releases = RootResponse.getReleases();
 
-        for (Release release : releases) {
-            release.setImageUrl("http://coverartarchive.org/release/" + release.getId() + "/front-250");
-        }
+        List<Release> updatedReleases = releases.stream()
+                .sorted(Comparator.comparingInt(Release::getScore).reversed())
+                // .limit(5)
+                .peek(release -> release
+                        .setImageUrl("http://coverartarchive.org/release/" + release.getId() + "/front-250"))
+                .collect(Collectors.toList());
 
-        return convertToDTO(releases);
+        return convertToDTO(updatedReleases);
     }
 
     private List<ReleaseDTO> convertToDTO(List<Release> releases) {
