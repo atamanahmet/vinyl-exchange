@@ -7,10 +7,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -35,7 +32,6 @@ public class Release {
 
     private String title;
 
-    // @ElementCollection
     @JsonAlias("artist-credit")
     private List<ArtistCredit> artistCredit;
 
@@ -47,7 +43,6 @@ public class Release {
 
     private String barcode;
 
-    // @ElementCollection
     @JsonAlias("label-info")
     private List<LabelInfo> labelInfo;
 
@@ -58,6 +53,6 @@ public class Release {
 
     private List<Tags> tags;
 
-    private String imageUrl;
+    private String externalCoverUrl;
 
 }

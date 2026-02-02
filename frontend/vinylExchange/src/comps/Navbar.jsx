@@ -399,7 +399,7 @@ export default function Navbar() {
                       <li>
                         <button
                           onClick={() => {
-                            navigate("/mylistings");
+                            navigate("/listings");
                             setIsUserMenuOpen(false);
                           }}
                           className="w-full text-left block px-4 py-2 text-sm text-body hover:bg-neutral-secondary-medium hover:text-heading"

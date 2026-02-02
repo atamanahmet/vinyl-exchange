@@ -12,7 +12,6 @@ export default function WishlistPage() {
   const isLoading = useWishlistStore((state) => state.isLoading);
   const isInWishlist = useWishlistStore((state) => state.isInWishlist);
   const fetchWishlist = useWishlistStore((state) => state.fetchWishlist);
-  // const toggleToWishlist = useWishlistStore((state) => state.toggleToWishlist);
   const removeFromWishlist = useWishlistStore(
     (state) => state.removeFromWishlist,
   );

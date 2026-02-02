@@ -21,6 +21,7 @@ export function listingToCardItem(
     label: listing.labelName,
     imageUrl: listing.imagePaths?.[0] || "/placeholder.png",
     price: listing.price,
+    country: listing.country,
     discountedPrice: listing.discountedPrice,
     isOwned: user?.username === listing.ownerUsername,
     isInCart: inCart,

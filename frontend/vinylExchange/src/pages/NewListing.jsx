@@ -5,10 +5,12 @@ import { useNavigate } from "react-router-dom";
 import { useSearchStore } from "../stores/searchStore";
 import Card from "../comps/Card";
 import { mbReleaseToListingMap } from "../adapters/mbReleaseToListingMap";
+import { useAuthStore } from "../stores/authStore";
 
 export default function NewListing() {
   const [images, setImages] = useState([]);
-
+  const user = useAuthStore((state) => state.user);
+  const setOpenLogin = useAuthStore((state) => state.setOpenLogin);
   const search = useSearchStore((state) => state.search);
   const isLoadingSearch = useSearchStore((state) => state.isLoadingSearch);
   const searchResult = useSearchStore((state) => state.searchResult);
@@ -21,6 +23,12 @@ export default function NewListing() {
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (user == null && !isLoading) {
+      setOpenLogin;
+    }
+  }, []);
+
   const [listing, setListing] = useState({
     title: "",
     // status: "",
@@ -31,6 +39,8 @@ export default function NewListing() {
     packaging: "",
     labelName: "",
     format: "",
+    imageUrl: "",
+    mbId: "",
     trackCount: 1,
     stockQuantity: 1,
     artistName: "",
@@ -38,7 +48,7 @@ export default function NewListing() {
     description: "",
 
     tradeable: false,
-    price: null,
+    price: 0,
     discount: 0,
     tradePreferences: [],
   });
@@ -56,12 +66,14 @@ export default function NewListing() {
   };
 
   const selectMbRelease = (item) => {
+    console.log("selected item", item);
     setListing((prev) => ({
       ...prev,
       title: item.title,
       artistName: item.artist,
       date: item.date || "",
       labelName: item.label || "",
+      mbId: item.id || "",
       barcode: item.barcode || "",
       format: item.format || "",
       country: item.country || "",
@@ -131,23 +143,13 @@ export default function NewListing() {
 
     const formData = new FormData();
 
-    if (images.length === 0 && listing.imageUrl) {
-      try {
-        const response = await fetch(listing.imageUrl);
-        const blob = await response.blob();
-        const filename = listing.imageUrl.split("/").pop();
-        const file = new File([blob], filename, { type: blob.type });
-        formData.append("images", file);
-      } catch (err) {
-        console.error("Failed to fetch image from URL:", err);
-      }
-    }
     // upload images
     images.forEach((img) => {
       formData.append("images", img);
     });
 
-    // JSON as string
+    // JSON as string because of trade pref
+    // TODO: refactor tradepref
     formData.append(
       "listing",
       new Blob([JSON.stringify(payload)], {
@@ -181,7 +183,14 @@ export default function NewListing() {
     <div className="mt-5 max-w-7xl mx-auto">
       {isModalOpen && (
         <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-black rounded-md p-6 max-w-4xl w-full overflow-y-auto max-h-[80vh] ">
+          <div className="bg-black rounded-md p-6 max-w-4xl w-full overflow-y-auto max-h-[80vh] relative ">
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="  absolute top-3 right-6 text-white text-2xl hover:text-red-500"
+              aria-label="Close"
+            >
+              ×
+            </button>
             <h2 className="text-xl font-bold mb-4">Select Release</h2>
             {isLoadingSearch && <p>Loading...</p>}
             {!searchResult.length && <p>No results found.</p>}
@@ -541,6 +550,7 @@ export default function NewListing() {
                   type="number"
                   name="price"
                   step="0.01"
+                  min={1}
                   value={listing.price}
                   onChange={handleChange}
                   className="input w-75 input-bordered  border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"

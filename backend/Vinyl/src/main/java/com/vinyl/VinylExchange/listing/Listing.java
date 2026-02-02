@@ -73,6 +73,8 @@ public class Listing extends BaseEntity {
     private String labelName;
     private String condition;
 
+    private UUID mbId;
+
     @Builder.Default
     private int stockQuantity = 5;
 
@@ -106,7 +108,6 @@ public class Listing extends BaseEntity {
     @JsonSerialize(using = DiscountSerializer.class)
     @Column(name = "discount_bp")
     @Builder.Default
-
     private int discountBP = 0; // as basisPoint, /10_000
 
     @Transient

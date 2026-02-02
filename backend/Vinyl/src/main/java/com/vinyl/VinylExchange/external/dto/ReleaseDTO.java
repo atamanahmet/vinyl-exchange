@@ -24,7 +24,7 @@ public class ReleaseDTO {
 
     private List<ArtistCredit> artistCredit;
 
-    private String imageUrl;
+    private String externalCoverUrl;
 
     private String date;
 
@@ -44,7 +44,7 @@ public class ReleaseDTO {
         this.id = release.getId();
         this.title = release.getTitle();
         this.artistCredit = release.getArtistCredit();
-        this.imageUrl = release.getImageUrl();
+        this.externalCoverUrl = release.getExternalCoverUrl();
         this.date = release.getDate();
         this.country = release.getCountry();
         this.barcode = release.getBarcode();

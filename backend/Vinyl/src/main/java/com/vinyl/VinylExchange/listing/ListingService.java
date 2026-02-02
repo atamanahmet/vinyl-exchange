@@ -1,30 +1,42 @@
 package com.vinyl.VinylExchange.listing;
 
 import java.beans.PropertyDescriptor;
+
 import java.time.LocalDateTime;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vinyl.VinylExchange.cart.CartService;
+
 import com.vinyl.VinylExchange.listing.dto.ListingDTO;
 import com.vinyl.VinylExchange.listing.enums.ListingStatus;
+
 import com.vinyl.VinylExchange.shared.dto.TradePreferenceDTO;
 import com.vinyl.VinylExchange.shared.exception.InsufficientStockException;
 import com.vinyl.VinylExchange.shared.exception.ListingNotFoundException;
 import com.vinyl.VinylExchange.shared.exception.UnauthorizedActionException;
+
 import com.vinyl.VinylExchange.user.User;
+
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
+
 import com.vinyl.VinylExchange.shared.FileStorageService;
+import com.vinyl.VinylExchange.shared.ImageSource;
 import com.vinyl.VinylExchange.shared.TradePreference;
 
 import jakarta.transaction.Transactional;
@@ -32,18 +44,25 @@ import jakarta.transaction.Transactional;
 @Service
 @Transactional
 public class ListingService {
+
+    private final Logger logger = LoggerFactory.getLogger(ListingService.class);
+
     private final ListingRepository listingRepository;
-    private FileStorageService fileStorageService;
+    private final FileStorageService fileStorageService;
     private final CartService cartService;
+    private final CoverArtService coverArtService;
 
     public ListingService(
             ListingRepository listingRepository,
             FileStorageService fileStorageService,
-            @Lazy CartService cartService) {
+            @Lazy CartService cartService,
+            WebClient webClient,
+            CoverArtService coverArtService) {
 
         this.listingRepository = listingRepository;
         this.fileStorageService = fileStorageService;
         this.cartService = cartService;
+        this.coverArtService = coverArtService;
     }
 
     public List<Listing> getAllListings() {
@@ -123,6 +142,10 @@ public class ListingService {
 
             List<String> imagePaths = fileStorageService.getListingImagePaths(listing.getId());
 
+            if (imagePaths == null || imagePaths.isEmpty()) {
+                imagePaths = fileStorageService.getListingImagePaths(listing.getMbId());
+            }
+
             listingDTOs.add(new ListingDTO(listing, imagePaths));
         }
 
@@ -134,13 +157,14 @@ public class ListingService {
         return listingRepository.save(listing);
     }
 
+    // Clean up files also, DDD loose couple, holding only Id
     public void deleteListing(UUID listingId, UserPrincipal userPrincipal) {
 
         Listing listing = listingRepository.findById(listingId).orElseThrow(() -> new ListingNotFoundException());
 
         if (listing.getOwner().getId().equals(userPrincipal.getId())) {
 
-            fileStorageService.deleteListingImages(listingId); // Clean up files
+            fileStorageService.deleteListingImages(listingId);
 
             listingRepository.deleteById(listingId);
         }
@@ -173,8 +197,18 @@ public class ListingService {
 
             Listing savedListing = listingRepository.save(listing);
 
-            if (images != null) {
-                fileStorageService.saveImages(images, savedListing.getId());
+            if (images != null && !images.isEmpty()) {
+                logger.info("Uploaded images: {}", images.size());
+
+                List<ImageSource> imageSources = getImageSourceList(images);
+                fileStorageService.saveImages(imageSources, savedListing.getId());
+
+            }
+
+            if (listing.getMbId() != null) {
+                coverArtService.fetchAndSaveCoverAsync(
+                        savedListing.getId(),
+                        listing.getMbId());
             }
 
         } catch (Exception e) {
@@ -182,6 +216,30 @@ public class ListingService {
             System.out.println(e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+
+    // for exception catch, constructor wont catch
+    public ImageSource convertToImageSource(MultipartFile image) {
+        try {
+            return new ImageSource(
+                    image.getInputStream(),
+                    image.getOriginalFilename(),
+                    image.getContentType(),
+                    image.getSize());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to read uploaded image to ImageSource: " + e.getMessage());
+        }
+    }
+
+    public List<ImageSource> getImageSourceList(List<MultipartFile> images) {
+        List<ImageSource> imageSources = new ArrayList<>();
+
+        for (MultipartFile image : images) {
+            imageSources.add(
+                    convertToImageSource(image));
+        }
+
+        return imageSources;
     }
 
     public void updateListing(UUID id, String listingJson, List<MultipartFile> images, UUID userId) {
@@ -212,7 +270,7 @@ public class ListingService {
             updatedListing.setFormat(listingDTO.getFormat());
             updatedListing.setPackaging(listingDTO.getPackaging());
             updatedListing.setDate(listingDTO.getDate());
-            // updatedListing.setCountry(listingDTO.getCountry());
+            updatedListing.setCountry(listingDTO.getCountry());
             updatedListing.setLabelName(listingDTO.getLabelName());
             updatedListing.setBarcode(listingDTO.getBarcode());
             updatedListing.setTrackCount(listingDTO.getTrackCount());
@@ -231,7 +289,9 @@ public class ListingService {
 
     /// gets old images, check deleted, add new images
     private void handleImageUpdates(UUID listingId, List<String> keptImageUrls, List<MultipartFile> newImages) {
+
         try {
+
             List<String> currentImageUrls = fileStorageService.getListingImagePaths(listingId);
 
             List<String> imagesToDelete = currentImageUrls.stream()
@@ -248,7 +308,8 @@ public class ListingService {
             }
 
             if (newImages != null && !newImages.isEmpty()) {
-                fileStorageService.saveImages(newImages, listingId);
+                List<ImageSource> imageSources = getImageSourceList(newImages);
+                fileStorageService.saveImages(imageSources, listingId);
             }
         } catch (Exception e) {
             System.out.println("Error handling image updates: " + e.getMessage());
@@ -293,6 +354,7 @@ public class ListingService {
         return converToDTO(listing);
     }
 
+    // TODO: refactor
     public static void copyNonNullFields(Listing source, Listing target) {
         BeanWrapper sourceWrap = new BeanWrapperImpl(source);
         BeanWrapper targetWrap = new BeanWrapperImpl(target);
@@ -319,7 +381,7 @@ public class ListingService {
         }
     }
 
-    // admin panel
+    // TODO: remove, admin panel
     public void promoteListing(UUID listingId, Boolean action, UserPrincipal currentUser) {
 
         Listing listing = listingRepository.findById(listingId)
@@ -399,6 +461,10 @@ public class ListingService {
 
         List<String> imagePaths = fileStorageService.getListingImagePaths(listing.getId());
 
+        if ((imagePaths == null || imagePaths.isEmpty()) && listing.getMbId() != null) {
+            imagePaths = fileStorageService.getListingImagePaths(listing.getMbId());
+        }
+
         return new ListingDTO(listing, imagePaths);
     }
 
@@ -409,6 +475,10 @@ public class ListingService {
         for (Listing listing : listings) {
 
             List<String> imagePaths = fileStorageService.getListingImagePaths(listing.getId());
+
+            if (imagePaths == null || imagePaths.isEmpty()) {
+                imagePaths = fileStorageService.getListingImagePaths(listing.getMbId());
+            }
 
             listingDTOs.add(new ListingDTO(listing, imagePaths));
         }

@@ -48,10 +48,12 @@ public class ListingDTO {
 
     private Boolean tradeable;
     private List<String> imagePaths;
+    private List<String> placeHoldeCoverPaths;
     private List<TradePreferenceDTO> tradePreferences;
     private String format;
     private String description;
     private String date;
+    private String country;
     private Integer trackCount;
     private int stockQuantity;
     private long tradeValue;
@@ -78,6 +80,7 @@ public class ListingDTO {
         this.discountedPrice = listing.getDiscountedPriceKurus();
         this.imagePaths = imagePaths;
         this.format = listing.getFormat();
+        this.country = listing.getCountry();
         this.packaging = listing.getPackaging();
         this.ownerUsername = listing.getOwnerUsername();
         this.trackCount = listing.getTrackCount();

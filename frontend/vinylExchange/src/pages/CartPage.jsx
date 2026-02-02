@@ -9,6 +9,7 @@ import PromotedItem from "../comps/PromotedItem";
 export default function CartPage() {
   const [promotedListings, setPromotedListings] = useState();
   const user = useAuthStore((state) => state.user);
+  const setOpenLogin = useAuthStore((state) => state.setOpenLogin);
   const cart = useCartStore((state) => state.cart);
   const fetchCart = useCartStore((state) => state.fetchCart);
   const addtoCart = useCartStore((state) => state.addtoCart);
@@ -17,6 +18,12 @@ export default function CartPage() {
 
   useEffect(() => {
     fetchCart();
+  }, []);
+
+  useEffect(() => {
+    if (user == null && !isLoading) {
+      setOpenLogin;
+    }
   }, []);
 
   async function fetchPromotedListings() {

@@ -36,10 +36,10 @@ export default function ListingsPage() {
 
   return (
     <>
-      <div className="min-h-screen min-w-300 bg-black text-white mt-15 rounded-3xl">
-        <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+      <div className="min-h-screen max-w-7xl mx-auto min-w-300 bg-black text-white">
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
           <div className="">
-            <h2 className="text-3xl font-semibold mb-5">All listings</h2>
+            <h2 className="text-3xl font-semibold mb-5">My listings</h2>
           </div>
           <div className="bg-neutral-primary-soft border-b  border-default grid grid-cols-6 items-center">
             <p>Cover</p>

@@ -9,7 +9,8 @@ import ModularButton from "./Buttons/ModularButton";
 import CardImage from "./CardImage";
 
 export default function Card({ item, onSelect }) {
-  console;
+  const imageSrc = item.imageUrl || item.externalCoverUrl;
+
   return (
     <div
       className="bg-neutral-primary-soft hover:-translate-y-1 duration-200 ease-in-out border border-default rounded-2xl shadow-xs flex flex-col justify-center items-center py-5 px-5 max-w-70"
@@ -18,10 +19,10 @@ export default function Card({ item, onSelect }) {
     >
       {!onSelect && (
         <Link to={`/listing/${item.id}`} className="cursor-pointer">
-          <CardImage src={item.imageUrl} alt={item.title} />
+          <CardImage src={imageSrc} alt={item.title} />
         </Link>
       )}
-      {onSelect && <CardImage src={item.imageUrl} alt={item.title} />}
+      {onSelect && <CardImage src={imageSrc} alt={item.title} />}
 
       <a href="#">
         <h5 className="mt-3 mb-2 text-2xl font-semibold tracking-tight text-heading ">
@@ -29,11 +30,13 @@ export default function Card({ item, onSelect }) {
         </h5>
       </a>
       <p className="mb-3 text-body text-amber-400">{item.artist}</p>
-      <p className="mb-3 text-body">{item.format || "‎"}</p>
-      <p className="text-body mb-2">{item.date || "‎"}</p>
-      <p className="text-body mb-2">{item.country || "‎"}</p>
-      <p className="text-body mb-2">{item.barcode || "‎"}</p>
-      <p className="text-body">{item.label || "‎"}</p>
+      <p className="mb-3 text-body ">{item.format || "Unknown Format"}</p>
+      <p className="text-body mb-2 text-amber-400">
+        {item.date || "Unknown Date"}
+      </p>
+      <p className="text-body mb-2">{item.country || "Unknown Country"}</p>
+      <p className="text-body mb-2">{item.barcode || "Unknown Barcode"}</p>
+      <p className="text-body">{item.label || "Unknown Label"}</p>
 
       {item.price && (
         <p className="text-body text-xl mt-5 text-green-400">

@@ -1,10 +1,14 @@
 package com.vinyl.VinylExchange.shared;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import java.time.Duration;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,15 +19,21 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.tomcat.util.http.fileupload.FileUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class FileStorageService {
+
     @Value("${file.upload-listing-dir}")
     private String UPLOAD_LISTING_DIR;
 
@@ -36,14 +46,27 @@ public class FileStorageService {
     private final Logger logger = LoggerFactory.getLogger(FileStorageService.class);
 
     private final ImageCompressionService imageCompressionService;
+    private final WebClient webClient;
 
-    public FileStorageService(ImageCompressionService imageCompressionService) {
-        this.imageCompressionService = imageCompressionService;
+    public List<String> saveImageFromUrl(String imageUrl, UUID listingId) throws IOException {
+
+        if (imageUrl == null) {
+            return null;
+        }
+
+        ImageSource imageSource = downloadExternalImage(imageUrl);
+
+        List<CompressedImage> compressedImages = imageCompressionService.compressImages(List.of(imageSource));
+
+        if (imageSource == null) {
+            return List.of();
+        }
+
+        return saveCompressedImages(compressedImages, listingId);
+
     }
 
-    // uncompress images from http upload, for saving directly
-    // refactor: only compressed
-    public List<String> saveImages(List<MultipartFile> images, UUID listingId) throws IOException {
+    public List<String> saveImages(List<ImageSource> images, UUID listingId) throws IOException {
 
         if (images == null) {
             return null;
@@ -94,6 +117,7 @@ public class FileStorageService {
             return Collections.emptyList();
         }
 
+        // mapping full path urls for frontend
         try (Stream<Path> paths = Files.list(listingFolder)) {
 
             return paths
@@ -102,8 +126,8 @@ public class FileStorageService {
                     .map(Path::getFileName)
                     .map(Path::toString)
                     .sorted()
-                    .map(filename -> BASE_URL + IMG_URL_PATH + listingId + "/" + filename) // full path for ulrs to
-                                                                                           // frontend only
+                    .map(filename -> BASE_URL + IMG_URL_PATH + listingId + "/" + filename)
+
                     .collect(Collectors.toList());
         } catch (IOException e) {
             logger.error("Failed to read images for listing {}: {}", listingId, e.getMessage());
@@ -125,7 +149,7 @@ public class FileStorageService {
         logger.info("Deleted image {} for listing {}", filename, listingId);
     }
 
-    public List<CompressedImage> compressImages(List<MultipartFile> images) {
+    public List<CompressedImage> compressImages(List<ImageSource> images) {
         try {
             return imageCompressionService.compressImages(images);
 
@@ -203,4 +227,32 @@ public class FileStorageService {
             throw new RuntimeException("COntent file read error");
         }
     }
+
+    public ImageSource downloadExternalImage(String imageUrl) {
+
+        try {
+            byte[] bytes = webClient.get()
+                    .uri(imageUrl)
+                    .accept(MediaType.IMAGE_JPEG, MediaType.IMAGE_PNG)
+                    .retrieve()
+                    .bodyToMono(byte[].class)
+                    .timeout(Duration.ofSeconds(10))
+                    .retry(3)
+                    .block();
+
+            if (bytes == null || bytes.length == 0)
+                return null;
+
+            return new ImageSource(
+                    new ByteArrayInputStream(bytes),
+                    "cover.jpg",
+                    "image/jpeg",
+                    bytes.length);
+
+        } catch (Exception e) {
+            logger.warn("Image download failed: {}", imageUrl);
+            return null;
+        }
+    }
+
 }

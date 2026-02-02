@@ -11,7 +11,7 @@ import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 
 import java.awt.image.BufferedImage;
-
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -19,31 +19,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ImageCompressionService {
 
     private Logger logger = LoggerFactory.getLogger(ImageCompressionService.class);
 
-    public List<CompressedImage> compressImages(List<MultipartFile> images) throws IOException {
+    public List<CompressedImage> compressImages(List<ImageSource> images) throws IOException {
 
         List<CompressedImage> compressedImages = new ArrayList<>();
 
-        for (MultipartFile file : images) {
+        for (ImageSource image : images) {
 
-            System.out.println(file.getSize() + "byte");
+            byte[] originalBytes = image.getInputStream().readAllBytes();
+
+            System.out.println(image.getSize() + "byte");
 
             // To do: lossless new impl, webp lossless file size bigger than jpg
             // compare dpi before converst lossless
 
-            // byte[] losslessImage = compressLossless(file);
-
             // smaller than 1000kb no need to compress, webp conversion reduces too much dpi
-            if (file.getSize() > 100000) {
-                byte[] lossyImage = compressLossy(file, 0.80f);
+            if (image.getSize() > 100_000) {
 
-                String newFileName = changeExtension(file.getOriginalFilename(), ".webp");
+                byte[] lossyImage = compressLossy(originalBytes, 0.80f);
+
+                String newFileName = changeExtension(image.getOriginalFilename(), ".webp");
 
                 compressedImages.add(new CompressedImage(newFileName, lossyImage));
 
@@ -51,29 +51,26 @@ public class ImageCompressionService {
 
             } else {
 
-                byte[] image = file.getBytes();
-
-                compressedImages.add(new CompressedImage(file.getOriginalFilename(), image));
+                compressedImages.add(new CompressedImage(image.getOriginalFilename(), originalBytes));
             }
         }
         return compressedImages;
     }
 
-    public byte[] compressLossy(MultipartFile file, Float quality) throws IOException {
-        return compressImage(file, CompressionType.LOSSY, quality);
+    public byte[] compressLossy(byte[] imageBytes, Float quality) throws IOException {
+        return compressImage(imageBytes, CompressionType.LOSSY, quality);
     }
 
-    public byte[] compressLossless(MultipartFile file) throws IOException {
-        return compressImage(file, CompressionType.LOSSLESS, null);
+    public byte[] compressLossless(byte[] imageBytes) throws IOException {
+        return compressImage(imageBytes, CompressionType.LOSSLESS, null);
     }
 
-    public byte[] compressImage(MultipartFile file, CompressionType compressionType, Float quality) throws IOException {
+    public byte[] compressImage(byte[] imageBytes, CompressionType compressionType, Float quality) throws IOException {
 
-        BufferedImage image = ImageIO.read(file.getInputStream());
+        BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(imageBytes));
 
-        if (image == null) {
-            throw new IllegalArgumentException("Invalid image file: " +
-                    file.getOriginalFilename());
+        if (bufferedImage == null) {
+            throw new IllegalArgumentException("Invalid image file: bufferedImage compress");
         }
 
         Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("webp");
@@ -101,15 +98,17 @@ public class ImageCompressionService {
 
             writer.setOutput(imageOutputStream);
 
-            writer.write(null, new IIOImage(image, null, null), writeParam);
+            writer.write(null, new IIOImage(bufferedImage, null, null), writeParam);
 
             imageOutputStream.flush();
 
             // System.out.println("output size after write: " + outputStream.size());
 
             return outputStream.toByteArray();
-        }
 
+        } finally {
+            writer.dispose();
+        }
     }
 
     public static String changeExtension(String filename, String ext) {

@@ -1,0 +1,69 @@
+package com.vinyl.VinylExchange.listing;
+
+import java.util.List;
+import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import com.vinyl.VinylExchange.listing.dto.CoverArtResponse;
+import com.vinyl.VinylExchange.listing.dto.ImageMeta;
+import com.vinyl.VinylExchange.shared.FileStorageService;
+import com.vinyl.VinylExchange.shared.ImageSource;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+@EnableAsync
+public class CoverArtService {
+
+    private final Logger logger = LoggerFactory.getLogger(CoverArtService.class);
+    private final WebClient webClient;
+    private final FileStorageService fileStorageService;
+
+    @Async
+    public void fetchAndSaveCoverAsync(UUID listingId, UUID mbId) {
+
+        try {
+            String imageUrl = fetchCoverUrl(mbId);
+            if (imageUrl == null)
+                return;
+
+            ImageSource image = fileStorageService.downloadExternalImage(imageUrl);
+            if (image == null)
+                return;
+
+            fileStorageService.saveImages(List.of(image), listingId);
+
+            logger.info("Cover art saved for lisitingId, mbId: {}", listingId, mbId);
+
+        } catch (Exception e) {
+            logger.warn("Cover art fetch failed for lisitingId,mbId: {}", listingId, mbId, e);
+        }
+    }
+
+    private String fetchCoverUrl(UUID mbId) {
+
+        CoverArtResponse response = webClient.get()
+                .uri("https://coverartarchive.org/release/{id}?fmt=json", mbId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(CoverArtResponse.class)
+                .block();
+
+        if (response == null || response.images() == null)
+            return null;
+
+        return response.images().stream()
+                .filter(ImageMeta::front)
+                .map(ImageMeta::image)
+                .findFirst()
+                .orElse(null);
+    }
+}

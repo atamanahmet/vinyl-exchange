@@ -18,12 +18,12 @@ import jakarta.transaction.Transactional;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final UserService userService;
+    // private final UserService userService;
 
     public NotificationService(NotificationRepository notificationRepository, UserService userService) {
 
         this.notificationRepository = notificationRepository;
-        this.userService = userService;
+        // this.userService = userService;
     }
 
     @Transactional
