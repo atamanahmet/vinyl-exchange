@@ -26,7 +26,7 @@ public class ReleaseDTO {
 
     private String externalCoverUrl;
 
-    private String date;
+    private int year;
 
     private String country;
 
@@ -40,17 +40,4 @@ public class ReleaseDTO {
 
     private List<Tags> tags;
 
-    public ReleaseDTO(Release release) {
-        this.id = release.getId();
-        this.title = release.getTitle();
-        this.artistCredit = release.getArtistCredit();
-        this.externalCoverUrl = release.getExternalCoverUrl();
-        this.date = release.getDate();
-        this.country = release.getCountry();
-        this.barcode = release.getBarcode();
-        this.labelInfo = release.getLabelInfo();
-        this.trackCount = release.getTrackCount();
-        this.media = release.getMedia();
-        this.title = release.getTitle();
-    }
 }

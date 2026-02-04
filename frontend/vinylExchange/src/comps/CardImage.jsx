@@ -5,7 +5,7 @@ export default function CardImage({ src, alt }) {
   const [error, setError] = useState(false);
 
   return (
-    <div className="relative h-60 w-60">
+    <div className="relative w-full aspect-square">
       {/* skeleton */}
       {!loaded && !error && (
         <div className="absolute inset-0 rounded-md bg-neutral-600 animate-pulse" />
@@ -16,7 +16,7 @@ export default function CardImage({ src, alt }) {
         <img
           src={src}
           alt={alt}
-          className={`rounded-md h-60 w-60 object-cover transition-opacity duration-300 ${
+          className={`rounded-md w-full h-full object-cover transition-opacity duration-300 ${
             loaded ? "opacity-100" : "opacity-0"
           }`}
           onLoad={() => setLoaded(true)}
@@ -32,7 +32,7 @@ export default function CardImage({ src, alt }) {
         <img
           src="/placeholder.png"
           alt="placeholder"
-          className="rounded-md h-60 w-60 object-cover"
+          className="rounded-md w-full h-full object-cover"
         />
       )}
     </div>

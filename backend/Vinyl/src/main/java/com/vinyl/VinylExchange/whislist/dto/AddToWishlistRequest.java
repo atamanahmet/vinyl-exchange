@@ -14,7 +14,13 @@ public class AddToWishlistRequest {
 
     private Integer year;
 
-    private String imageUrl;
+    private String country;
+
+    private String label;
+
+    private String barcode;
+
+    private String externalCoverUrl;
 
     private String format;
 }

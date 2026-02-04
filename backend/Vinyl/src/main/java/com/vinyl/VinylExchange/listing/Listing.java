@@ -63,7 +63,8 @@ public class Listing extends BaseEntity {
 
     private String title;
     private String packaging;
-    private String date;
+
+    private int year;
     private String country;
     private String barcode;
     private String format;

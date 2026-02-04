@@ -46,7 +46,13 @@ public class WishlistItem {
 
     private String format;
 
-    private String imageUrl;
+    private String externalCoverUrl;
+
+    private String country;
+
+    private String label;
+
+    private String barcode;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

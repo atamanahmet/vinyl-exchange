@@ -32,13 +32,13 @@ export default function Card({ item, onSelect }) {
       <p className="mb-3 text-body text-amber-400">{item.artist}</p>
       <p className="mb-3 text-body ">{item.format || "Unknown Format"}</p>
       <p className="text-body mb-2 text-amber-400">
-        {item.date || "Unknown Date"}
+        {item.year || "Unknown Year"}
       </p>
       <p className="text-body mb-2">{item.country || "Unknown Country"}</p>
       <p className="text-body mb-2">{item.barcode || "Unknown Barcode"}</p>
       <p className="text-body">{item.label || "Unknown Label"}</p>
 
-      {item.price && (
+      {item.price != null && (
         <p className="text-body text-xl mt-5 text-green-400">
           {(item.discountedPrice ?? item.price).toLocaleString("tr-TR")} ₺
         </p>

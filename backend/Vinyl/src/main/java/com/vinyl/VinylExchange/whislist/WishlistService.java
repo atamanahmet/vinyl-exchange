@@ -1,11 +1,14 @@
 package com.vinyl.VinylExchange.whislist;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.vinyl.VinylExchange.shared.exception.ResourceNotFoundException;
 import com.vinyl.VinylExchange.shared.exception.UnauthorizedActionException;
 import com.vinyl.VinylExchange.user.User;
 import com.vinyl.VinylExchange.user.UserService;
+import com.vinyl.VinylExchange.whislist.dto.AddToWishlistBulkRequest;
 import com.vinyl.VinylExchange.whislist.dto.AddToWishlistRequest;
 import com.vinyl.VinylExchange.whislist.dto.WishlistItemDTO;
 
@@ -13,12 +16,15 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class WishlistService {
+
+    private final Logger logger = LoggerFactory.getLogger(WishlistService.class);
 
     private final WishlistItemRepository wishlistItemRepository;
     private final UserService userService;
@@ -30,12 +36,30 @@ public class WishlistService {
                 .toList();
     }
 
+    public List<WishlistItemDTO> addAllToWishlist(UUID userId, AddToWishlistBulkRequest requests) {
+
+        List<WishlistItemDTO> wishlistDTO = new ArrayList<>();
+
+        for (AddToWishlistRequest eachRequest : requests.getBulkRequest()) {
+
+            try {
+                WishlistItemDTO itemDTO = addToWishlist(userId, eachRequest);
+
+                wishlistDTO.add(itemDTO);
+            } catch (Exception e) {
+                logger.warn("Duplicate wishlist item for: {}- reason: {}", eachRequest.getTitle(), e.getMessage());
+            }
+        }
+
+        return wishlistDTO;
+    }
+
     // checks item year only while creation,
     // notification will send even when release year is diffirent
     @Transactional
     public WishlistItemDTO addToWishlist(UUID userId, AddToWishlistRequest request) {
 
-        System.err.println(request.getImageUrl());
+        System.err.println(request.getExternalCoverUrl());
 
         String title = request.getTitle();
         String artist = request.getArtist();
@@ -44,8 +68,7 @@ public class WishlistService {
         if (wishlistItemRepository.existsByUserIdAndTitleAndArtistAndYear(
                 userId, title, artist, year)) {
 
-            // TODO: add duplicate exception
-            throw new ResourceNotFoundException("This item is already in your wishlist");
+            throw new RuntimeException("This item is already in your wishlist");
         }
 
         User user = userService.findByUserId(userId);
@@ -56,7 +79,10 @@ public class WishlistService {
         wishlistItem.setTitle(title);
         wishlistItem.setArtist(artist);
         wishlistItem.setYear(year);
-        wishlistItem.setImageUrl(request.getImageUrl());
+        wishlistItem.setCountry(request.getCountry());
+        wishlistItem.setLabel(request.getLabel());
+        wishlistItem.setBarcode(request.getBarcode());
+        wishlistItem.setExternalCoverUrl(request.getExternalCoverUrl());
         wishlistItem.setFormat(request.getFormat());
 
         WishlistItem savedWishlistItem = wishlistItemRepository.save(wishlistItem);
@@ -97,7 +123,10 @@ public class WishlistService {
                 .title(wishlistItem.getTitle())
                 .artist(wishlistItem.getArtist())
                 .year(wishlistItem.getYear())
-                .imageUrl(wishlistItem.getImageUrl())
+                .country(wishlistItem.getCountry())
+                .externalCoverUrl(wishlistItem.getExternalCoverUrl())
+                .barcode(wishlistItem.getBarcode())
+                .label(wishlistItem.getLabel())
                 .format(wishlistItem.getFormat())
                 .addedAt(wishlistItem.getAddedAt())
                 .build();

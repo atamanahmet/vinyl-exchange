@@ -18,7 +18,6 @@ const useWishlistStore = create((set, get) => ({
 
       if (res.status === 200) {
         set({ wishlist: res.data, isLoading: false });
-        console.log(res.data);
         return true;
       }
       // exist
@@ -35,8 +34,6 @@ const useWishlistStore = create((set, get) => ({
   addToWishlist: async (release) => {
     set({ isLoading: true, error: null });
 
-    console.log("wish release: ", release);
-
     const url = "http://localhost:8080/api/wishlists";
 
     try {
@@ -48,7 +45,46 @@ const useWishlistStore = create((set, get) => ({
             release.artistCredit?.[0]?.name.toLowerCase() || "Unknown Artist",
           year: release.date ? release.date.substring(0, 4) : "Unknown Date",
           format: release.media?.[0]?.format || "Unknown Format",
-          imageUrl: release.imageUrl,
+          externalCoverUrl: release.externalCoverUrl,
+        },
+
+        { withCredentials: true },
+      );
+      if (res.status === 201) {
+        set({ wishlist: res.data, isLoading: false });
+
+        return true;
+      }
+
+      console.warn("Unexpected wishlist post status:", res.status);
+      return false;
+    } catch (error) {
+      console.log(error);
+
+      return false;
+    }
+  },
+  addToWishlistBulk: async (wishlistHolder) => {
+    set({ isLoading: true, error: null });
+
+    const url = "http://localhost:8080/api/wishlists/bulk";
+
+    const payload = wishlistHolder.map((release) => ({
+      title: release.title,
+      artist: release.artistCredit?.[0]?.name.toLowerCase(),
+      year: release.date ? release.date.substring(0, 4) : null,
+      format: release.media?.[0]?.format,
+      barcode: release.barcode,
+      country: release.country,
+      label: release.labelInfo?.[0].label?.name,
+      externalCoverUrl: release.externalCoverUrl,
+    }));
+
+    try {
+      const res = await axios.post(
+        url,
+        {
+          bulkRequest: payload,
         },
 
         { withCredentials: true },

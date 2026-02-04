@@ -1,8 +1,4 @@
-export function watchlistItemToCardItem(
-  item,
-  isInWishlist,
-  removeFromWishlist,
-) {
+export function wishlistItemToCardItem(item, isInWishlist, removeFromWishlist) {
   const inWishlist = isInWishlist(item);
 
   return {
@@ -10,10 +6,11 @@ export function watchlistItemToCardItem(
     title: item.title,
     artist: item.artist || "Unknown artist",
     format: item.format || "Unknown format",
-    imageUrl: item.imageUrl,
-    date: item.year ? item.year : "Unknown Date",
-    price: item.price ? item.price : "Unknown Price",
-    // label: item.labelInfo?.[0].label?.name || "Unknown Label",
+    externalCoverUrl: item.externalCoverUrl,
+    barcode: item.barcode || "Unknown Barcode",
+    country: item.country || "Unknown Country",
+    year: item.year || "Unknown Date",
+    label: item.label || "Unknown Label",
 
     primaryAction: {
       label: inWishlist ? "Remove" : "Add to Wishlist",

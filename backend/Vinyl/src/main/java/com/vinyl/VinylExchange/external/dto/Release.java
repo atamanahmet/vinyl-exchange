@@ -35,7 +35,7 @@ public class Release {
     @JsonAlias("artist-credit")
     private List<ArtistCredit> artistCredit;
 
-    private String date;
+    private int year;
 
     private String status;
 

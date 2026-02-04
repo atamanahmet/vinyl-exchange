@@ -44,7 +44,19 @@ public class MusicBrainzService {
     private List<ReleaseDTO> convertToDTO(List<Release> releases) {
 
         List<ReleaseDTO> releaseDTOs = releases.stream()
-                .map(release -> new ReleaseDTO(release))
+                .map(release -> ReleaseDTO.builder()
+                        .id(release.getId())
+                        .title(release.getTitle())
+                        .artistCredit(release.getArtistCredit())
+                        .externalCoverUrl(release.getExternalCoverUrl())
+                        .year(release.getYear())
+                        .country(release.getCountry())
+                        .barcode(release.getBarcode())
+                        .labelInfo(release.getLabelInfo())
+                        .trackCount(release.getTrackCount())
+                        .media(release.getMedia())
+                        .tags(release.getTags())
+                        .build())
                 .toList();
 
         return releaseDTOs;

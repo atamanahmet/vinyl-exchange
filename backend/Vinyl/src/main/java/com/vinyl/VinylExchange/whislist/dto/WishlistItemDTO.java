@@ -24,7 +24,13 @@ public class WishlistItemDTO {
 
     private String format;
 
-    private String imageUrl;
+    private String country;
+
+    private String externalCoverUrl;
+
+    private String barcode;
+
+    private String label;
 
     private LocalDateTime addedAt;
 

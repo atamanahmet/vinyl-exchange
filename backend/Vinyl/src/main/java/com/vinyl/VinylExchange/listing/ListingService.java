@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -25,14 +26,13 @@ import com.vinyl.VinylExchange.cart.CartService;
 
 import com.vinyl.VinylExchange.listing.dto.ListingDTO;
 import com.vinyl.VinylExchange.listing.enums.ListingStatus;
-
+import com.vinyl.VinylExchange.listing.event.ListingCreatedEvent;
 import com.vinyl.VinylExchange.shared.dto.TradePreferenceDTO;
 import com.vinyl.VinylExchange.shared.exception.InsufficientStockException;
 import com.vinyl.VinylExchange.shared.exception.ListingNotFoundException;
 import com.vinyl.VinylExchange.shared.exception.UnauthorizedActionException;
 
 import com.vinyl.VinylExchange.user.User;
-
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
 
 import com.vinyl.VinylExchange.shared.FileStorageService;
@@ -52,17 +52,22 @@ public class ListingService {
     private final CartService cartService;
     private final CoverArtService coverArtService;
 
+    // publish event to wishlist check -> send notification
+    private final ApplicationEventPublisher eventPublisher;
+
     public ListingService(
             ListingRepository listingRepository,
             FileStorageService fileStorageService,
             @Lazy CartService cartService,
             WebClient webClient,
-            CoverArtService coverArtService) {
+            CoverArtService coverArtService,
+            ApplicationEventPublisher eventPublisher) {
 
         this.listingRepository = listingRepository;
         this.fileStorageService = fileStorageService;
         this.cartService = cartService;
         this.coverArtService = coverArtService;
+        this.eventPublisher = eventPublisher;
     }
 
     public List<Listing> getAllListings() {
@@ -211,6 +216,15 @@ public class ListingService {
                         listing.getMbId());
             }
 
+            // redundant
+            savedListing = listingRepository.save(savedListing);
+
+            eventPublisher.publishEvent(
+                    ListingCreatedEvent.builder()
+                            .title(savedListing.getTitle())
+                            .artist(savedListing.getArtistName())
+                            .date(savedListing.getYear()));
+
         } catch (Exception e) {
             // TODO: handle exception
             System.out.println(e.getMessage());
@@ -269,7 +283,7 @@ public class ListingService {
             updatedListing.setCondition(listingDTO.getCondition());
             updatedListing.setFormat(listingDTO.getFormat());
             updatedListing.setPackaging(listingDTO.getPackaging());
-            updatedListing.setDate(listingDTO.getDate());
+            updatedListing.setYear(listingDTO.getYear());
             updatedListing.setCountry(listingDTO.getCountry());
             updatedListing.setLabelName(listingDTO.getLabelName());
             updatedListing.setBarcode(listingDTO.getBarcode());

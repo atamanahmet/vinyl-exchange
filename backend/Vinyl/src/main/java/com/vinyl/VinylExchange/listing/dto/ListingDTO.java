@@ -52,7 +52,7 @@ public class ListingDTO {
     private List<TradePreferenceDTO> tradePreferences;
     private String format;
     private String description;
-    private String date;
+    private int year;
     private String country;
     private Integer trackCount;
     private int stockQuantity;
@@ -74,7 +74,7 @@ public class ListingDTO {
         this.id = listing.getId();
         this.title = listing.getTitle();
         this.description = listing.getDescription();
-        this.date = listing.getDate();
+        this.year = listing.getYear();
         this.priceKurus = listing.getPriceKurus();
         this.tradeable = listing.getTradeable();
         this.discountedPrice = listing.getDiscountedPriceKurus();

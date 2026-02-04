@@ -176,7 +176,7 @@ export default function Navbar() {
               <input
                 type="search"
                 className="block w-full p-2.5 pl-10 text-sm text-heading border-2  rounded-base bg-neutral-primary focus:ring-accent-primary focus:border-accent-primary placeholder-body rounded-xl"
-                placeholder="Search products..."
+                placeholder="Search marketplace..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyPress}

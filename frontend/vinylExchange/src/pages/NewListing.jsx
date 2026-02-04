@@ -6,12 +6,19 @@ import { useSearchStore } from "../stores/searchStore";
 import Card from "../comps/Card";
 import { mbReleaseToListingMap } from "../adapters/mbReleaseToListingMap";
 import { useAuthStore } from "../stores/authStore";
+import {
+  Button,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+} from "flowbite-react";
 
 export default function NewListing() {
   const [images, setImages] = useState([]);
   const user = useAuthStore((state) => state.user);
   const setOpenLogin = useAuthStore((state) => state.setOpenLogin);
-  const search = useSearchStore((state) => state.search);
+  const searchMusicBrainz = useSearchStore((state) => state.searchMusicBrainz);
   const isLoadingSearch = useSearchStore((state) => state.isLoadingSearch);
   const searchResult = useSearchStore((state) => state.searchResult);
 
@@ -60,9 +67,8 @@ export default function NewListing() {
 
   const checkRelease = async () => {
     if (!listing.title) return alert("Enter album title first");
-    await search(listing.title);
-
     setIsModalOpen(true);
+    await searchMusicBrainz(listing.title);
   };
 
   const selectMbRelease = (item) => {
@@ -71,7 +77,7 @@ export default function NewListing() {
       ...prev,
       title: item.title,
       artistName: item.artist,
-      date: item.date || "",
+      year: item.year || "",
       labelName: item.label || "",
       mbId: item.id || "",
       barcode: item.barcode || "",
@@ -181,29 +187,39 @@ export default function NewListing() {
 
   return (
     <div className="mt-5 max-w-7xl mx-auto">
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-black rounded-md p-6 max-w-4xl w-full overflow-y-auto max-h-[80vh] relative ">
+      <Modal
+        show={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        dismissible
+        className="backdrop-blur-sm "
+      >
+        <div className="flex justify-center w-full">
+          <div className="bg-black text-center rounded-md px-5 w-full sm:w-auto min-w-3xl max-w-5xl max-h-[95vh] overflow-y-auto relative">
+            {/* close button */}
             <button
               onClick={() => setIsModalOpen(false)}
-              className="  absolute top-3 right-6 text-white text-2xl hover:text-red-500"
+              className="absolute top-3 right-6 text-white text-2xl hover:text-red-500"
               aria-label="Close"
             >
               ×
             </button>
-            <h2 className="text-xl font-bold mb-4">Select Release</h2>
+            <ModalHeader className="bg-black sticky top-0 z-10">
+              Select Release
+            </ModalHeader>
+
             {isLoadingSearch && <p>Loading...</p>}
             {!searchResult.length && <p>No results found.</p>}
-            <div className="grid grid-cols-3 gap-3">
-              {items &&
-                items.map((item) => (
-                  <Card
-                    key={item.id}
-                    item={item}
-                    onSelect={() => selectMbRelease(item)}
-                  />
-                ))}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center py-5">
+              {items?.map((item) => (
+                <Card
+                  key={item.id}
+                  item={item}
+                  onSelect={() => selectMbRelease(item)}
+                />
+              ))}
             </div>
+
             <button
               className="btn btn-sm btn-outline mt-4"
               onClick={() => setIsModalOpen(false)}
@@ -212,7 +228,8 @@ export default function NewListing() {
             </button>
           </div>
         </div>
-      )}
+      </Modal>
+
       <h2 className="text-3xl font-bold text-left ml-4">Create New Listing</h2>
       <form onSubmit={handleSubmit} className=" p-4 space-y-4 text-left">
         <div className="grid grid-cols-[0.9fr_0.5fr_1fr_1fr]">
@@ -285,17 +302,20 @@ export default function NewListing() {
               </label>
             </div>
             <div className="formItem mt-3">
-              <label className="block mb-1">Release Date</label>
+              <label className="block mb-1">Release Year</label>
               <input
                 type="number"
-                name="date"
-                value={listing.date ? new Date(listing.date).getFullYear() : ""}
+                name="year"
+                value={listing.year || ""}
                 onChange={(e) =>
                   handleChange({
-                    target: { name: "date", value: e.target.value + "-01-01" },
+                    target: {
+                      name: "year",
+                      value: Number(e.target.value),
+                    },
                   })
                 }
-                min="1900"
+                min={1900}
                 max={new Date().getFullYear()}
                 className="input w-75 input-bordered border-2 border-amber-50 ring-1 ring-indigo-800 rounded-md pl-2 py-1"
               />

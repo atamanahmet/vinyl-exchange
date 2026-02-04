@@ -7,7 +7,7 @@ export function mbReleaseToListingMap(release) {
     externalCoverUrl: release.externalCoverUrl,
     country: release.country,
     barcode: release.barcode,
-    date: release.date ? release.date.substring(0, 4) : "Unknown Date",
+    year: release.year || "Unknown Date",
     label: release.labelInfo?.[0].label?.name || "Unknown Label",
   };
 }

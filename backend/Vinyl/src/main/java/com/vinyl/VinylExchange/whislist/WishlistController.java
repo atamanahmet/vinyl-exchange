@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vinyl.VinylExchange.security.principal.UserPrincipal;
+import com.vinyl.VinylExchange.whislist.dto.AddToWishlistBulkRequest;
 import com.vinyl.VinylExchange.whislist.dto.AddToWishlistRequest;
 import com.vinyl.VinylExchange.whislist.dto.WishlistItemDTO;
 
@@ -45,6 +46,23 @@ public class WishlistController {
                         @RequestBody AddToWishlistRequest request) {
 
                 wishlistService.addToWishlist(userPrincipal.getId(), request);
+
+                List<WishlistItemDTO> wishlistDTO = wishlistService.getWishlistByUserId(userPrincipal.getId());
+
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(wishlistDTO);
+
+        }
+
+        @PostMapping("/bulk")
+        public ResponseEntity<List<WishlistItemDTO>> addToWishlistBulk(
+                        @AuthenticationPrincipal UserPrincipal userPrincipal,
+                        @RequestBody AddToWishlistBulkRequest bulkRequest) {
+
+                System.out.println(bulkRequest);
+
+                wishlistService.addAllToWishlist(userPrincipal.getId(), bulkRequest);
 
                 List<WishlistItemDTO> wishlistDTO = wishlistService.getWishlistByUserId(userPrincipal.getId());
 
