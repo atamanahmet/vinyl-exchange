@@ -8,6 +8,7 @@ import { useDataStore } from "../stores/dataStore";
 import { useMessagingStore } from "../stores/messagingStore";
 import { useNotificationStore } from "../stores/notificationStore";
 import Notification from "./Notification";
+import { useSearchStore } from "../stores/searchStore";
 
 //TODO: remove, test
 const SkeletonNavbar = () => (
@@ -67,6 +68,8 @@ export default function Navbar() {
 
   const search = useDataStore((state) => state.search);
 
+  const searchProducts = useSearchStore((state) => state.searchProducts);
+
   const openLogin = useUIStore((state) => state.openLogin);
   const navbarActive = useUIStore((state) => state.navbarActive);
   const setOpenLogin = useUIStore((state) => state.setOpenLogin);
@@ -96,7 +99,7 @@ export default function Navbar() {
   const handleSearch = (e) => {
     if (e) e.preventDefault();
     navigate("/");
-    search(query);
+    searchProducts(query);
   };
 
   const handleKeyPress = (e) => {

@@ -16,6 +16,8 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +29,7 @@ import com.vinyl.VinylExchange.cart.CartService;
 import com.vinyl.VinylExchange.listing.dto.ListingDTO;
 import com.vinyl.VinylExchange.listing.enums.ListingStatus;
 import com.vinyl.VinylExchange.listing.event.ListingCreatedEvent;
+import com.vinyl.VinylExchange.listing.event.ListingUpdatedEvent;
 import com.vinyl.VinylExchange.shared.dto.TradePreferenceDTO;
 import com.vinyl.VinylExchange.shared.exception.InsufficientStockException;
 import com.vinyl.VinylExchange.shared.exception.ListingNotFoundException;
@@ -73,6 +76,11 @@ public class ListingService {
     public List<Listing> getAllListings() {
 
         return listingRepository.findAll();
+    }
+
+    public Page<Listing> getAllListingsPageable(Pageable pageable) {
+
+        return listingRepository.findAll(pageable);
     }
 
     public List<ListingDTO> getAllListingDTO() {
@@ -131,6 +139,32 @@ public class ListingService {
         return listingRepository.findAllByIdIn(listingIds);
     }
 
+    public List<ListingDTO> getListingDTOsWithIds(List<UUID> listingIdList) {
+
+        List<Listing> resultListings = listingRepository.findAllByIdIn(listingIdList);
+
+        List<ListingDTO> listingDTOs = new ArrayList<>();
+
+        for (Listing listing : resultListings) {
+            List<TradePreferenceDTO> tradePreferenceDTOs = new ArrayList<>();
+
+            for (TradePreference tradePreference : listing.getTradePreferences()) {
+
+                tradePreferenceDTOs.add(new TradePreferenceDTO(tradePreference));
+            }
+
+            List<String> imagePaths = fileStorageService.getListingImagePaths(listing.getId());
+
+            if (imagePaths == null || imagePaths.isEmpty()) {
+                imagePaths = fileStorageService.getListingImagePaths(listing.getMbId());
+            }
+
+            listingDTOs.add(new ListingDTO(listing, imagePaths));
+        }
+
+        return listingDTOs;
+    }
+
     public List<ListingDTO> getListingsDTOs() {
 
         List<Listing> allListings = listingRepository.findAll();
@@ -182,6 +216,11 @@ public class ListingService {
                 .orElseThrow(() -> new ListingNotFoundException());
     }
 
+    public long totalCount() {
+        return listingRepository.count();
+    }
+
+    // TODO: refactor
     @Transactional
     public void createNewListing(
             String listingJson,
@@ -221,9 +260,7 @@ public class ListingService {
 
             eventPublisher.publishEvent(
                     ListingCreatedEvent.builder()
-                            .title(savedListing.getTitle())
-                            .artist(savedListing.getArtistName())
-                            .date(savedListing.getYear()));
+                            .listing(savedListing));
 
         } catch (Exception e) {
             // TODO: handle exception
@@ -293,7 +330,11 @@ public class ListingService {
 
             updateTradePreferences(existingListing, listingDTO.getTradePreferences());
 
-            saveListing(existingListing);
+            Listing savedListing = saveListing(existingListing);
+
+            eventPublisher.publishEvent(
+                    ListingUpdatedEvent.builder()
+                            .listing(savedListing));
 
         } catch (Exception e) {
             System.out.println("Error updating listing: " + e.getMessage());

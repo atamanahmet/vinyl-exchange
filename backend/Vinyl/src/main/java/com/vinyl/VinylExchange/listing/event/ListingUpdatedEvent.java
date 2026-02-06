@@ -7,6 +7,6 @@ import lombok.Data;
 
 @Data
 @Builder
-public class ListingCreatedEvent {
+public class ListingUpdatedEvent {
     private final Listing listing;
 }

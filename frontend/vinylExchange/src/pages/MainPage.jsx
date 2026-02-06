@@ -18,6 +18,7 @@ import { mbReleaseToCardItem } from "../adapters/mbReleaseToCardItem";
 import { useNavigate } from "react-router-dom";
 import { useMessagingStore } from "../stores/messagingStore";
 import useWishlistStore from "../stores/wishlistStore";
+import { useSearchStore } from "../stores/searchStore";
 
 export default function MainPage() {
   const PAGE_SIZE = 20;
@@ -29,6 +30,8 @@ export default function MainPage() {
 
   const data = useDataStore((state) => state.data);
   const dataType = useDataStore((state) => state.dataType);
+
+  const searchResult = useSearchStore((state) => state.searchResult);
 
   const user = useAuthStore((state) => state.user);
   const addToWishlist = useWishlistStore((state) => state.addToWishlist);

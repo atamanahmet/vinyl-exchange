@@ -21,7 +21,7 @@ export const useSearchStore = create((set, get) => ({
       if (res.status === 200) {
         console.log("search results: ", res.data);
         set({
-          searchResult: res.data,
+          searchResult: res.data ?? [],
         });
       }
     } catch (e) {
@@ -32,22 +32,24 @@ export const useSearchStore = create((set, get) => ({
       });
     }
   },
-  searchProducts: async (title) => {
+  searchProducts: async (query) => {
     set({
       isLoadingSearch: true,
     });
 
     try {
-      const res = await axios.get("http://localhost:8080/api/mb/search", {
+      const res = await axios.get("http://localhost:8080/api/listings/search", {
         params: {
-          title: title,
-          limit: 75,
+          query: query,
+          page: 0,
+          size: 75,
         },
+        withCredentials: true,
       });
       if (res.status === 200) {
         console.log("search results: ", res.data);
         set({
-          searchResult: res.data,
+          searchResult: res.data?.content ?? [],
         });
       }
     } catch (e) {

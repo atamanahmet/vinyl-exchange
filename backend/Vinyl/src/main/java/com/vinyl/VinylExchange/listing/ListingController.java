@@ -127,6 +127,8 @@ public class ListingController {
 
                 ListingDTO listingDTO = listingService.getListingDTOById(listingId);
 
+                System.out.println(listingDTO.getStatus());
+
                 return ResponseEntity
                                 .status(HttpStatus.OK)
                                 .body(listingDTO);
@@ -145,16 +147,21 @@ public class ListingController {
         }
 
         @PostMapping("/price/preview")
-        public BigDecimal previewPrice(
+        public ResponseEntity<BigDecimal> previewPrice(
                         @AuthenticationPrincipal UserPrincipal currentUserPrincipal,
                         @RequestBody PricePreviewRequest pricePreviewRequestDTO) {
 
+                BigDecimal previewPrice = new BigDecimal(0);
+
                 if (pricePreviewRequestDTO.priceTL() != null) {
-                        return pricePreviewService.previewDiscountedPrice(
+                        previewPrice = pricePreviewService.previewDiscountedPrice(
                                         pricePreviewRequestDTO.priceTL(),
                                         pricePreviewRequestDTO.discountPercent());
                 }
-                return null;
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(previewPrice);
+
         }
 
         // admin

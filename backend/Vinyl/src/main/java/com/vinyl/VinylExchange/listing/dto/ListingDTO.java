@@ -13,6 +13,7 @@ import com.vinyl.VinylExchange.config.json.DiscountSerializer;
 import com.vinyl.VinylExchange.config.json.PriceKurusDeserializer;
 import com.vinyl.VinylExchange.config.json.PriceTlSerializer;
 import com.vinyl.VinylExchange.listing.Listing;
+import com.vinyl.VinylExchange.listing.enums.ListingStatus;
 import com.vinyl.VinylExchange.shared.dto.TradePreferenceDTO;
 
 import jakarta.validation.constraints.Max;
@@ -32,10 +33,12 @@ public class ListingDTO {
 
     private UUID id;
     private String title;
-    private String status;
     private String barcode;
 
     private String packaging;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private ListingStatus status;
 
     @JsonProperty("price")
     @JsonDeserialize(using = PriceKurusDeserializer.class)
@@ -81,6 +84,7 @@ public class ListingDTO {
         this.imagePaths = imagePaths;
         this.format = listing.getFormat();
         this.country = listing.getCountry();
+        this.status = listing.getStatus();
         this.packaging = listing.getPackaging();
         this.ownerUsername = listing.getOwnerUsername();
         this.trackCount = listing.getTrackCount();
