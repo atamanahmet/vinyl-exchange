@@ -5,10 +5,10 @@ import java.util.UUID;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
-import com.vinyl.VinylExchange.security.principal.UserPrincipal;
-import com.vinyl.VinylExchange.shared.exception.NoCurrentUserException;
-import com.vinyl.VinylExchange.user.User;
-import com.vinyl.VinylExchange.user.UserRepository;
+import com.vinyl.VinylExchange.security.principal.UserDetailsImpl;
+import com.vinyl.VinylExchange.exception.NoCurrentUserException;
+import com.vinyl.VinylExchange.domain.entity.User;
+import com.vinyl.VinylExchange.repository.UserRepository;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -21,19 +21,19 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     @Override
-    public UserPrincipal loadUserByUsername(String username) {
+    public UserDetailsImpl loadUserByUsername(String username) {
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoCurrentUserException());
 
-        return new UserPrincipal(user);
+        return new UserDetailsImpl(user);
     }
 
-    public UserPrincipal loadUserByUserId(UUID userId) {
+    public UserDetailsImpl loadUserByUserId(UUID userId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NoCurrentUserException());
 
-        return new UserPrincipal(user);
+        return new UserDetailsImpl(user);
     }
 }

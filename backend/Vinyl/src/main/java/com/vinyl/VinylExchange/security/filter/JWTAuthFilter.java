@@ -14,7 +14,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 
-import com.vinyl.VinylExchange.security.principal.UserPrincipal;
+import com.vinyl.VinylExchange.security.principal.UserDetailsImpl;
 import com.vinyl.VinylExchange.security.service.UserDetailsServiceImpl;
 import com.vinyl.VinylExchange.security.util.JwtCookieUtil;
 import com.vinyl.VinylExchange.security.util.JwtTokenUtil;
@@ -72,7 +72,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
                 return;
             }
 
-            UserPrincipal userPrincipal = userDetailsServiceImpl.loadUserByUserId(userId);
+            UserDetailsImpl userPrincipal = userDetailsServiceImpl.loadUserByUserId(userId);
 
             if (!userPrincipal.isEnabled() ||
                     !userPrincipal.isAccountNonLocked() ||

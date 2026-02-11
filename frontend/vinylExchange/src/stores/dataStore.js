@@ -1,18 +1,21 @@
 import axios from "axios";
 import { create } from "zustand";
+import { normalizeApiResponse } from "../utils/normalizeApiResponse";
 
 export const useDataStore = create((set, get) => ({
   isFetching: false,
-  data: null,
-  dataType: "",
   hasError: false,
+
+  data: {
+    items: [],
+    pagination: null,
+    dataType: "",
+  },
+
   avatar: sessionStorage.getItem("avatar") || null,
-  searchQuery: "",
 
-  setSearchQuery: (query) => set({ searchQuery: query }),
-
-  fetchAllListings: async () => {
-    if (get().isFetching) return;
+  fetchAllListings: async (params = {}) => {
+    if (get().isFetching) return false;
 
     set({ isFetching: true });
 
@@ -20,55 +23,139 @@ export const useDataStore = create((set, get) => ({
 
     try {
       const res = await axios.get(url, {
+        params,
         withCredentials: true,
       });
 
       if (res.status === 200) {
+        const normalized = normalizeApiResponse(res.data);
+
         set({
-          data: res.data,
-          dataType: "listing",
+          data: {
+            items: normalized.data,
+            pagination: normalized.pagination,
+            dataType: "listing",
+          },
           hasError: false,
         });
+
         return true;
       }
+
       console.warn("Unexpected data fetch status:", res.status);
       return false;
     } catch (err) {
       console.error("Backend error:", err);
+
       set({
-        data: null,
+        data: {
+          items: [],
+          pagination: null,
+          dataType: "",
+        },
         hasError: true,
       });
+
       return false;
     } finally {
       set({ isFetching: false });
     }
   },
-  search: async (query) => {
-    if (!query) {
-      await get().fetchAllListings();
-      return;
-    }
+  fetchMyActiveListings: async (params = {}) => {
+    if (get().isFetching) return false;
 
-    const url = "http://localhost:8080/api/mb/search";
+    set({ isFetching: true });
+
+    const url = "http://localhost:8080/api/me/listings/active";
 
     try {
       const res = await axios.get(url, {
-        params: {
-          title: query,
-          limit: 20,
-        },
+        params,
         withCredentials: true,
       });
 
       if (res.status === 200) {
-        set({ data: res.data, dataType: "mb" });
-        console.log(res.data);
-      } else {
-        console.error("Search failed with status:", res.status);
+        const normalized = normalizeApiResponse(res.data);
+
+        set({
+          data: {
+            items: normalized.data,
+            pagination: normalized.pagination,
+            dataType: "listing",
+          },
+          hasError: false,
+        });
+
+        return true;
       }
+
+      console.warn("Unexpected data fetch status:", res.status);
+      return false;
     } catch (err) {
-      console.log("Search error:", err);
+      console.error("Backend error:", err);
+
+      set({
+        data: {
+          items: [],
+          pagination: null,
+          dataType: "",
+        },
+        hasError: true,
+      });
+
+      return false;
+    } finally {
+      set({ isFetching: false });
     }
+  },
+  fetchMyArchivedListings: async (params = {}) => {
+    if (get().isFetching) return false;
+
+    set({ isFetching: true });
+
+    const url = "http://localhost:8080/api/me/listings/archived";
+
+    try {
+      const res = await axios.get(url, {
+        params,
+        withCredentials: true,
+      });
+
+      if (res.status === 200) {
+        const normalized = normalizeApiResponse(res.data);
+
+        set({
+          data: {
+            items: normalized.data,
+            pagination: normalized.pagination,
+            dataType: "listing",
+          },
+          hasError: false,
+        });
+
+        return true;
+      }
+
+      console.warn("Unexpected data fetch status:", res.status);
+      return false;
+    } catch (err) {
+      console.error("Backend error:", err);
+
+      set({
+        data: {
+          items: [],
+          pagination: null,
+          dataType: "",
+        },
+        hasError: true,
+      });
+
+      return false;
+    } finally {
+      set({ isFetching: false });
+    }
+  },
+  deleteListing: () => {
+    console.log("delete request");
   },
 }));

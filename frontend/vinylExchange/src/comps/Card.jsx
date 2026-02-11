@@ -7,13 +7,14 @@ import { useMessagingStore } from "../stores/messagingStore";
 
 import ModularButton from "./Buttons/ModularButton";
 import CardImage from "./CardImage";
+import CardShell from "./CardShell";
 
 export default function Card({ item, onSelect }) {
   const imageSrc = item.imageUrl || item.externalCoverUrl;
 
   return (
     <div
-      className="bg-neutral-primary-soft hover:-translate-y-1 duration-200 ease-in-out border border-default rounded-2xl shadow-xs flex flex-col justify-center items-center py-5 px-5 max-w-70"
+      className="hover:-translate-y-1 duration-200 ease-in-out border-2 p-4 rounded-2xl "
       onClick={onSelect ? () => onSelect(item) : null}
       style={{ cursor: onSelect ? "pointer" : "default" }}
     >

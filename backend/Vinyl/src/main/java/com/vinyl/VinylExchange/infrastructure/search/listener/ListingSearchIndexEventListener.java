@@ -5,9 +5,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import com.vinyl.VinylExchange.infrastructure.search.service.ListingIndexService;
-import com.vinyl.VinylExchange.listing.event.ListingCreatedEvent;
-import com.vinyl.VinylExchange.listing.event.ListingUpdatedEvent;
+import com.vinyl.VinylExchange.service.ListingIndexService;
+import com.vinyl.VinylExchange.event.ListingCreatedEvent;
+import com.vinyl.VinylExchange.event.ListingUpdatedEvent;
 
 import lombok.RequiredArgsConstructor;
 

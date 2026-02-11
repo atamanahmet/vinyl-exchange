@@ -46,12 +46,14 @@ export default function ListView({ item }) {
     ? cart.items.some((element) => element.listingId === item.id)
     : false;
 
+  const imageSrc = item.imageUrl || item.externalCoverUrl;
+
   return (
     <>
       <div className="bg-neutral-primary-soft grid grid-cols-7 border-b   items-center">
         <div className="scale-65 -ml-6 -my-5">
           <Link to={`/listing/${item.id}`} className="cursor-pointer">
-            <CardImage src={item.imageUrl} alt={item.title} />
+            <CardImage src={imageSrc} alt={item.title} />
           </Link>
         </div>
         <button
@@ -78,15 +80,17 @@ export default function ListView({ item }) {
         <p className="px-6 py-4">{item.year || item.date} </p>
         <p className="">{item.format} </p>
         <div className="">
-          <p
-            className={`px-6 ${
-              item.discount > 0
-                ? "text-base font-bold text-gray-900 dark:text-white line-through"
-                : "text-base font-bold text-gray-900 dark:text-white"
-            }`}
-          >
-            {item.price + " ₺"}
-          </p>
+          {item.price && (
+            <p
+              className={`px-6 ${
+                item.discount > 0
+                  ? "text-base font-bold text-gray-900 dark:text-white line-through"
+                  : "text-base font-bold text-gray-900 dark:text-white"
+              }`}
+            >
+              {item.price + " ₺"}
+            </p>
+          )}
           <p
             className={`px-6 ${
               item.discount > 0

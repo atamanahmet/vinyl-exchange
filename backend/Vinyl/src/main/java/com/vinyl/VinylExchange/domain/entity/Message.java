@@ -1,0 +1,77 @@
+package com.vinyl.VinylExchange.domain.entity;
+
+import com.vinyl.VinylExchange.domain.enums.MessageType;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(name = "messages")
+@Builder
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class Message {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    @Column(nullable = false)
+    private UUID conversationId;
+
+    @Column(nullable = false)
+    private UUID senderId;
+
+    private String senderUsername;
+
+    private String receiverUsername;
+
+    private UUID receiverId;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+
+    @Column(nullable = false)
+    private MessageType messageType = MessageType.TEXT;
+
+    @Column(nullable = false, length = 2000)
+    private String content;
+
+    @Column(nullable = false, updatable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Builder.Default
+    private LocalDateTime timestamp = LocalDateTime.now();
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean isRead = false;
+
+    public void markAsRead() {
+        this.isRead = true;
+    }
+
+    public boolean isSentBy(UUID userId) {
+
+        return this.senderId.equals(userId);
+    }
+
+}

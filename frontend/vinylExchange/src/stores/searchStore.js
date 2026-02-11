@@ -2,8 +2,14 @@ import { create } from "zustand";
 import axios from "axios";
 
 export const useSearchStore = create((set, get) => ({
-  searchResult: [],
+  searchResult: {
+    dataType: "",
+    items: [],
+  },
+
   isLoadingSearch: true,
+
+  clearSearch: () => set({ searchResult: { items: [] } }),
 
   searchMusicBrainz: async (title) => {
     set({
@@ -19,9 +25,11 @@ export const useSearchStore = create((set, get) => ({
         withCredentials: true,
       });
       if (res.status === 200) {
-        console.log("search results: ", res.data);
         set({
-          searchResult: res.data ?? [],
+          searchResult: {
+            dataType: "mb",
+            items: res.data ?? [],
+          },
         });
       }
     } catch (e) {
@@ -49,7 +57,10 @@ export const useSearchStore = create((set, get) => ({
       if (res.status === 200) {
         console.log("search results: ", res.data);
         set({
-          searchResult: res.data?.content ?? [],
+          searchResult: {
+            dataType: "listing",
+            items: res.data?.content ?? [],
+          },
         });
       }
     } catch (e) {

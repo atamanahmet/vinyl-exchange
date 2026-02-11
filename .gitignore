@@ -3,9 +3,8 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-/backend/Vinyl/src/main/resources/application.properties
 /backend/Vinyl/uploads/**
-/backend/Vinyl/src/main/java/com/vinyl/VinylExchange/config/StartUpInit.java
+/backend/Vinyl/.env
 
 ### STS ###
 .apt_generated

@@ -12,11 +12,11 @@ import { useSearchStore } from "../stores/searchStore";
 
 //TODO: remove, test
 const SkeletonNavbar = () => (
-  <nav className="bg-neutral-primary border-neutral-secondary border-b">
-    <div className="max-w-7xl mx-auto px-4 py-3">
+  <nav className=" border-neutral-secondary border-b">
+    <div className="max-w-7xl mx-auto px-3 py-3">
       {/* logo */}
       <div className="flex items-center justify-between">
-        <div className="h-8 w-32 bg-neutral-secondary-medium rounded animate-pulse"></div>
+        <div className="h-10 w-32 bg-neutral-secondary-medium rounded animate-pulse"></div>
 
         <div className="hidden md:block flex-1 max-w-md mx-8">
           <div className="h-10 bg-neutral-secondary-medium rounded animate-pulse"></div>
@@ -41,13 +41,6 @@ const SkeletonNavbar = () => (
           {/* mobile menu*/}
           <div className="h-10 w-10 bg-neutral-secondary-medium rounded lg:hidden animate-pulse"></div>
         </div>
-      </div>
-
-      <div className="hidden lg:flex items-center justify-center gap-6 mt-4">
-        <div className="h-4 w-16 bg-neutral-secondary-medium rounded animate-pulse"></div>
-        <div className="h-4 w-16 bg-neutral-secondary-medium rounded animate-pulse"></div>
-        <div className="h-4 w-16 bg-neutral-secondary-medium rounded animate-pulse"></div>
-        <div className="h-4 w-16 bg-neutral-secondary-medium rounded animate-pulse"></div>
       </div>
     </div>
   </nav>
@@ -147,7 +140,7 @@ export default function Navbar() {
             className="flex items-center space-x-3 shrink-0"
           >
             <svg
-              className="h-8 w-8 text-accent-primary"
+              className="h-10 w-8 text-accent-primary"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -318,6 +311,11 @@ export default function Navbar() {
                       </g>
                     </svg>
                   </div>
+                  {notificationUnreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-accent-primary rounded-full">
+                      {notificationUnreadCount}
+                    </span>
+                  )}
                 </button>
 
                 {isNotificationMenuOpen && (

@@ -79,7 +79,7 @@ export default function WishlistPage() {
     wishlistItemToCardItem(item, isInWishlist, removeFromWishlist),
   );
 
-  const searchItems = searchResult?.map((item) =>
+  const searchItems = searchResult?.items?.map((item) =>
     mbReleaseToWishlistItem(item, isInWishlistHolder, addToWishlistHolder),
   );
 

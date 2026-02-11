@@ -7,12 +7,12 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.vinyl.VinylExchange.auth.AuthService;
-import com.vinyl.VinylExchange.auth.Role;
-import com.vinyl.VinylExchange.auth.RoleService;
-import com.vinyl.VinylExchange.auth.enums.RoleName;
+import com.vinyl.VinylExchange.service.AuthService;
+import com.vinyl.VinylExchange.domain.entity.Role;
+import com.vinyl.VinylExchange.service.RoleService;
+import com.vinyl.VinylExchange.domain.enums.RoleName;
 
-import com.vinyl.VinylExchange.user.UserService;
+import com.vinyl.VinylExchange.service.UserService;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;

@@ -13,10 +13,13 @@ import {
   ModalFooter,
   ModalHeader,
 } from "flowbite-react";
+import SkeletonCardView from "../comps/Skeletons/SkeletonCardView";
+import CardShell from "../comps/CardShell";
 
 export default function NewListing() {
   const [images, setImages] = useState([]);
   const user = useAuthStore((state) => state.user);
+  const checkUser = useAuthStore((state) => state.checkUser);
   const setOpenLogin = useAuthStore((state) => state.setOpenLogin);
   const searchMusicBrainz = useSearchStore((state) => state.searchMusicBrainz);
   const isLoadingSearch = useSearchStore((state) => state.isLoadingSearch);
@@ -30,10 +33,9 @@ export default function NewListing() {
 
   const navigate = useNavigate();
 
+  //user check
   useEffect(() => {
-    if (user == null && !isLoading) {
-      setOpenLogin;
-    }
+    checkUser;
   }, []);
 
   const [listing, setListing] = useState({
@@ -61,8 +63,14 @@ export default function NewListing() {
   });
 
   useEffect(() => {
-    setItems(searchResult.map((release) => mbReleaseToListingMap(release)));
-    console.log("items ", items);
+    if (!searchResult?.items) {
+      setItems([]);
+      return;
+    }
+
+    setItems(
+      searchResult?.items.map((release) => mbReleaseToListingMap(release)),
+    );
   }, [searchResult]);
 
   const checkRelease = async () => {
@@ -208,16 +216,29 @@ export default function NewListing() {
             </ModalHeader>
 
             {isLoadingSearch && <p>Loading...</p>}
-            {!searchResult.length && <p>No results found.</p>}
+
+            {!isLoadingSearch && !searchResult.items.length && (
+              <p>No results found.</p>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center py-5">
-              {items?.map((item) => (
-                <Card
-                  key={item.id}
-                  item={item}
-                  onSelect={() => selectMbRelease(item)}
-                />
-              ))}
+              {isLoadingSearch ? (
+                Array(6)
+                  .fill(0)
+                  .map((_, i) => <SkeletonCardView key={i} />)
+              ) : items.length === 0 ? (
+                <p className="text-white col-span-full text-center">
+                  No results found.
+                </p>
+              ) : (
+                items.map((item) => (
+                  <Card
+                    key={item.id}
+                    item={item}
+                    onSelect={() => selectMbRelease(item)}
+                  />
+                ))
+              )}
             </div>
 
             <button

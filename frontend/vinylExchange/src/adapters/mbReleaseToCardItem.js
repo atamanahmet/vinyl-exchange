@@ -6,7 +6,7 @@ export function mbReleaseToCardItem(release, isInWishlist, toggleToWishlist) {
     title: release.title,
     artist: release.artistCredit?.[0]?.name || "Unknown artist",
     format: release.media?.[0]?.format || "Unknown format",
-    barcode: item.barcode || "Unkown Barcode",
+    barcode: release.barcode || "Unkown Barcode",
     externalCoverUrl: release.externalCoverUrl,
     year: release.year || "Unknown Date",
     label: release.labelInfo?.[0].label?.name || "Unknown Label",

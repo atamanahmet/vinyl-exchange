@@ -10,7 +10,7 @@ import MainPage from "./pages/MainPage";
 import About from "./pages/About";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import NewListing from "./pages/NewListing";
-import ListingsPage from "./pages/ListingsPage";
+import ListingsPage from "./pages/MyListingsPage";
 import EditListing from "./pages/EditListing";
 import ItemPage from "./pages/ItemPage";
 import CartPage from "./pages/CartPage";
@@ -22,6 +22,7 @@ import OrderItemsPage from "./pages/OrderItemsPage";
 import ConversationsPage from "./pages/ConversationsPage";
 import { useCartStore } from "./stores/cartStore";
 import WishlistPage from "./pages/WishlistPage";
+import MyListingsPage from "./pages/MyListingsPage";
 
 function App() {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ function App() {
         <Route path="/" element={<MainPage />} />
         <Route path="/about" element={<About />} />
         <Route path="/newlisting" element={<NewListing />} />
-        <Route path="/listings" element={<ListingsPage />} />
+        <Route path="/listings" element={<MyListingsPage />} />
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/edit/:listingId" element={<EditListing />} />
         <Route path="/listing/:listingId" element={<ItemPage />} />

@@ -5,18 +5,18 @@ export default function CardImage({ src, alt }) {
   const [error, setError] = useState(false);
 
   return (
-    <div className="relative w-full aspect-square">
+    <div className="relative w-full aspect-square overflow-hidden rounded-md">
       {/* skeleton */}
-      {!loaded && !error && (
-        <div className="absolute inset-0 rounded-md bg-neutral-600 animate-pulse" />
+      {!loaded && (
+        <div className="absolute inset-0 bg-neutral-600 animate-pulse rounded-md" />
       )}
 
       {/* image */}
-      {!error && (
+      {src && !error && (
         <img
           src={src}
-          alt={alt}
-          className={`rounded-md w-full h-full object-cover transition-opacity duration-300 ${
+          alt={alt || "cover"}
+          className={`w-full h-full object-cover transition-opacity duration-300 ${
             loaded ? "opacity-100" : "opacity-0"
           }`}
           onLoad={() => setLoaded(true)}
@@ -27,13 +27,11 @@ export default function CardImage({ src, alt }) {
         />
       )}
 
-      {/* placeholder on error */}
+      {/* error placeholder */}
       {error && (
-        <img
-          src="/placeholder.png"
-          alt="placeholder"
-          className="rounded-md w-full h-full object-cover"
-        />
+        <div className="w-full h-full bg-neutral-700 flex items-center justify-center rounded-md">
+          <span className="text-white text-sm">No Image</span>
+        </div>
       )}
     </div>
   );

@@ -8,6 +8,16 @@ export const useCartStore = create((set, get) => ({
   cartItemCount: 0,
 
   fetchCart: async () => {
+    const user = useAuthStore.getState().user;
+
+    if (!user) {
+      set({
+        cart: null,
+        cartItemCount: 0,
+      });
+      return;
+    }
+
     try {
       const res = await axios.get("http://localhost:8080/api/cart", {
         withCredentials: true,

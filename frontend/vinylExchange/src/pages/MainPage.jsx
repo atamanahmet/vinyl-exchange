@@ -13,75 +13,89 @@ import { useAuthStore } from "../stores/authStore";
 import { useUIStore } from "../stores/uiStore";
 import { useCartStore } from "../stores/cartStore";
 
-import { listingToCardItem } from "../adapters/listingToCardItem";
 import { mbReleaseToCardItem } from "../adapters/mbReleaseToCardItem";
 import { useNavigate } from "react-router-dom";
 import { useMessagingStore } from "../stores/messagingStore";
 import useWishlistStore from "../stores/wishlistStore";
 import { useSearchStore } from "../stores/searchStore";
+import { mapListingsToCardItems } from "../adapters/mapListingToCardItems";
 
 export default function MainPage() {
   const PAGE_SIZE = 20;
 
   const [page, setPage] = useState(1);
+
   const [visibleItems, setVisibleItems] = useState([]);
 
   const navigate = useNavigate();
 
-  const data = useDataStore((state) => state.data);
-  const dataType = useDataStore((state) => state.dataType);
-
   const searchResult = useSearchStore((state) => state.searchResult);
+  const clearSearch = useSearchStore((state) => state.clearSearch);
 
   const user = useAuthStore((state) => state.user);
+
+  //wishlist store
   const addToWishlist = useWishlistStore((state) => state.addToWishlist);
   const isInWishlist = useWishlistStore((state) => state.isInWishlist);
   const toggleToWishlist = useWishlistStore((state) => state.toggleToWishlist);
   const removeFromWishlist = useWishlistStore(
     (state) => state.removeFromWishlist,
   );
+
+  //data store
   const isFetching = useDataStore((state) => state.isFetching);
   const fetchAllListings = useDataStore((state) => state.fetchAllListings);
+  const data = useDataStore((state) => state.data);
+
+  //UI store
   const layout = useUIStore((state) => state.layout);
   const setLayout = useUIStore((state) => state.setLayout);
+
+  //cart store
   const cart = useCartStore((state) => state.cart);
-  const startConversation = useMessagingStore(
-    (state) => state.startConversation,
-  );
   const addToCart = useCartStore((state) => state.addToCart);
   const removeFromCart = useCartStore((state) => state.removeFromCart);
 
+  const startConversation = useMessagingStore(
+    (state) => state.startConversation,
+  );
+
   useEffect(() => {
+    clearSearch();
     fetchAllListings();
   }, []);
 
-  const items = useMemo(() => {
-    if (dataType === "listing" && Array.isArray(data)) {
-      const cartIds = new Set(cart?.items?.map((i) => i.listingId) || []);
-      return data.map((listing) =>
-        listingToCardItem(
-          listing,
-          user,
-          cartIds,
-          addToCart,
-          removeFromCart,
-          navigate,
-          startConversation,
-        ),
-      );
-    }
+  const currentData = useMemo(() => {
+    return searchResult.items?.length > 0 ? searchResult : data;
+  }, [searchResult, data]);
 
-    if (dataType === "mb") {
-      return data?.map((release) =>
+  const items = useMemo(() => {
+    if (!currentData?.items) return [];
+
+    if (currentData.dataType === "listing") {
+      const cartIds = new Set(cart?.items?.map((i) => i.listingId) || []);
+
+      return mapListingsToCardItems(currentData.items, {
+        user,
+        cartIds,
+        addToCart,
+        navigate,
+        startConversation,
+      });
+    }
+    //TODO:remove, devonly
+    if (currentData.dataType === "mb") {
+      return currentData.items.map((release) =>
         mbReleaseToCardItem(release, isInWishlist, toggleToWishlist),
       );
     }
 
     return [];
-  }, [data, dataType, cart, user]);
+  }, [currentData, cart, user]);
 
   //pagination for infinite scroll
   useEffect(() => {
+    if (!currentData?.items) return;
     setPage(1);
     setVisibleItems(items.slice(0, PAGE_SIZE));
   }, [items]);
@@ -99,7 +113,7 @@ export default function MainPage() {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [visibleItems, items, page]);
+  }, [visibleItems.length, items, page]);
 
   const loadNextPage = () => {
     const nextPage = page + 1;
