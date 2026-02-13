@@ -2,6 +2,7 @@ package com.vinyl.VinylExchange.session;
 
 import com.vinyl.VinylExchange.domain.entity.User;
 import com.vinyl.VinylExchange.domain.enums.RoleName;
+import com.vinyl.VinylExchange.exception.UnauthorizedActionException;
 import com.vinyl.VinylExchange.exception.UserNotFoundException;
 import com.vinyl.VinylExchange.security.principal.UserDetailsImpl;
 import org.springframework.security.core.Authentication;
@@ -20,7 +21,7 @@ public class UserUtil {
             return authentication.isAuthenticated();
         }
 
-        return false;
+        throw new UnauthorizedActionException("Authentication needed for this action");
     }
 
     public static Authentication getAuthentication(){

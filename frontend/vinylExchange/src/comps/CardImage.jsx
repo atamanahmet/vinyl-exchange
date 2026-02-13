@@ -4,6 +4,8 @@ export default function CardImage({ src, alt }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
 
+  const isPlaceholder = src?.includes("/placeholders/");
+
   return (
     <div className="relative w-full aspect-square overflow-hidden rounded-md">
       {/* skeleton */}
@@ -27,7 +29,14 @@ export default function CardImage({ src, alt }) {
         />
       )}
 
-      {/* error placeholder */}
+      {/* placeholder badge */}
+      {isPlaceholder && !error && (
+        <div className="absolute top-6 -left-8.5 -rotate-45 bg-amber-500 text-black text-md font-semibold px-7 py-0.5 rounded shadow-lg tracking-wider">
+          Placeholder
+        </div>
+      )}
+
+      {/* error fallback */}
       {error && (
         <div className="w-full h-full bg-neutral-700 flex items-center justify-center rounded-md">
           <span className="text-white text-sm">No Image</span>

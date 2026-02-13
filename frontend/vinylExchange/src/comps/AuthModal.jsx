@@ -10,7 +10,6 @@ import {
 import { useState } from "react";
 import { Login } from "./Login";
 import { Register } from "./Register";
-import { useUser } from "../context/old.UserContext";
 import { useAuthStore } from "../stores/authStore";
 
 export function AuthModal({ openModal, setOpenModal }) {

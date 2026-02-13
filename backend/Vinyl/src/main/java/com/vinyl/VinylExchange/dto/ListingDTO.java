@@ -32,7 +32,11 @@ import lombok.Setter;
 public class ListingDTO {
 
     private UUID id;
+
+    private UUID mbId;
+
     private String title;
+
     private String barcode;
 
     private String packaging;
@@ -50,16 +54,37 @@ public class ListingDTO {
     private long discountedPrice;
 
     private Boolean tradeable;
+
     private List<String> imagePaths;
-    private List<String> placeHoldeCoverPaths;
+
+    private List<String> placeHolderCoverPaths;
+
     private List<TradePreferenceDTO> tradePreferences;
+
     private String format;
+
     private String description;
+
     private int year;
+
     private String country;
+
     private Integer trackCount;
+
     private int stockQuantity;
+
     private long tradeValue;
+
+
+    private String condition;
+
+    private String artistName;
+
+    private String labelName;
+
+    private String ownerUsername;
+
+    private LocalDateTime createdAt;
 
     @Min(0)
     @Max(10_000)
@@ -68,15 +93,9 @@ public class ListingDTO {
     @JsonSerialize(using = DiscountSerializer.class)
     private int discountBP; // bp
 
-    private String condition;
-    private String artistName;
-    private String labelName;
-    private String ownerUsername;
-
-    private LocalDateTime createdAt;
-
     public ListingDTO(Listing listing, List<String> imagePaths) {
         this.id = listing.getId();
+        this.mbId = listing.getMbId()==null?null:listing.getMbId();
         this.title = listing.getTitle();
         this.description = listing.getDescription();
         this.year = listing.getYear();

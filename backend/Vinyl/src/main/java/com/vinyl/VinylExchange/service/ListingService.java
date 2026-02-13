@@ -2,6 +2,7 @@ package com.vinyl.VinylExchange.service;
 
 import java.beans.PropertyDescriptor;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 import java.util.ArrayList;
@@ -11,7 +12,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.vinyl.VinylExchange.domain.entity.Listing;
+import com.vinyl.VinylExchange.dto.*;
+import com.vinyl.VinylExchange.exception.*;
+import com.vinyl.VinylExchange.mapper.ListingMapper;
 import com.vinyl.VinylExchange.repository.ListingRepository;
+import com.vinyl.VinylExchange.session.UserUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
@@ -27,14 +32,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.vinyl.VinylExchange.dto.ListingDTO;
 import com.vinyl.VinylExchange.domain.enums.ListingStatus;
 import com.vinyl.VinylExchange.event.ListingCreatedEvent;
 import com.vinyl.VinylExchange.event.ListingUpdatedEvent;
-import com.vinyl.VinylExchange.dto.TradePreferenceDTO;
-import com.vinyl.VinylExchange.exception.InsufficientStockException;
-import com.vinyl.VinylExchange.exception.ListingNotFoundException;
-import com.vinyl.VinylExchange.exception.UnauthorizedActionException;
 
 import com.vinyl.VinylExchange.domain.entity.User;
 import com.vinyl.VinylExchange.security.principal.UserDetailsImpl;
@@ -58,19 +58,23 @@ public class ListingService {
     // publish event to wishlist check -> send notification
     private final ApplicationEventPublisher eventPublisher;
 
+    private final ListingMapper listingMapper;
+
     public ListingService(
             ListingRepository listingRepository,
             FileStorageService fileStorageService,
             @Lazy CartService cartService,
             WebClient webClient,
             CoverArtService coverArtService,
-            ApplicationEventPublisher eventPublisher) {
+            ApplicationEventPublisher eventPublisher,
+            ListingMapper listingMapper) {
 
         this.listingRepository = listingRepository;
         this.fileStorageService = fileStorageService;
         this.cartService = cartService;
         this.coverArtService = coverArtService;
         this.eventPublisher = eventPublisher;
+        this.listingMapper = listingMapper;
     }
 
     public List<Listing> getAllListings() {
@@ -87,18 +91,21 @@ public class ListingService {
 
         Page<Listing> listingsPage = listingRepository.findAllWithStatus(ListingStatus.AVAILABLE, pageable);
 
-        Page<ListingDTO> listingDTOsPage = listingsPage.map(listing -> converToDTO(listing));
+        return listingsPage.map(this::toDTO);
+    }
 
-        return listingDTOsPage;
+    public Page<ListingDTO> getAllAvailableListingsByUser(String username, Pageable pageable) {
+
+        Page<Listing> listingsPage = listingRepository.findAllWithStatusAndUsername(ListingStatus.AVAILABLE, username, pageable);
+
+        return listingsPage.map(this::toDTO);
     }
 
     public Page<ListingDTO> getPublicListings(Pageable pageable) {
 
         Page<Listing> listingsPage = listingRepository.findAllWithStatus(ListingStatus.AVAILABLE, pageable);
 
-        Page<ListingDTO> listingDTOsPage = listingsPage.map(listing -> converToDTO(listing));
-
-        return listingDTOsPage;
+        return listingsPage.map(this::toDTO);
     }
 
     public List<Listing> getPromotedListings() {
@@ -112,7 +119,7 @@ public class ListingService {
                 .getCartDTO(userId)
                 .getItems()
                 .stream()
-                .map(item -> item.getListingId()).collect(Collectors.toSet());
+                .map(CartItemDTO::getListingId).collect(Collectors.toSet());
 
         if (cartListingIds.isEmpty()) {
             return List.of();
@@ -124,10 +131,10 @@ public class ListingService {
         List<Listing> filteredPromotedList = promotedListings.stream()
                 .filter(listing -> !cartListingIds.contains(listing.getId()))
                 .limit(5)
-                .collect(Collectors.toList());
+                .toList();
 
         return filteredPromotedList.stream()
-                .map(filteredItem -> converToDTO(filteredItem))
+                .map(this::toDTO)
                 .toList();
     }
 
@@ -149,52 +156,16 @@ public class ListingService {
 
         List<Listing> resultListings = listingRepository.findAllByIdIn(listingIdList);
 
-        List<ListingDTO> listingDTOs = new ArrayList<>();
-
-        for (Listing listing : resultListings) {
-            List<TradePreferenceDTO> tradePreferenceDTOs = new ArrayList<>();
-
-            for (TradePreference tradePreference : listing.getTradePreferences()) {
-
-                tradePreferenceDTOs.add(new TradePreferenceDTO(tradePreference));
-            }
-
-            List<String> imagePaths = fileStorageService.getListingImagePaths(listing.getId());
-
-            if (imagePaths == null || imagePaths.isEmpty()) {
-                imagePaths = fileStorageService.getListingImagePaths(listing.getMbId());
-            }
-
-            listingDTOs.add(new ListingDTO(listing, imagePaths));
-        }
-
-        return listingDTOs;
+        return toDTOList(resultListings);
     }
 
-    public List<ListingDTO> getListingsDTOs() {
+    // Admin only, maybe unnecessary
+    // TODO: check again
+    public List<ListingDTO> getAllListingsDTOs() {
 
         List<Listing> allListings = listingRepository.findAll();
 
-        List<ListingDTO> listingDTOs = new ArrayList<>();
-
-        for (Listing listing : allListings) {
-            List<TradePreferenceDTO> tradePreferenceDTOs = new ArrayList<>();
-
-            for (TradePreference tradePreference : listing.getTradePreferences()) {
-
-                tradePreferenceDTOs.add(new TradePreferenceDTO(tradePreference));
-            }
-
-            List<String> imagePaths = fileStorageService.getListingImagePaths(listing.getId());
-
-            if (imagePaths == null || imagePaths.isEmpty()) {
-                imagePaths = fileStorageService.getListingImagePaths(listing.getMbId());
-            }
-
-            listingDTOs.add(new ListingDTO(listing, imagePaths));
-        }
-
-        return listingDTOs;
+        return toDTOList(allListings);
     }
 
     public Listing saveListing(Listing listing) {
@@ -202,24 +173,37 @@ public class ListingService {
         return listingRepository.save(listing);
     }
 
-    // Clean up files also, DDD loose couple, holding only Id
-    public void deleteListing(UUID listingId, UserDetailsImpl userPrincipal) {
+    public void deleteListing(UUID listingId) {
 
-        Listing listing = listingRepository.findById(listingId).orElseThrow(() -> new ListingNotFoundException());
+        UUID userId = UserUtil.getCurrentUserId();
 
-        if (listing.getOwner().getId().equals(userPrincipal.getId())) {
+        Listing existingListing = listingRepository.findById(listingId).orElseThrow(ListingNotFoundException::new);
 
+
+        if (!existingListing.getOwner().getId().equals(userId)) {
+
+            logger.warn("Listing delete unauthorized, action caused by userId: " + userId);
+
+            throw new UnauthorizedActionException("Users only delete their own listings.");
+        }
+
+        listingRepository.delete(existingListing);
+
+        try{
             fileStorageService.deleteListingImages(listingId);
 
-            listingRepository.deleteById(listingId);
+        } catch (Exception e) {
+            logger.error("Listing files deletion failed for id: {} ", listingId);
+            throw new RuntimeException(e);
         }
+
     }
 
     public Listing findListingById(UUID listingId) {
 
         return listingRepository
                 .findById(listingId)
-                .orElseThrow(() -> new ListingNotFoundException());
+                .orElseThrow(ListingNotFoundException::new);
     }
 
     public long totalCount() {
@@ -229,30 +213,21 @@ public class ListingService {
     // TODO: refactor
     @Transactional
     public void createNewListing(
-            String listingJson,
+            CreateListingRequest request,
             List<MultipartFile> images,
-            User user) {
+            User owner) {
 
         try {
 
-            Listing listing = new ObjectMapper().readValue(listingJson, Listing.class);
+            Listing listing = listingMapper.toEntity(request);
 
-            listing.setOwner(user);
+            listing.setOwner(owner);
 
-            if (listing.getTradePreferences() != null) {
-
-                listing.getTradePreferences()
-                        .forEach(preference -> preference.setListing(listing));
-            }
 
             Listing savedListing = listingRepository.save(listing);
 
             if (images != null && !images.isEmpty()) {
-                logger.info("Uploaded images: {}", images.size());
-
-                List<ImageSource> imageSources = getImageSourceList(images);
-                fileStorageService.saveImages(imageSources, savedListing.getId());
-
+                handleImageUpload(savedListing.getId(), images);
             }
 
             if (listing.getMbId() != null) {
@@ -261,17 +236,26 @@ public class ListingService {
                         listing.getMbId());
             }
 
-            // redundant
-            savedListing = listingRepository.save(savedListing);
-
             eventPublisher.publishEvent(
                     ListingCreatedEvent.builder()
                             .listing(savedListing).build());
 
         } catch (Exception e) {
-            // TODO: handle exception
-            System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            throw new ListingCreationException("Listing creation failed for user: ", owner.getUsername());
+        }
+    }
+
+    private void handleImageUpload(UUID listingId, List<MultipartFile> images) {
+        try {
+            List<ImageSource> imageSources = images.stream()
+                    .map(this::convertToImageSource)
+                    .toList();
+
+            fileStorageService.saveImages(imageSources, listingId);
+
+        } catch (IOException e) {
+            logger.error("Failed to upload images for listing {}", listingId, e);
+            throw new ImageUploadException("Failed to upload images");
         }
     }
 
@@ -299,10 +283,11 @@ public class ListingService {
         return imageSources;
     }
 
-    public void updateListing(UUID id, String listingJson, List<MultipartFile> images, UUID userId) {
+    @Transactional
+    public ListingDTO updateListing(UUID listingId, UpdateListingRequest request, List<MultipartFile> newImages, UUID userId) {
 
-        Listing existingListing = listingRepository.findById(id)
-                .orElseThrow(() -> new ListingNotFoundException());
+        Listing existingListing = listingRepository.findById(listingId)
+                .orElseThrow(ListingNotFoundException::new);
 
         // Security check
         if (!existingListing.getOwner().getId().equals(userId)) {
@@ -310,37 +295,17 @@ public class ListingService {
         }
 
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            ListingDTO listingDTO = objectMapper.readValue(listingJson, ListingDTO.class);
+            handleImageUpdates(listingId, request.getImagePaths(), newImages);
 
-            handleImageUpdates(id, listingDTO.getImagePaths(), images);
+            listingMapper.updateEntityFromRequest(existingListing, request);
 
-            Listing updatedListing = new Listing();
-            updatedListing.setTitle(listingDTO.getTitle());
-            updatedListing.setArtistName(listingDTO.getArtistName());
-            updatedListing.setDescription(listingDTO.getDescription());
-            updatedListing.setPriceKurus(listingDTO.getPriceKurus());
-            updatedListing.setDiscountBP(listingDTO.getDiscountBP());
-            updatedListing.setTradeable(listingDTO.getTradeable());
-            updatedListing.setTradeValue(listingDTO.getTradeValue());
-            updatedListing.setCondition(listingDTO.getCondition());
-            updatedListing.setFormat(listingDTO.getFormat());
-            updatedListing.setPackaging(listingDTO.getPackaging());
-            updatedListing.setYear(listingDTO.getYear());
-            updatedListing.setCountry(listingDTO.getCountry());
-            updatedListing.setLabelName(listingDTO.getLabelName());
-            updatedListing.setBarcode(listingDTO.getBarcode());
-            updatedListing.setTrackCount(listingDTO.getTrackCount());
-
-            copyNonNullFields(updatedListing, existingListing);
-
-            updateTradePreferences(existingListing, listingDTO.getTradePreferences());
-
-            Listing savedListing = saveListing(existingListing);
+            Listing savedListing = listingRepository.save(existingListing);
 
             eventPublisher.publishEvent(
-                    ListingUpdatedEvent.builder()
-                            .listing(savedListing));
+                    ListingUpdatedEvent.builder().listing(savedListing).build()
+            );
+
+            return toDTO(savedListing);
 
         } catch (Exception e) {
             System.out.println("Error updating listing: " + e.getMessage());
@@ -402,7 +367,7 @@ public class ListingService {
             return List.of();
 
         return userListings.stream()
-                .map(listing -> converToDTO(listing))
+                .map(this::toDTO)
                 .toList();
     }
 
@@ -410,37 +375,11 @@ public class ListingService {
 
         Listing listing = listingRepository
                 .findById(listingId)
-                .orElseThrow(() -> new ListingNotFoundException());
+                .orElseThrow(ListingNotFoundException::new);
 
-        return converToDTO(listing);
+        return toDTO(listing);
     }
 
-    // TODO: refactor
-    public static void copyNonNullFields(Listing source, Listing target) {
-        BeanWrapper sourceWrap = new BeanWrapperImpl(source);
-        BeanWrapper targetWrap = new BeanWrapperImpl(target);
-
-        for (PropertyDescriptor propertyDescriptor : sourceWrap.getPropertyDescriptors()) {
-            String name = propertyDescriptor.getName();
-
-            if (name.equals("class")
-                    || name.equals("id")
-                    || name.equals("owner")
-                    || name.equals("tradePreferences")
-                    || name.equals("promote")) {
-                continue;
-            }
-
-            if (!targetWrap.isWritableProperty(name)) {
-                continue;
-            }
-            Object value = sourceWrap.getPropertyValue(name);
-
-            if (value != null) {
-                targetWrap.setPropertyValue(name, value);
-            }
-        }
-    }
 
     // TODO: remove, admin panel
     public void promoteListing(UUID listingId, Boolean action, UserDetailsImpl currentUser) {
@@ -459,7 +398,7 @@ public class ListingService {
     public void freezeListing(UUID listingId, Boolean action, UserDetailsImpl currentUser) {
 
         Listing listing = listingRepository.findById(listingId)
-                .orElseThrow(() -> new ListingNotFoundException("Listing not found to promote"));
+                .orElseThrow(() -> new ListingNotFoundException("Listing not found to freeze"));
 
         listing.setOnHold(action);
         // listing.setPromotedBy(currentUser.getUsername());
@@ -472,7 +411,7 @@ public class ListingService {
     public void decreaseItemQuantity(UUID listingId, int quantity) {
 
         Listing listing = listingRepository.findById(listingId)
-                .orElseThrow(() -> new ListingNotFoundException());
+                .orElseThrow(ListingNotFoundException::new);
 
         if (!listing.hasEnoughStock(quantity)) {
             throw new InsufficientStockException();
@@ -495,7 +434,7 @@ public class ListingService {
     public String getOwnerUsernameByListingId(UUID listingId) {
 
         Listing listing = listingRepository.findById(listingId)
-                .orElseThrow(() -> new ListingNotFoundException());
+                .orElseThrow(ListingNotFoundException::new);
 
         return listing.getOwner().getUsername();
     }
@@ -505,48 +444,67 @@ public class ListingService {
         List<Listing> listings = getAllListings();
 
         return listings.stream()
-                .map(listing -> converToDTO(listing))
+                .map(this::toDTO)
                 .toList();
     }
 
-    public ListingDTO converToDTO(Listing listing) {
+    public List<String> getImagePaths(UUID listingId){
+        return fileStorageService.getListingImagePaths(listingId);
+    }
 
+
+    public void restoreStock(UUID listingId, int quantity) {
+
+        Listing listing = listingRepository.findById(listingId)
+                .orElseThrow(() -> new ListingNotFoundException("Listing not found for restock"));
+
+        listing.setStockQuantity(listing.getStockQuantity() + quantity);
+
+        listingRepository.save(listing);
+
+    }
+
+    /**
+     * Private helper: fetches images and converts to DTO
+     * Centralizes the repetitive pattern
+     */
+    private ListingDTO toDTO(Listing listing) {
+
+        List<String> imagePaths = getImagePaths(listing);
+
+        if(imagePaths.isEmpty()){
+            imagePaths= getPlaceholderImagePath(listing.getMbId());
+        }
+        return listingMapper.toDTO(listing, imagePaths);
+    }
+
+    /**
+     * Private helper: if user didnt provide images, fetch placeholder image from mbId
+     */
+    private List<String> getPlaceholderImagePath(UUID mbId){
+        return fileStorageService.getPlaceholderImagePaths(mbId);
+    }
+
+    /**
+     * Private helper: batch conversion
+     */
+    private List<ListingDTO> toDTOList(List<Listing> listings) {
+        return listings.stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
+    /**
+     * Private helper: fetch image paths with fallback epmty list
+     */
+    private List<String> getImagePaths(Listing listing) {
         List<String> imagePaths = fileStorageService.getListingImagePaths(listing.getId());
 
         if ((imagePaths == null || imagePaths.isEmpty()) && listing.getMbId() != null) {
             imagePaths = fileStorageService.getListingImagePaths(listing.getMbId());
         }
 
-        return new ListingDTO(listing, imagePaths);
-    }
-
-    public List<ListingDTO> converAllToDTO(List<Listing> listings) {
-
-        List<ListingDTO> listingDTOs = new ArrayList<>();
-
-        for (Listing listing : listings) {
-
-            List<String> imagePaths = fileStorageService.getListingImagePaths(listing.getId());
-
-            if (imagePaths == null || imagePaths.isEmpty()) {
-                imagePaths = fileStorageService.getListingImagePaths(listing.getMbId());
-            }
-
-            listingDTOs.add(new ListingDTO(listing, imagePaths));
-        }
-
-        return listingDTOs;
-    }
-
-    public void restoreStock(UUID listingId, int quantity) {
-
-        Listing listing = listingRepository.findById(listingId)
-                .orElseThrow(() -> new ListingNotFoundException("Listing not foujnd for restock"));
-
-        listing.setStockQuantity(listing.getStockQuantity() + quantity);
-
-        listingRepository.save(listing);
-
+        return imagePaths != null ? imagePaths : List.of();
     }
 
 }

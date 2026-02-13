@@ -9,6 +9,10 @@ const useWishlistStore = create((set, get) => ({
   error: null,
 
   fetchWishlist: async () => {
+    const user = useAuthStore.getState().user;
+
+    if (user == null) return;
+
     set({ isLoading: true, error: null });
 
     try {

@@ -2,7 +2,6 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import ImageGallery from "../comps/ImageGallery";
-import { useCart } from "../context/old.CartContext";
 
 import {
   Button,
@@ -14,12 +13,18 @@ import {
 import { useAuthStore } from "../stores/authStore";
 import { useMessagingStore } from "../stores/messagingStore";
 import { useCartStore } from "../stores/cartStore";
+import { useDataStore } from "../stores/dataStore";
 
 export default function ItemPage() {
   const user = useAuthStore((state) => state.user);
 
   const addToCart = useCartStore((state) => state.addToCart);
   const removeFromCart = useCartStore((state) => state.removeFromCart);
+  const data = useDataStore((state) => state.data);
+  const fetchListing = useDataStore((state) => state.fetchListing);
+  const fetchListingsByUser = useDataStore(
+    (state) => state.fetchListingsByUser,
+  );
 
   const startConversation = useMessagingStore(
     (state) => state.startConversation,
@@ -60,40 +65,43 @@ export default function ItemPage() {
     addToCart(listing.id);
   }
 
-  async function getListing() {
-    try {
-      const res = await axios.get(
-        `http://localhost:8080/api/listings/${listingId}`,
-        {
-          withCredentials: true,
-        },
-      );
-      if (res.status == 200) {
-        console.log(res.data);
-        setListing(res.data);
-      }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  }
+  // async function getListing() {
+  //   try {
+  //     const res = await axios.get(
+  //       `http://localhost:8080/api/listings/${listingId}`,
+  //       {
+  //         withCredentials: true,
+  //       },
+  //     );
+  //     if (res.status == 200) {
+  //       console.log(res.data);
+  //       setListing(res.data);
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
 
   useEffect(() => {
-    getListing();
+    if (listingId == null) return;
+    fetchListing(listingId);
   }, [listingId]);
 
   useEffect(() => {
-    if (listing && user && listing.ownerUsername === user.username) {
+    if (data.items && user && data.items[0].ownerUsername === user.username) {
       setIsOwnerUser(true);
     } else {
       setIsOwnerUser(false);
     }
-  }, [listing, user]);
+  }, [data.items, user]);
+
+  // const handleUserListingSelection = () => {};
 
   return (
     <>
-      {listing && (
+      {data.items[0] && (
         <div className="w-full px-4 sm:px-6 lg:px-8 py-4 ">
           <div>
             <Modal
@@ -113,58 +121,72 @@ export default function ItemPage() {
           </div>
           <div className="flex justify-center gap-20 text-left mt-20">
             <ImageGallery
-              imagePaths={listing.imagePaths}
+              imagePaths={data.items[0].imagePaths}
               openModal={openModalImage}
             />
             <div>
               <h2 className="company uppercase text-amber-600 font-bold text-sm sm:text-md tracking-wider pb-3 sm:pb-5">
-                {listing.labelName}
+                {data.items[0].labelName}
               </h2>
               <h3
-                // ref={listing.title}
+                // ref={data.items[0].title}
                 className="product capitalize text-very-dark-blue font-bold text-3xl sm:text-4xl sm:leading-none pb-3"
               >
-                {listing.title}{" "}
+                {data.items[0].title}{" "}
                 <span className="block  mt-5 text-2xl text-amber-600">
                   {/* {size} */}
-                  {listing.artistName}
+                  {data.items[0].artistName}
                 </span>
                 <span className="block  mt-5 text-2xl">
                   {/* {size} */}
                   {label}
                 </span>
-                <span className="block  mt-5 text-2xl">{listing.format}</span>
+                <span className="block  mt-5 text-2xl">
+                  {data.items[0].format}
+                </span>
                 <span className="block  mt-5 text-2xl">
                   <span className="italic font-normal text-amber-200">
                     Condition:{" "}
                   </span>
-                  {listing.condition}
+                  {data.items[0].condition}
                 </span>
-                <span className="block  mt-5 text-2xl">{listing.date}</span>
+                <span className="block  mt-5 text-2xl">
+                  {data.items[0].date}
+                </span>
               </h3>
-              <p className="mt-5">Seller: {listing.ownerUsername}</p>
-              <p className="mt-5">Stock: {listing.stockQuantity}</p>
+
+              <p className="mt-5">
+                Seller:{" "}
+                <button onClick={() => handleUserListingSelection()}>
+                  {data.items[0].ownerUsername}
+                </button>
+              </p>
+
+              <p className="mt-5">Stock: {data.items[0].stockQuantity}</p>
 
               <p className="text-dark-grayish-blue pb-6 lg:py-7 lg:leading-6">
-                {listing.description}
+                {data.items[0].description}
               </p>
               <div className="amount font-bold flex items-center justify-between lg:flex-col lg:items-start mb-6">
                 <div className="discount-price items-center flex">
                   <div className="price -mt-5 text-3xl ">
                     <span className="text-green-400">
-                      {listing.discount == 0
-                        ? listing.price.toLocaleString("tr-TR") + " ₺"
-                        : listing.discountedPrice.toLocaleString("tr-TR") +
-                          " ₺"}
+                      {data.items[0].discount == 0
+                        ? data.items[0].price.toLocaleString("tr-TR") + " ₺"
+                        : data.items[0].discountedPrice.toLocaleString(
+                            "tr-TR",
+                          ) + " ₺"}
                     </span>
                   </div>
                   <div className="discount text-green bg-pale-orange w-max px-2 rounded mx-5 h-6">
-                    {listing.discount != 0 ? listing.discount + "%" : null}
+                    {data.items[0].discount != 0
+                      ? data.items[0].discount + "%"
+                      : null}
                   </div>
                 </div>
                 <div className="original-price text-grayish-blue line-through lg:mt-2">
-                  {listing.discount != 0
-                    ? listing.price.toLocaleString("tr-TR") + "₺"
+                  {data.items[0].discount != 0
+                    ? data.items[0].price.toLocaleString("tr-TR") + "₺"
                     : null}
                 </div>
               </div>
@@ -172,7 +194,7 @@ export default function ItemPage() {
                 {!isOwnerUser && (
                   <div className="quantity-container w-full bg-light-grayish-blue rounded-lg h-14 mb-4 flex items-center justify-between px-6 lg:px-3 font-bold sm:mr-3 lg:mr-5 lg:w-1/3">
                     <button
-                      // onClick={listing.format}
+                      // onClick={data.items[0].format}
                       className="text-orange text-2xl leading-none font-bold mb-1 lg:mb-2 lg:text-3xl hover:opacity-60"
                     >
                       -

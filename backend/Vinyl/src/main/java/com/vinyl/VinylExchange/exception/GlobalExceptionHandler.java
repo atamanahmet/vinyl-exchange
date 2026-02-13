@@ -84,13 +84,27 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UnauthorizedActionException.class)
-    public void handleUnauthorizedActionException(UnauthorizedActionException exception) {
-        System.out.println("Exception: " + exception.getMessage());
+    public ResponseEntity<?> handleUnauthorizedActionException(UnauthorizedActionException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(exception.getMessage());
     }
 
     @ExceptionHandler(NoCurrentUserException.class)
     public void handleNoCurrentUserException(NoCurrentUserException exception) {
         System.out.println("No user");
+    }
+
+
+    @ExceptionHandler(ImageUploadException.class)
+    public void handleImageUploadException(ImageUploadException exception) {
+        logger.error(exception.getMessage());
+    }
+
+    @ExceptionHandler(ListingCreationException.class)
+    public void handleListingCreationException(ListingCreationException exception, String username) {
+        logger.error(exception.getMessage(), username);
     }
 
     @ExceptionHandler(ConversationNotFoundException.class)

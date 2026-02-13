@@ -37,6 +37,7 @@ public interface ListingRepository extends JpaRepository<Listing, UUID> {
                         "WHERE l.id = :listingId " +
                         "AND l.stockQuantity > 0 " +
                         "AND l.status = :status")
+
         boolean isAvailableForTrade(
                         @Param("listingId") UUID listingId,
                         @Param("status") ListingStatus status);
@@ -46,6 +47,17 @@ public interface ListingRepository extends JpaRepository<Listing, UUID> {
                         "AND l.status = :status " +
                         "AND l.onHold = false")
         Page<Listing> findAllWithStatus(@Param("status") ListingStatus status, Pageable pageable);
+
+        @Query("SELECT l FROM Listing l " +
+                        "WHERE l.stockQuantity > 0 " +
+                        "AND l.status = :status " +
+                        "AND l.onHold = false " +
+                        "AND l.owner.username =:username")
+        Page<Listing> findAllWithStatusAndUsername(
+                @Param("status") ListingStatus status,
+                @Param("username") String username,
+                Pageable pageable);
+
 
         @Query("SELECT COUNT(l) FROM Listing l " +
                         "WHERE l.stockQuantity > 0 " +

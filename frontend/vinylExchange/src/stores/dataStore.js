@@ -108,6 +108,7 @@ export const useDataStore = create((set, get) => ({
       set({ isFetching: false });
     }
   },
+
   fetchMyArchivedListings: async (params = {}) => {
     if (get().isFetching) return false;
 
@@ -155,7 +156,88 @@ export const useDataStore = create((set, get) => ({
       set({ isFetching: false });
     }
   },
-  deleteListing: () => {
-    console.log("delete request");
+
+  deleteListing: async (listingId) => {
+    console.log("Deleting:", listingId);
+    try {
+      const res = await axios.delete(
+        `http://localhost:8080/api/listings/${listingId}`,
+        {
+          withCredentials: true,
+        },
+      );
+      console.log("listing deleted");
+      get().fetchMyActiveListings();
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+  fetchListing: async (listingId) => {
+    if (get().isFetching) return false;
+
+    set({ isFetching: true });
+
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/listings/${listingId}`,
+        {
+          withCredentials: true,
+        },
+      );
+      if (res.status === 200) {
+        const normalized = normalizeApiResponse(res.data);
+
+        console.log(res.data);
+
+        set({
+          data: {
+            items: normalized.data,
+            pagination: normalized.pagination,
+            dataType: "listing",
+          },
+          hasError: false,
+        });
+
+        return true;
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      set({ isFetching: false });
+    }
+  },
+
+  fetchListingsByUser: async (username) => {
+    if (get().isFetching) return false;
+
+    set({ isFetching: true });
+
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/listings/${username}`,
+        {
+          withCredentials: true,
+        },
+      );
+      if (res.status === 200) {
+        const normalized = normalizeApiResponse(res.data);
+
+        set({
+          data: {
+            items: normalized.data,
+            pagination: normalized.pagination,
+            dataType: "listing",
+          },
+          hasError: false,
+        });
+
+        return true;
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      set({ isFetching: false });
+    }
   },
 }));

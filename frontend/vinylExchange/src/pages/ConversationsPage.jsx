@@ -4,124 +4,71 @@ import { button } from "@material-tailwind/react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { useMessagingStore } from "../stores/messagingStore";
+import { useUIStore } from "../stores/uiStore";
+import { useDataStore } from "../stores/dataStore";
 
 export default function ConversationsPage() {
   const navigate = useNavigate();
+
+  const [relatedListing, setRelatedListing] = useState();
+
+  const fetchListing = useDataStore((state) => state.fetchListing);
+
   const user = useAuthStore((state) => state.user);
   const isLoading = useAuthStore((state) => state.isLoading);
-  const setOpenLogin = useAuthStore((state) => state.setOpenLogin);
+
+  const setOpenLogin = useUIStore((state) => state.setOpenLogin);
+
+  const setActiveConvoId = useMessagingStore((state) => state.setActiveConvoId);
   const activeConvoId = useMessagingStore((state) => state.activeConvoId);
 
-  const [conversations, setConversations] = useState();
-  const [activeConversation, setActiveConversation] = useState();
-  const [fetchConvoId, setFetchConvoId] = useState();
+  const setActiveConversation = useMessagingStore(
+    (state) => state.setActiveConversation,
+  );
+
+  const sendMessage = useMessagingStore((state) => state.sendMessage);
+  const activeConversation = useMessagingStore(
+    (state) => state.activeConversation,
+  );
+  const fetchConversations = useMessagingStore(
+    (state) => state.fetchConversations,
+  );
+  const fetchMessages = useMessagingStore((state) => state.fetchMessages);
+  const deleteAllConversations = useMessagingStore(
+    (state) => state.deleteAllConversations,
+  );
+  const conversations = useMessagingStore((state) => state.conversations);
+
   const [relatedListingId, setRelatedListingId] = useState();
-  const [response, setResponse] = useState();
+
   const { listingId } = useParams();
   const [messages, setMessages] = useState();
   const [newMessage, setNewMessage] = useState("");
   const [participantUsername, setParticipantUsername] = useState();
 
   useEffect(() => {
-    console.log("active convoıd : " + activeConvoId);
-    if (activeConvoId != null) {
-      fetchMessages(activeConvoId);
-    }
-  }, [user]);
-
-  //user check
-  useEffect(() => {
-    if (user == null && !isLoading) {
-      setOpenLogin;
-      // navigate("/");
-    }
-  }, []);
-
-  const handleSend = async () => {
-    if (newMessage == "") {
+    if (!user) {
+      navigate("/");
       return;
     }
-    try {
-      const res = await axios.post(
-        "http://localhost:8080/api/messages",
-        {
-          conversationId: activeConversation.id,
-          relatedListingId: activeConversation.relatedListingId,
-          content: newMessage,
-        },
-        { withCredentials: true },
-      );
 
-      console.log(res.data);
-      if (res.status == 200) {
-        setResponse(res.data);
-      }
+    if (activeConvoId) {
+      fetchMessages(activeConvoId);
+    }
+  }, [activeConvoId, user]);
+
+  const handleSend = async () => {
+    if (!activeConversation?.conversation?.id) return;
+
+    try {
+      await sendMessage(activeConversation, newMessage);
+      await fetchMessages(activeConversation.conversation.id);
     } catch (error) {
       console.log(error);
-    } finally {
-      fetchMessages(activeConversation.id);
     }
 
     setNewMessage("");
   };
-
-  async function fetchConversations() {
-    try {
-      const res = await axios.get(
-        `http://localhost:8080/api/messages/conversations`,
-        {
-          withCredentials: true,
-        },
-      );
-      if (res.status == 200) {
-        setConversations(res.data);
-        console.log(res.data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  //TODO: remove, helper not prod
-  async function deleteAllConversations() {
-    try {
-      const res = await axios.delete(
-        `http://localhost:8080/api/messages/conversations`,
-        {
-          withCredentials: true,
-        },
-      );
-      if (res.status == 204) {
-        console.log("deleted");
-        setConversations();
-        setActiveConversation();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  async function fetchMessages(activeConversationId) {
-    try {
-      const res = await axios.get(
-        `http://localhost:8080/api/messages/conversation/${activeConversationId}`,
-        {
-          withCredentials: true,
-        },
-      );
-      if (res.status == 200) {
-        setActiveConversation(res.data.conversationDTO);
-        setMessages(res.data.messagePage.content);
-        setParticipantUsername(
-          user.username == res.data.conversationDTO.initiatorUsername
-            ? res.data.conversationDTO.participantUsername
-            : res.data.conversationDTO.initiatorUsername,
-        );
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -157,7 +104,7 @@ export default function ConversationsPage() {
             conversations.map((convo) => (
               <button
                 key={convo.id}
-                onClick={() => fetchMessages(convo.id)}
+                onClick={() => setActiveConvoId(convo.id)}
                 className="w-full"
               >
                 <div className="px-3 py-2 border-b border-neutral-secondary hover:bg-neutral-secondary-soft transition-colors">
@@ -193,7 +140,7 @@ export default function ConversationsPage() {
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col sm:w-4/5 lg:w-4/5 bg-neutral-primary">
-        {user && messages ? (
+        {user && activeConversation?.messages ? (
           <>
             {/* Chat Header */}
             <header className="bg-neutral-primary border-b border-neutral-secondary p-3 flex items-center gap-3 shrink-0">
@@ -205,11 +152,14 @@ export default function ConversationsPage() {
               <h2 className="text-lg font-semibold text-heading">
                 {participantUsername}
               </h2>
+              {/* <h2 className="text-lg font-semibold text-heading justify-end">
+                {listing}
+              </h2> */}
             </header>
 
             {/* Messages Container */}
             <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-              {messages.map((message) => (
+              {activeConversation?.messages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex ${
@@ -230,7 +180,7 @@ export default function ConversationsPage() {
                         {message.senderUsername}
                       </p>
                     )}
-                    <p className="text-sm leading-relaxed wrap-break-words">
+                    <p className="text-sm text-left leading-relaxed wrap-break-words">
                       {message.content}
                     </p>
                     <p

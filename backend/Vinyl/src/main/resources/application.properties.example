@@ -47,5 +47,6 @@ app.base-url=http://localhost:${SERVER_PORT}
 
 #file upload directory
 file.upload-listing-dir=uploads/listings/
+file.upload-placeholder-dir=uploads/placeholders/
 file.upload-cms-dir=uploads/cms/
 file.image.url-path=/uploads/listings/

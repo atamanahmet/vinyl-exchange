@@ -39,6 +39,10 @@ public class SecurityConfig implements WebMvcConfigurer {
 
     @Value("${file.upload-listing-dir}")
     private String UPLOAD_LISTING_DIR;
+
+    @Value("${file.upload-placeholder-dir}")
+    private String UPLOAD_PLACEHOLDER_DIR;
+
     @Value("${file.upload-cms-dir}")
     private String UPLOAD_CMS_DIR;
 
@@ -80,7 +84,8 @@ public class SecurityConfig implements WebMvcConfigurer {
                                 "/api/listings/**",
                                 "/api/listings/search",
                                 "/uploads/cms/**",
-                                "/uploads/listings/**")
+                                "/uploads/listings/**",
+                                "/uploads/placeholders/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/logout").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/cart/items/**").authenticated()
@@ -111,8 +116,8 @@ public class SecurityConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry
-                .addResourceHandler("/uploads/listings/**", "/uploads/cms/**")
-                .addResourceLocations("file:" + UPLOAD_LISTING_DIR, "file:" + UPLOAD_CMS_DIR)
+                .addResourceHandler("/uploads/listings/**","/uploads/placeholders/**", "/uploads/cms/**")
+                .addResourceLocations("file:" + UPLOAD_LISTING_DIR, "file:"+UPLOAD_PLACEHOLDER_DIR, "file:" + UPLOAD_CMS_DIR)
                 .setCachePeriod(3600); // 1 hour
     }
 

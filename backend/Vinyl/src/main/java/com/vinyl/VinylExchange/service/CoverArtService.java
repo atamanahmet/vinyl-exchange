@@ -29,8 +29,16 @@ public class CoverArtService {
     @Async
     public void fetchAndSaveCoverAsync(UUID listingId, UUID mbId) {
 
+        if(mbId==null){
+            logger.info("MBId is null, coverArt fetch aborted");
+
+            return;
+        }
+
         try {
+
             String imageUrl = fetchCoverUrl(mbId);
+
             if (imageUrl == null)
                 return;
 
@@ -38,12 +46,12 @@ public class CoverArtService {
             if (image == null)
                 return;
 
-            fileStorageService.saveImages(List.of(image), listingId);
+            fileStorageService.savePlaceholderImage(image, mbId);
 
-            logger.info("Cover art saved for lisitingId, mbId: {}", listingId, mbId);
+            logger.info("Cover art saved for listingId: {}, mbId: {}", listingId, mbId);
 
         } catch (Exception e) {
-            logger.warn("Cover art fetch failed for lisitingId,mbId: {}", listingId, mbId, e);
+            logger.warn("Cover art fetch failed for listingId: {}, mbId: {}", listingId, mbId, e);
         }
     }
 

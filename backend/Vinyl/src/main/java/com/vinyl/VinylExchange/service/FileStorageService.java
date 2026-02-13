@@ -39,8 +39,8 @@ public class FileStorageService {
     @Value("${file.upload-listing-dir}")
     private String UPLOAD_LISTING_DIR;
 
-    @Value("${file.image.url-path}")
-    private String IMG_URL_PATH;
+    @Value("${file.upload-placeholder-dir}")
+    private String UPLOAD_PLACEHOLDER_DIR;
 
     @Value("${app.base-url}")
     private String BASE_URL;
@@ -64,9 +64,9 @@ public class FileStorageService {
 
         List<CompressedImage> compressedImages = imageCompressionService.compressImages(List.of(imageSource));
 
-        if (imageSource == null) {
-            return List.of();
-        }
+//        if (imageSource == null) {
+//            return List.of();
+//        }
 
         return saveCompressedImages(compressedImages, listingId);
 
@@ -102,7 +102,8 @@ public class FileStorageService {
 
                 Files.write(path, image.getImage());
 
-                String fullPath = BASE_URL + IMG_URL_PATH + listingId + "/" + image.getFileName();
+                String fullPath = BASE_URL + "/uploads/listings/"
+                        + listingId + "/" + image.getFileName();
 
                 savedPaths.add(fullPath);
 
@@ -132,7 +133,7 @@ public class FileStorageService {
                     .map(Path::getFileName)
                     .map(Path::toString)
                     .sorted()
-                    .map(filename -> BASE_URL + IMG_URL_PATH + listingId + "/" + filename)
+                    .map(filename -> BASE_URL + "/uploads/listings/" + listingId + "/" + filename)
 
                     .collect(Collectors.toList());
         } catch (IOException e) {
@@ -214,7 +215,7 @@ public class FileStorageService {
                     .filter(path -> isImageFile(path.getFileName().toString()))
                     .sorted()
                     .findFirst() // first image only as a mainImg
-                    .map(path -> BASE_URL + IMG_URL_PATH + listingId + "/" + path.getFileName().toString())
+                    .map(path -> BASE_URL + "/uploads/listings/" + listingId + "/" + path.getFileName().toString())
                     .orElse(null); // null if no images found
         } catch (IOException e) {
             logger.error("read eror for main image {}: {}", listingId, e.getMessage());
@@ -260,5 +261,68 @@ public class FileStorageService {
             return null;
         }
     }
+
+    public void savePlaceholderImage(ImageSource imageSource, UUID mbId) throws IOException {
+
+        if (imageSource == null) {
+            return;
+        }
+
+        Path placeholderFolder = Paths.get(UPLOAD_PLACEHOLDER_DIR)
+                .resolve(mbId.toString())
+                .toAbsolutePath();
+
+        if (Files.exists(placeholderFolder)) {
+            return;
+        }
+
+        Files.createDirectories(placeholderFolder);
+
+        String filename = imageSource.getOriginalFilename();
+
+        Path filePath = placeholderFolder.resolve(filename);
+
+        Files.copy(imageSource.getInputStream(), filePath);
+
+        String fullPath = BASE_URL + "/uploads/placeholders/"
+                + mbId + "/" + filename;
+
+        logger.info("Placeholder coverArt downloaded for mb id: {}", mbId);
+
+    }
+
+    public List<String> getPlaceholderImagePaths(UUID mbId) {
+
+        if(mbId==null){
+            return Collections.emptyList();
+        }
+
+        Path folder = Paths.get(UPLOAD_PLACEHOLDER_DIR)
+                .resolve(mbId.toString())
+                .toAbsolutePath();
+
+        if (!Files.exists(folder)) {
+            return Collections.emptyList();
+        }
+
+        try (Stream<Path> paths = Files.list(folder)) {
+
+            return paths
+                    .filter(Files::isRegularFile)
+                    .filter(path -> isImageFile(path.getFileName().toString()))
+                    .sorted()
+                    .map(path -> BASE_URL + "/uploads/placeholders/"
+                            + mbId + "/"
+                            + path.getFileName().toString())
+                    .collect(Collectors.toList());
+
+        } catch (IOException e) {
+            logger.error("Failed to read placeholder images for mbId {}: {}", mbId, e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+
+
 
 }

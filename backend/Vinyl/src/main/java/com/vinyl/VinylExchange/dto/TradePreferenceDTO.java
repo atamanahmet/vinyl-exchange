@@ -3,6 +3,7 @@ package com.vinyl.VinylExchange.dto;
 import java.util.List;
 import java.util.UUID;
 
+import com.vinyl.VinylExchange.domain.PaymentDirection;
 import com.vinyl.VinylExchange.domain.entity.TradePreference;
 
 import lombok.AllArgsConstructor;
@@ -18,7 +19,7 @@ public class TradePreferenceDTO {
     private UUID id;
     private String desiredItem;
     private Double extraAmount;
-    private String paymentDirection;
+    private PaymentDirection paymentDirection;
 
     public TradePreferenceDTO(TradePreference tradePreference) {
         this.id = tradePreference.getId();
@@ -33,8 +34,7 @@ public class TradePreferenceDTO {
         }
 
         return tradePreferences.stream()
-                .map(tradePref -> new TradePreferenceDTO(tradePref))
-                // immutable
+                .map(TradePreferenceDTO::new)
                 .toList();
     }
 }

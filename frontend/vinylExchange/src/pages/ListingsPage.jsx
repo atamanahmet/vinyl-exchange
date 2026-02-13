@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { mapListingsToCardItems } from "../adapters/mapListingToCardItems";
 import { useAuthStore } from "../stores/authStore";
 
-export default function MyListingsPage() {
+export default function ListingsPage() {
   const navigate = useNavigate();
 
   const user = useAuthStore((state) => state.user);
@@ -20,6 +20,10 @@ export default function MyListingsPage() {
 
   const fetchMyActiveListings = useDataStore(
     (state) => state.fetchMyActiveListings,
+  );
+
+  const fetchListingsByUser = useDataStore(
+    (state) => state.fetchListingsByUser,
   );
 
   const deleteListing = useDataStore((state) => state.deleteListing);
@@ -35,6 +39,7 @@ export default function MyListingsPage() {
       onDelete: deleteListing,
     });
   }, [data, user]);
+
   return (
     <>
       <div className="min-h-screen max-w-7xl mx-auto min-w-300 bg-black text-white">

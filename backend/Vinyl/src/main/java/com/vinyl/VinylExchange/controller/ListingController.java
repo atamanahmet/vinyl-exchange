@@ -5,9 +5,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+import com.vinyl.VinylExchange.dto.*;
 import com.vinyl.VinylExchange.service.ListingService;
 import com.vinyl.VinylExchange.service.PricePreviewService;
 import com.vinyl.VinylExchange.session.UserUtil;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -29,11 +31,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.web.multipart.MultipartFile;
-
-import com.vinyl.VinylExchange.dto.FreezeRequest;
-import com.vinyl.VinylExchange.dto.ListingDTO;
-import com.vinyl.VinylExchange.dto.PricePreviewRequest;
-import com.vinyl.VinylExchange.dto.PromoteRequest;
 
 import com.vinyl.VinylExchange.domain.entity.User;
 
@@ -58,6 +55,18 @@ public class ListingController {
                                 .body(listingDTOs);
         }
 
+        @GetMapping("/username")
+        public ResponseEntity<?> getPublicListingsByUser(
+                        @PathVariable(name = "username", required = true) String username,
+                        @PageableDefault(size = 50) Pageable pageable) {
+
+                Page<ListingDTO> listingDTOs = listingService.getAllAvailableListingsByUser(username, pageable);
+
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(listingDTOs);
+        }
+
         // for admin actions only, promote, freeze, remove etc
         @PreAuthorize("hasRole('ADMIN')")
         @GetMapping("/all")
@@ -72,6 +81,7 @@ public class ListingController {
 
         @GetMapping("/promote")
         public ResponseEntity<?> getPromotedListingsForUser() {
+                User user = UserUtil.getCurrentUser();
 
                 List<ListingDTO> promoteListings = listingService.getFilteredPromotedListingDTOs(UserUtil.getCurrentUserId());
 
@@ -82,30 +92,34 @@ public class ListingController {
 
         @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
         public ResponseEntity<?> createListing(
-                        @RequestPart("listing") String listingJson,
+                        @RequestPart("listing") @Valid CreateListingRequest request,
                         @RequestPart(value = "images", required = false) List<MultipartFile> images) {
 
                 User user = UserUtil.getCurrentUser();
 
                 listingService.createNewListing(
-                                listingJson,
+                                request,
                                 images,
                                 user);
 
                 return ResponseEntity
                                 .status(HttpStatus.CREATED)
-                                .body("Listing created");
+                                .build();
         }
 
-        @PutMapping("/{listingId}")
+        @PatchMapping("/{listingId}")
         public ResponseEntity<?> updateListing(
                         @PathVariable UUID listingId,
-                        @RequestPart("listing") String listingJson,
+                        @RequestPart("listing") UpdateListingRequest request,
                         @RequestPart(value = "images", required = false) List<MultipartFile> newImages) {
 
-                listingService.updateListing(listingId, listingJson, newImages, UserUtil.getCurrentUserId());
+                UserUtil.isAuthenticated();
 
-                return ResponseEntity.ok("Listing updated");
+               ListingDTO updatedListing = listingService.updateListing(listingId, request, newImages, UserUtil.getCurrentUserId());
+
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .build();
         }
 
         @GetMapping("/{listingId}")
@@ -125,7 +139,9 @@ public class ListingController {
         public ResponseEntity<?> deleteListing(
                         @PathVariable(name = "listingId", required = true) UUID listingId) {
 
-                listingService.deleteListing(listingId, UserUtil.getCurrentUserDetails());
+                UserUtil.isAuthenticated();
+
+                listingService.deleteListing(listingId);
 
                 return ResponseEntity
                                 .status(HttpStatus.NO_CONTENT)
@@ -155,6 +171,8 @@ public class ListingController {
         public ResponseEntity<?> promoteListing(
                         @PathVariable(name = "listingId", required = true) UUID listingId,
                         @RequestBody PromoteRequest promoteRequest) {
+
+                UserUtil.isAuthenticated();
 
                 listingService.promoteListing(listingId, promoteRequest.action(), UserUtil.getCurrentUserDetails());
 

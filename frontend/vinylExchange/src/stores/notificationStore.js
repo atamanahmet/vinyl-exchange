@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
+import { useAuthStore } from "./authStore";
 
 export const useNotificationStore = create((set, get) => ({
   notifications: [],
@@ -7,6 +8,17 @@ export const useNotificationStore = create((set, get) => ({
   isLoading: false,
 
   fetchDropdownNotifications: async () => {
+    const user = useAuthStore.getState().user;
+
+    if (!user) {
+      set({
+        notifications: [],
+        cartItemCount: 0,
+        isLoading: false,
+      });
+      return;
+    }
+
     const url = "http://localhost:8080/api";
 
     set({ isLoading: true });

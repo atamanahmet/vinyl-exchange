@@ -12,7 +12,7 @@ const MessagingPage = () => {
 
   const [conversations, setConversations] = useState();
 
-  const { user } = useUser();
+  const user = useAuthStore((state) => state.user);
 
   if (user == null) {
     navigate("/");

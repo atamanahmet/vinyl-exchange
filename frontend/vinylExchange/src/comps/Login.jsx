@@ -1,6 +1,5 @@
 import { Button, Checkbox, Label, TextInput } from "flowbite-react";
 import { useState } from "react";
-import { useUser } from "../context/old.UserContext";
 import { useAuthStore } from "../stores/authStore";
 
 export function Login() {

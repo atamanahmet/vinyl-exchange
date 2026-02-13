@@ -7,11 +7,25 @@ import { navigate } from "../utils/router";
 export const useMessagingStore = create((set, get) => ({
   activeConvoId: null,
   unreadCount: null,
+  conversations: [],
+  activeConversation: {
+    conversation: null,
+    messages: null,
+    participantUsername: null,
+  },
+  messages: null,
+  participantUsername: null,
 
   setActiveConvoId: (id) => set({ activeConvoId: id }),
+  setActiveConversation: (selected) => set({ activeConversation: selected }),
 
   fetchUnreadCount: async () => {
     const user = useAuthStore.getState().user;
+
+    if (!user) {
+      return;
+    }
+
     try {
       const response = await axios.get(
         "http://localhost:8080/api/messages/unread",
@@ -22,10 +36,8 @@ export const useMessagingStore = create((set, get) => ({
     } catch (error) {
       console.error("Failed to fetch unread count:", error);
     }
-    // if (user) {
-
-    // }
   },
+
   startConversation: async (relatedListingId) => {
     const user = useAuthStore.getState().user;
 
@@ -55,6 +67,87 @@ export const useMessagingStore = create((set, get) => ({
     } catch (error) {
       console.log("convo starting error " + error);
       return false;
+    }
+  },
+
+  fetchConversations: async () => {
+    const user = useAuthStore.getState().user;
+
+    if (!user) {
+      return;
+    }
+
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/messages/conversations`,
+        {
+          withCredentials: true,
+        },
+      );
+      if (res.status == 200) {
+        set({ conversations: res.data });
+        console.log(res.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+  sendMessage: async (activeConversation, message) => {
+    try {
+      const res = await axios.post(
+        "http://localhost:8080/api/messages",
+        {
+          conversationId: activeConversation.conversation.id,
+          relatedListingId: activeConversation.conversation.relatedListingId,
+          content: message,
+        },
+        { withCredentials: true },
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+  fetchMessages: async (activeConversationId) => {
+    console.log(activeConversationId);
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/messages/conversation/${activeConversationId}`,
+        {
+          withCredentials: true,
+        },
+      );
+      if (res.status == 200) {
+        set({
+          activeConversation: {
+            conversation: res.data.conversationDTO,
+            messages: res.data.messagePage.content,
+            participantUsername: res.data.conversationDTO.initiatorUsername
+              ? res.data.conversationDTO.participantUsername
+              : res.data.conversationDTO.initiatorUsername,
+          },
+        });
+        console.log("active convo", get().activeConversation);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+  deleteAllConversations: async () => {
+    try {
+      const res = await axios.delete(
+        `http://localhost:8080/api/messages/conversations`,
+        {
+          withCredentials: true,
+        },
+      );
+    } catch (error) {
+      console.log(error);
+    } finally {
+      get().fetchConversations();
+      set({ activeConversation: null });
     }
   },
 }));
