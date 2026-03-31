@@ -3,8 +3,8 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-/backend/Vinyl/uploads/**
-/backend/Vinyl/.env
+/backend/vinyl-exchange/uploads/**
+/backend/vinyl-exchange/.env
 
 ### STS ###
 .apt_generated
