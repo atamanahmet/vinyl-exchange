@@ -4,9 +4,7 @@ Vinyl Exchange is a web platform for buying and trading vinyl records. Sellers l
 
 ## Prerequisites
 
-- **Java 17+ JVM** - backend
-- **PostgreSQL** - database
-- **Docker** - for OpenSearch
+- **Docker** - all services run in containers
 
 ## How it works
 
@@ -24,18 +22,34 @@ Vinyl Exchange is a web platform for buying and trading vinyl records. Sellers l
 - Integrates with MusicBrainz API for record metadata, OpenSearch for listing search
 - Stores all monetary values in the smallest currency unit for precision and compliance
 
-## Getting Started
-
-**Frontend**
-- Run `npm install` in the frontend directory
-- Run `npm run dev`
-
-**Backend**
-- Copy .env.example to .env and fill in your credentials
-- Start Docker
-- Run `./mvnw spring-boot:run`
-- OpenSearch will start automatically if not already running
-
+### Setup
+ 
+Copy `.env.example` to `.env` and fill in your credentials:
+ 
+```bash
+cp .env.example .env
+```
+ 
+### Running
+ 
+```bash
+# Start all services (PostgreSQL, OpenSearch, backend, frontend)
+make start
+ 
+# Stop all services
+make stop
+```
+ 
+`make start` builds and starts all containers, then waits for each service to pass its health check before printing the access URLs.
+ 
+The stack includes:
+ 
+| Service | Description |
+|---|---|
+| `postgres` | PostgreSQL 17 database |
+| `opensearch` | OpenSearch 2.19.4 for listing search |
+| `vx-backend` | Spring Boot API |
+| `vx-frontend` | React app served via Nginx on port 80 |
 ## Notes
 
 - Work in progress, core features functional, escrow and full payment flow not yet implemented
