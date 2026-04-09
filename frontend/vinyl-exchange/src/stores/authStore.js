@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
+import axios from "../api/axiosInstance";
 
 export const useAuthStore = create((set, get) => ({
   user: null,
@@ -11,7 +11,7 @@ export const useAuthStore = create((set, get) => ({
   checkAuth: async () => {
     set({ isLoading: true });
     try {
-      const res = await axios.get("http://localhost:8080/api/me", {
+      const res = await axios.get("/api/me", {
         withCredentials: true,
       });
       if (res.status === 200) {
@@ -30,7 +30,7 @@ export const useAuthStore = create((set, get) => ({
   },
 
   loginUser: async (formData) => {
-    const url = "http://localhost:8080/login";
+    const url = "/login";
 
     try {
       const res = await axios.post(
@@ -64,7 +64,7 @@ export const useAuthStore = create((set, get) => ({
   },
 
   registerUser: async (formData) => {
-    const url = "http://localhost:8080/register";
+    const url = "/register";
 
     try {
       const res = await axios.post(
@@ -100,7 +100,7 @@ export const useAuthStore = create((set, get) => ({
   },
 
   logOut: async () => {
-    const url = "http://localhost:8080/logout";
+    const url = "/logout";
     try {
       const res = await axios.post(url, null, {
         withCredentials: true,

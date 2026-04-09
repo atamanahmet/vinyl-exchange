@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>com.atamanahmet</groupId>
 	<artifactId>vinyl-exchange</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>vinyl-exchange</name>
 	<description>VinylExchange - A vinyl record marketplace for buying, selling, and trading records.</description>
 	<url />
@@ -69,6 +69,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
 		<dependency>

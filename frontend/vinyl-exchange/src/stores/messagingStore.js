@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
+import axios from "../api/axiosInstance";
 import { useAuthStore } from "./authStore";
 import { useUIStore } from "./uiStore";
 import { navigate } from "../utils/router";
@@ -27,10 +27,9 @@ export const useMessagingStore = create((set, get) => ({
     }
 
     try {
-      const response = await axios.get(
-        "http://localhost:8080/api/messages/unread",
-        { withCredentials: true },
-      );
+      const response = await axios.get("/api/messages/unread", {
+        withCredentials: true,
+      });
 
       set({ unreadCount: response.data.unreadCount });
     } catch (error) {
@@ -50,7 +49,7 @@ export const useMessagingStore = create((set, get) => ({
 
     try {
       const res = await axios.post(
-        `http://localhost:8080/api/messages/start`,
+        `/api/messages/start`,
         { relatedListingId: relatedListingId },
         { withCredentials: true },
       );
@@ -78,12 +77,9 @@ export const useMessagingStore = create((set, get) => ({
     }
 
     try {
-      const res = await axios.get(
-        `http://localhost:8080/api/messages/conversations`,
-        {
-          withCredentials: true,
-        },
-      );
+      const res = await axios.get(`/api/messages/conversations`, {
+        withCredentials: true,
+      });
       if (res.status == 200) {
         set({ conversations: res.data });
         console.log(res.data);
@@ -96,7 +92,7 @@ export const useMessagingStore = create((set, get) => ({
   sendMessage: async (activeConversation, message) => {
     try {
       const res = await axios.post(
-        "http://localhost:8080/api/messages",
+        "/api/messages",
         {
           conversationId: activeConversation.conversation.id,
           relatedListingId: activeConversation.conversation.relatedListingId,
@@ -113,7 +109,7 @@ export const useMessagingStore = create((set, get) => ({
     console.log(activeConversationId);
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/messages/conversation/${activeConversationId}`,
+        `/api/messages/conversation/${activeConversationId}`,
         {
           withCredentials: true,
         },
@@ -137,12 +133,9 @@ export const useMessagingStore = create((set, get) => ({
 
   deleteAllConversations: async () => {
     try {
-      const res = await axios.delete(
-        `http://localhost:8080/api/messages/conversations`,
-        {
-          withCredentials: true,
-        },
-      );
+      const res = await axios.delete(`/api/messages/conversations`, {
+        withCredentials: true,
+      });
     } catch (error) {
       console.log(error);
     } finally {

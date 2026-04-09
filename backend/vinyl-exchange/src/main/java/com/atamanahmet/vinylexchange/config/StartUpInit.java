@@ -61,6 +61,8 @@ public class StartUpInit implements ApplicationRunner {
         @Value("${app.base-url}")
         private String BASE_URL;
 
+        private boolean isBulkIndexEnabled = true;
+
         private Logger logger = LoggerFactory.getLogger(StartUpInit.class);
 
         private final UserService userService;
@@ -121,7 +123,6 @@ public class StartUpInit implements ApplicationRunner {
 
                 createSearchIndex();
 
-            boolean isBulkIndexEnabled = false;
             if (isBulkIndexEnabled) {
                         bulkListingIndexService.indexAllListings();
                 }

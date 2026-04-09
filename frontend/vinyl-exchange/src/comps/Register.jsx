@@ -1,8 +1,9 @@
 import { Button, Checkbox, Label, TextInput } from "flowbite-react";
 import { useState } from "react";
+import { useAuthStore } from "../stores/authStore";
 
 export function Register() {
-  const { registerUser, user } = useUser();
+  const { registerUser, user } = useAuthStore();
 
   const [formData, setFormData] = useState({
     username: "",

@@ -24,16 +24,15 @@ public class OpenSearchInitializer {
 
     private final RestHighLevelClient openSearchClient;
 
+    private int retries = 20;
+
     // check open search client is running, if not, start docker container;
     @PostConstruct
     public void init() throws InterruptedException {
 
         if (!isOpenSearchRunning()) {
-
-            startDockerCompose();
             waitForOpenSearch();
         }
-
         log.info("OpenSearch client container is running");
 
     }
@@ -59,30 +58,18 @@ public class OpenSearchInitializer {
         }
     }
 
-    private void waitForOpenSearch() {
-        int retries = 20;
-
+    private void waitForOpenSearch() throws InterruptedException {
         while (retries-- > 0) {
             try {
-                HttpURLConnection con = (HttpURLConnection) new URL("https://localhost:9200").openConnection();
-                con.setRequestMethod("GET");
-                con.setConnectTimeout(1000);
-                con.setReadTimeout(1000);
-                con.connect();
-
-                if (con.getResponseCode() == 200) {
+                if (openSearchClient.ping(RequestOptions.DEFAULT)) {
                     return;
                 }
             } catch (Exception e) {
+                log.warn("OpenSearch not ready, retrying... ({} attempts left) — reason: {}", retries, e.getMessage());
             }
-
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-            }
+            Thread.sleep(3000);
         }
-
-        throw new IllegalStateException("OpenSearch is not ready, adjust retries");
+        throw new IllegalStateException("OpenSearch is not ready, waiting..");
     }
 
     private boolean isOpenSearchRunning() {

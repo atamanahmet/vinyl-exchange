@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "../api/axiosInstance";
 import { create } from "zustand";
 import { normalizeApiResponse } from "../utils/normalizeApiResponse";
 
@@ -19,7 +19,7 @@ export const useDataStore = create((set, get) => ({
 
     set({ isFetching: true });
 
-    const url = "http://localhost:8080/api/listings";
+    const url = "/api/listings";
 
     try {
       const res = await axios.get(url, {
@@ -66,7 +66,7 @@ export const useDataStore = create((set, get) => ({
 
     set({ isFetching: true });
 
-    const url = "http://localhost:8080/api/me/listings/active";
+    const url = "/api/me/listings/active";
 
     try {
       const res = await axios.get(url, {
@@ -114,7 +114,7 @@ export const useDataStore = create((set, get) => ({
 
     set({ isFetching: true });
 
-    const url = "http://localhost:8080/api/me/listings/archived";
+    const url = "/api/me/listings/archived";
 
     try {
       const res = await axios.get(url, {
@@ -160,12 +160,9 @@ export const useDataStore = create((set, get) => ({
   deleteListing: async (listingId) => {
     console.log("Deleting:", listingId);
     try {
-      const res = await axios.delete(
-        `http://localhost:8080/api/listings/${listingId}`,
-        {
-          withCredentials: true,
-        },
-      );
+      const res = await axios.delete(`/api/listings/${listingId}`, {
+        withCredentials: true,
+      });
       console.log("listing deleted");
       get().fetchMyActiveListings();
     } catch (error) {
@@ -179,12 +176,9 @@ export const useDataStore = create((set, get) => ({
     set({ isFetching: true });
 
     try {
-      const res = await axios.get(
-        `http://localhost:8080/api/listings/${listingId}`,
-        {
-          withCredentials: true,
-        },
-      );
+      const res = await axios.get(`/api/listings/${listingId}`, {
+        withCredentials: true,
+      });
       if (res.status === 200) {
         const normalized = normalizeApiResponse(res.data);
 
@@ -214,12 +208,9 @@ export const useDataStore = create((set, get) => ({
     set({ isFetching: true });
 
     try {
-      const res = await axios.get(
-        `http://localhost:8080/api/listings/${username}`,
-        {
-          withCredentials: true,
-        },
-      );
+      const res = await axios.get(`/api/listings/${username}`, {
+        withCredentials: true,
+      });
       if (res.status === 200) {
         const normalized = normalizeApiResponse(res.data);
 

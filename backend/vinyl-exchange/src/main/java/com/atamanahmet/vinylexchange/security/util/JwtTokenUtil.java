@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.auth0.jwt.JWT;
@@ -20,6 +22,8 @@ import com.atamanahmet.vinylexchange.domain.entity.User;
 public class JwtTokenUtil {
 
     private final JwtConfig jwtConfig;
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenUtil.class);
 
     public JwtTokenUtil(JwtConfig jwtConfig) {
         this.jwtConfig = jwtConfig;
@@ -39,8 +43,6 @@ public class JwtTokenUtil {
                 .withExpiresAt(Date.from(expiry))
                 .sign(Algorithm.HMAC512(jwtConfig.getSECRET()));
 
-        // System.out.println("Created Token: " + token);
-
         return token;
     }
 
@@ -58,15 +60,12 @@ public class JwtTokenUtil {
                 .withExpiresAt(Date.from(expiry))
                 .sign(Algorithm.HMAC512(jwtConfig.getSECRET()));
 
-        // System.out.println("Created Token: " + token);
-
         return token;
     }
 
     public boolean validateToken(String token) {
 
         try {
-
             JWT.require(Algorithm.HMAC512(jwtConfig.getSECRET()))
                     .build()
                     .verify(token);
@@ -75,7 +74,7 @@ public class JwtTokenUtil {
 
         } catch (JWTVerificationException e) {
 
-            System.out.println(e.getMessage());
+            logger.debug("JWT validation failed: {}", e.getMessage());
             return false;
         }
     }

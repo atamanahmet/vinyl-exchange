@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
+import axios from "../api/axiosInstance";
 
 export const useUIStore = create((set, get) => ({
   openLogin: false,

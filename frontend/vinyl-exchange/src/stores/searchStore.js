@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
+import axios from "../api/axiosInstance";
 
 export const useSearchStore = create((set, get) => ({
   searchResult: {
@@ -17,7 +17,7 @@ export const useSearchStore = create((set, get) => ({
     });
 
     try {
-      const res = await axios.get("http://localhost:8080/api/mb/search", {
+      const res = await axios.get("/api/mb/search", {
         params: {
           title: title,
           limit: 75,
@@ -46,7 +46,7 @@ export const useSearchStore = create((set, get) => ({
     });
 
     try {
-      const res = await axios.get("http://localhost:8080/api/listings/search", {
+      const res = await axios.get("/api/listings/search", {
         params: {
           query: query,
           page: 0,

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
+import axios from "../api/axiosInstance";
 import { useAuthStore } from "./authStore";
 import { useUIStore } from "./uiStore";
 
@@ -19,7 +19,7 @@ export const useCartStore = create((set, get) => ({
     }
 
     try {
-      const res = await axios.get("http://localhost:8080/api/cart", {
+      const res = await axios.get("/api/cart", {
         withCredentials: true,
       });
       if (res.status === 200) {
@@ -44,7 +44,7 @@ export const useCartStore = create((set, get) => ({
     }
     try {
       const res = await axios.post(
-        "http://localhost:8080/api/cart/items",
+        "/api/cart/items",
         { listingId: listingId, quantity: 1 },
         { withCredentials: true },
       );
@@ -68,7 +68,7 @@ export const useCartStore = create((set, get) => ({
     }
     try {
       const res = await axios.patch(
-        `http://localhost:8080/api/cart/items/${cartItemId}`,
+        `/api/cart/items/${cartItemId}`,
         {},
         { withCredentials: true },
       );
@@ -91,10 +91,9 @@ export const useCartStore = create((set, get) => ({
       }
     }
     try {
-      const res = await axios.delete(
-        `http://localhost:8080/api/cart/items/${cartItemId}`,
-        { withCredentials: true },
-      );
+      const res = await axios.delete(`/api/cart/items/${cartItemId}`, {
+        withCredentials: true,
+      });
       if (res.status === 204) {
         // refresh shared cart after change
         await get().fetchCart();

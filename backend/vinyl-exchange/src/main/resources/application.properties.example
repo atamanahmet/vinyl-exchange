@@ -1,18 +1,30 @@
 # IMPORTANT: Environment variables are loaded from .env file in project root
 # Copy .env.example to .env and configure your values before running the application
-# Required variables: DB_NAME, DB_USER, DB_PASSWORD, POSTGRES_PORT, JWT_SECRET, JWT_EXPIRATION, SERVER_PORT, OPENSEARCH_ADMIN_PASSWORD, OPENSEARCH_PORT
+# Required variables: 
+#   DB_NAME, 
+#   DB_USER, 
+#   DB_PASSWORD, 
+#   POSTGRES_PORT, 
+#   JWT_SECRET, 
+#   JWT_EXPIRATION, 
+#   SERVER_PORT, 
+#   OPENSEARCH_USERNAME, 
+#   OPENSEARCH_PASSWORD, 
+#   OPENSEARCH_PORT
+#   ADMIN_USER_EMAIL
+#   ADMIN_USER_PASSWORD
 
-spring.application.name=vinylExchange
+spring.application.name=vinyl-exchange
 
 # Debug (WARNING: Set to INFO or WARN in production environments)
-logging.level.org.springframework.security=DEBUG
+logging.level.org.springframework.security=INFO
 
 #Multipart file size
 spring.servlet.multipart.max-file-size=38MB
 spring.servlet.multipart.max-request-size=38MB
 
 #Database
-spring.datasource.url=jdbc:postgresql://localhost:${POSTGRES_PORT}/${DB_NAME}
+spring.datasource.url=jdbc:postgresql://${DB_HOST:localhost}:${POSTGRES_PORT:5432}/${DB_NAME}
 spring.datasource.username=${DB_USER}
 spring.datasource.password=${DB_PASSWORD}
 spring.datasource.driver-class-name=org.postgresql.Driver
@@ -23,6 +35,12 @@ spring.jpa.show-sql=false
 spring.jpa.properties.hibernate.format_sql=true
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation=true
+
+# OpenSearch
+opensearch.host=${OPENSEARCH_HOST:localhost}
+opensearch.port=${OPENSEARCH_PORT:9200}
+opensearch.username=${OPENSEARCH_USERNAME:admin}
+opensearch.password=${OPENSEARCH_PASSWORD}
 
 #flyway
 # flyway:
@@ -38,9 +56,12 @@ server.error.include-binding-errors=always
 
 #SSecurity
 jwt.secret=${JWT_SECRET}
-
 # 1hour-ms
 jwt.expiration=${JWT_EXPIRATION}
+
+# Admin test user
+admin.test.password=${ADMIN_USER_PASSWORD}
+admin.test.email=${ADMIN_USER_EMAIL}
 
 #Base app url
 app.base-url=http://localhost:${SERVER_PORT}

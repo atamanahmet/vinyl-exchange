@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
+import axios from "../api/axiosInstance";
 import { useAuthStore } from "./authStore";
 import { useUIStore } from "./uiStore";
 
@@ -16,7 +16,7 @@ const useWishlistStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const res = await axios.get("http://localhost:8080/api/wishlists", {
+      const res = await axios.get("/api/wishlists", {
         withCredentials: true,
       });
 
@@ -38,7 +38,7 @@ const useWishlistStore = create((set, get) => ({
   addToWishlist: async (release) => {
     set({ isLoading: true, error: null });
 
-    const url = "http://localhost:8080/api/wishlists";
+    const url = "/api/wishlists";
 
     try {
       const res = await axios.post(
@@ -71,7 +71,7 @@ const useWishlistStore = create((set, get) => ({
   addToWishlistBulk: async (wishlistHolder) => {
     set({ isLoading: true, error: null });
 
-    const url = "http://localhost:8080/api/wishlists/bulk";
+    const url = "/api/wishlists/bulk";
 
     const payload = wishlistHolder.map((release) => ({
       title: release.title,
@@ -111,7 +111,7 @@ const useWishlistStore = create((set, get) => ({
   removeFromWishlist: async (wishlistItemId) => {
     set({ isLoading: true, error: null });
 
-    const url = `http://localhost:8080/api/wishlists/${wishlistItemId}`;
+    const url = `/api/wishlists/${wishlistItemId}`;
 
     try {
       const res = await axios.delete(url, {
