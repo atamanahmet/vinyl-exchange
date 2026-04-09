@@ -5,6 +5,11 @@ target/
 !**/src/test/**/target/
 /backend/vinyl-exchange/uploads/**
 /backend/vinyl-exchange/.env
+backend/vinyl-exchange/src/main/resources/application.properties
+frontend/vinylExchange/.flowbite-react
+backend/vinyl-exchange/.mvn/
+.env
+
 
 ### STS ###
 .apt_generated

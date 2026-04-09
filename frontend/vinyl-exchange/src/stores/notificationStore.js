@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
+import axios from "../api/axiosInstance";
 import { useAuthStore } from "./authStore";
 
 export const useNotificationStore = create((set, get) => ({
@@ -19,7 +19,7 @@ export const useNotificationStore = create((set, get) => ({
       return;
     }
 
-    const url = "http://localhost:8080/api";
+    const url = "/api";
 
     set({ isLoading: true });
     try {
@@ -38,7 +38,7 @@ export const useNotificationStore = create((set, get) => ({
   },
 
   fetchAllNotifications: async () => {
-    const url = "http://localhost:8080/api";
+    const url = "/api";
 
     set({ isLoading: true });
     try {
@@ -57,7 +57,7 @@ export const useNotificationStore = create((set, get) => ({
   },
 
   markAsRead: async (notificationId) => {
-    const url = "http://localhost:8080/api";
+    const url = "/api";
 
     try {
       await axios.post(url + `/notifications/${notificationId}/read`, null, {
@@ -75,7 +75,7 @@ export const useNotificationStore = create((set, get) => ({
   },
 
   markAllAsRead: async () => {
-    const url = "http://localhost:8080/api";
+    const url = "/api";
 
     const allIds = get().notifications.map((n) => n.id);
     await Promise.all(

@@ -43,15 +43,8 @@ public class JWTAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String requestUri = request.getRequestURI();
-        System.out.println("request url " + requestUri);
         try {
 
-            // without jwt header?
-            if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
             String token = jwtCookieUtil.extractTokenFromRequest(request);
 
             if (token == null) {
@@ -67,7 +60,6 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             UUID userId = jwtTokenUtil.extractUserId(token);
 
             if (SecurityContextHolder.getContext().getAuthentication() != null) {
-
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -79,7 +71,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
                     !userPrincipal.isAccountNonExpired() ||
                     !userPrincipal.isCredentialsNonExpired()) {
 
-                logger.warn("Account validation failed for user: " + userId, null);
+                logger.warn("Account validation failed for user: " + userId);
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -98,6 +90,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
         } catch (UsernameNotFoundException e) {
 
             logger.warn("User not found for JWT authentication: ", e);
+
         } catch (Exception e) {
 
             logger.error("Unexpected error during JWT authentication", e);
